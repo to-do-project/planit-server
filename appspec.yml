@@ -6,7 +6,7 @@ files:
     # 인스턴스에서 파일이 저장될 위치
     destination: /home/ubuntu/deploy
 permissions:
-  - object: /home/ubuntu/deploy/
+  - object: /home/ubuntu
     owner: ubuntu
     group: ubuntu
     mode: 755
