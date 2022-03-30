@@ -1,4 +1,4 @@
-package com.planz.planit.controller;
+package com.planz.planit.src.apicontroller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
