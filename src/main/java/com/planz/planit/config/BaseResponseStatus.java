@@ -49,15 +49,28 @@ public enum BaseResponseStatus {
     DATABASE_ERROR(false, 4000, "데이터베이스 연결에 실패하였습니다."),
     SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
 
-    //[PATCH] /users/{userIdx}
+    //[PATCH] /users/{userId}
     MODIFY_FAIL_USERNAME(false,4014,"유저네임 수정 실패"),
 
     PASSWORD_ENCRYPTION_ERROR(false, 4011, "비밀번호 암호화에 실패하였습니다."),
-    PASSWORD_DECRYPTION_ERROR(false, 4012, "비밀번호 복호화에 실패하였습니다.");
+    PASSWORD_DECRYPTION_ERROR(false, 4012, "비밀번호 복호화에 실패하였습니다."),
 
 
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요
+
+    INVALID_ACCESS_TOKEN(false, 6000, "유효하지 않은 access token 입니다."),
+    NOT_EXIST_USER(false, 6001, "존재하지 않는 사용자입니다."),
+    INVALID_ID_OR_PWD(false, 6002, "이메일 혹은 비밀번호를 잘못 입력했습니다."),
+    IO_EXCEPTION(false, 6003, "로그인 시도 중에 IOException이 발생했습니다."),
+    NOT_EXIST_ACCESS_TOKEN_SUBJECT(false, 6004, "access token에 subject가 존재하지 않습니다."),
+    INVALID_USER_ID(false, 6005, "유효하지 않은 userId입니다. 숫자형태로 입력해주세요."),
+    NOT_EQUAL_USER_ID(false, 6006, "accessToken 내의 userId와 header 내의 userId가 일치하지 않습니다."),
+    NOT_EXIST_USER_ID_IN_HEADER(false, 6007, "userId를 헤더에 입력해주세요"),
+    NOT_EXIST_ACCESS_TOKEN_IN_HEADER(false, 6008, "access token을 헤더에 입력해주세요."),
+    NOT_EXIST_LOGIN_REQ_DTO(false, 6009, "email, password, deviceToken을 모두 입력해주세요."),
+    INVALID_EMAIL_FORM(false, 6010, "이메일 형식이 올바르지 않습니다."),
+    INVALID_PWD_FORM(false, 6011, "비밀번호 형식이 올바르지 않습니다. (영문+숫자 6~15자)");
 
 
     private final boolean isSuccess;
