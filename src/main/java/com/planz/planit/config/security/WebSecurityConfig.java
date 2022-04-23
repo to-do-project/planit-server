@@ -1,8 +1,8 @@
 package com.planz.planit.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.planz.planit.config.security.Filter.JwtAuthenticationFilter;
-import com.planz.planit.config.security.Filter.JwtAuthorizationFilter;
+import com.planz.planit.config.security.filter.JwtAuthenticationFilter;
+import com.planz.planit.config.security.filter.JwtAuthorizationFilter;
 import com.planz.planit.src.domain.user.UserRepository;
 import com.planz.planit.src.service.HttpResponseService;
 import com.planz.planit.src.service.JwtTokenService;

@@ -17,9 +17,18 @@ public class ValidationRegex {
         return matcher.find();
     }
 
+    // 비밀번호 형식 체크
     public static boolean isRegexPassword(String target){
         // 영어 + 숫자 6~15
         String regex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,15}$";
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(target);
+        return matcher.find();
+    }
+
+    // 닉네임 형식 체크
+    public static boolean isRegexNickname(String target){
+        String regex = "^[A-Za-z0-9ㄱ-ㅎ가-힣]{1,20}$";
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(target);
         return matcher.find();

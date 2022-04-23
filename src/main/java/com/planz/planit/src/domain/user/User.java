@@ -1,5 +1,6 @@
 package com.planz.planit.src.domain.user;
 
+import com.planz.planit.src.domain.planet.Planet;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,35 +22,43 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long userId;
 
-    @Column(unique = true)
-//    @OneToOne
-//    @JoinColumn(name = "planetId")
-    private Long planetId;
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Planet planet;
 
-
-    @Column(unique = true, length = 50)
+    @Column(nullable = false, unique = true, length = 50)
     private String email;
 
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false, unique = true, length = 20)
     private String nickname;
 
-    private Integer characterColor = 0;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "character_color", nullable = false)
+    private UserCharacterColor characterColor;
 
-    private Integer profileColor = 0;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "profile_color", nullable = false)
+    private UserProfileColor profileColor;
 
+    @Column(nullable = false)
     private Integer point = 0;
 
+    @Column(name = "mission_status", nullable = false)
     private Integer missionStatus = 1;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "user_status", nullable = false)
     private UserStatus userStatus;
 
+    @Column(name = "create_at")
     private LocalDateTime createAt;
 
+    @Column(name = "last_check_at")
     private LocalDateTime lastCheckAt;
 
 /*    @ElementCollection(fetch = FetchType.EAGER)
@@ -57,6 +66,7 @@ public class User {
     private List<String> roles = new ArrayList<>();*/
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private UserRole role;
 
     @PrePersist

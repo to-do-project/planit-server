@@ -1,10 +1,11 @@
-package com.planz.planit.config.security.Filter;
+package com.planz.planit.config.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.planz.planit.src.domain.user.LoginResDTO;
+import com.planz.planit.src.domain.user.UserCharacterColor;
+import com.planz.planit.src.domain.user.dto.LoginResDTO;
 import com.planz.planit.src.service.HttpResponseService;
 import com.planz.planit.config.security.auth.PrincipalDetails;
-import com.planz.planit.src.domain.user.LoginReqDTO;
+import com.planz.planit.src.domain.user.dto.LoginReqDTO;
 import com.planz.planit.src.domain.user.User;
 import com.planz.planit.src.service.JwtTokenService;
 import com.planz.planit.utils.ValidationRegex;
@@ -122,11 +123,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // 성공메시지 리턴하기
         LoginResDTO loginResDTO = LoginResDTO.builder()
                 .userId(loginUser.getUserId())
-                .planetId(loginUser.getPlanetId())
+                .planetId(loginUser.getPlanet().getPlanetId())
                 .email(loginUser.getEmail())
                 .nickname(loginUser.getNickname())
-                .characterColor(loginUser.getCharacterColor())
-                .profileColor(loginUser.getProfileColor())
+                .characterColor(loginUser.getCharacterColor().name())
+                .profileColor(loginUser.getProfileColor().name())
                 .point(loginUser.getPoint())
                 .missionStatus(loginUser.getMissionStatus())
                 .deviceToken(loginUser.getDeviceToken())

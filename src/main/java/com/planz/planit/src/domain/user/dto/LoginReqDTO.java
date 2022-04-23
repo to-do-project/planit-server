@@ -1,4 +1,4 @@
-package com.planz.planit.src.domain.user;
+package com.planz.planit.src.domain.user.dto;
 
 import lombok.*;
 

@@ -3,15 +3,13 @@ package com.planz.planit.src.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.planz.planit.config.BaseResponse;
 import com.planz.planit.config.BaseResponseStatus;
-import com.planz.planit.src.domain.user.LoginResDTO;
+import com.planz.planit.src.domain.user.dto.LoginResDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import static com.planz.planit.config.BaseResponseStatus.INVALID_ACCESS_TOKEN;
 
 @Service
 public class HttpResponseService {

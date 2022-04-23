@@ -1,9 +1,8 @@
-package com.planz.planit.src.domain.user;
+package com.planz.planit.src.domain.user.dto;
 
+import com.planz.planit.src.domain.user.UserCharacterColor;
+import com.planz.planit.src.domain.user.UserProfileColor;
 import lombok.*;
-
-import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -19,9 +18,9 @@ public class LoginResDTO {
 
     private String nickname;
 
-    private Integer characterColor;
+    private String characterColor;
 
-    private Integer profileColor;
+    private String profileColor;
 
     private Integer point;
 

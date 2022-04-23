@@ -1,4 +1,4 @@
-package com.planz.planit.config.security.Filter;
+package com.planz.planit.config.security.filter;
 
 import com.planz.planit.src.service.HttpResponseService;
 import com.planz.planit.config.security.auth.PrincipalDetails;
@@ -46,7 +46,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         log.info("요청 URI " + request.getRequestURI());
 
         // 회원가입 요청인 경우
-        if (request.getRequestURI().equals("/join")) {
+        if (request.getRequestURI().startsWith("/join")) {
             chain.doFilter(request, response);
             return;
         }
