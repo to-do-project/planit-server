@@ -30,6 +30,10 @@ public class JwtTokenService {
     @Value("${jwt.refresh-token-expire-time}")
     private long REFRESH_TOKEN_EXPIRE_TIME;
 
+    // refresh token 재발급 기준 시간 2일 = 1000 * 60 * 60 * 24 * 2
+    @Value("${jwt.refresh-token-reissue-time}")
+    private long REFRESH_TOKEN_REISSUE_TIME;
+
     @Value("${jwt.access-token-header-name}")
     private String ACCESS_TOKEN_HEADER_NAME;
 
@@ -120,7 +124,7 @@ public class JwtTokenService {
 
 
     // 토큰의 유효성 + 만료일자 확인
-    public boolean validateAccessToken(String jwtToken){
+    public boolean validateToken(String jwtToken){
 
         try{
             log.info("validateAccessToken() 호출");
@@ -130,5 +134,18 @@ public class JwtTokenService {
         catch (Exception e){
             return false;
         }
+    }
+
+    // refresh 남은 유효기간 확인
+    public boolean isRefreshReissue(String jwtRefreshToken){
+        try{
+            Date now = new Date();
+            Jws<Claims> claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(jwtRefreshToken);
+            return claims.getBody().getExpiration().before(new Date(now.getTime() + REFRESH_TOKEN_REISSUE_TIME));
+        }
+        catch (Exception e){
+            return true;
+        }
+
     }
 }

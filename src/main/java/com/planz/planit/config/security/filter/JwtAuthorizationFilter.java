@@ -51,6 +51,12 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             return;
         }
 
+        // 액세스 토큰 재발급 요청인 경우
+        if (request.getRequestURI().startsWith("/access-token")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         // 인증이 필요한 요청인 경우
         log.info("인증이나 권한이 필요한 주고사 요청이 됨 => " + request.getRequestURI());
 
@@ -114,7 +120,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             return false;
         }
 
-        if (jwtTokenService.validateAccessToken(jwtAccessToken) == false) {
+        if (jwtTokenService.validateToken(jwtAccessToken) == false) {
             log.error("유효하지 않은 access token입니다.");
             httpResponseService.errorRespond(response, INVALID_ACCESS_TOKEN);
             return false;

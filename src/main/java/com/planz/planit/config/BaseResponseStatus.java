@@ -81,7 +81,9 @@ public enum BaseResponseStatus {
     NOT_EXIST_AUTH_NUM_IN_REDIS(false, 6019, "발급받은 인증번호가 없습니다."),
     INVALID_AUTH_NUM(false, 6020, "인증번호가 일치하지 않습니다."),
     NOT_EXIST_AUTH_NUM_IN_BODY(false, 6021, "인증번호를 입력해주세요."),
-    INVALID_AUTH_NUM_FORM(false, 6022, "인증번호 형식이 올바르지 않습니다. (6자리 숫자)")
+    INVALID_AUTH_NUM_FORM(false, 6022, "인증번호 형식이 올바르지 않습니다. (6자리 숫자)"),
+    INVALID_REFRESH_TOKEN(false, 6023, "유효하지 않은 refresh token 입니다. 다시 로그인해주세요."),
+    NOT_EXIST_REFRESH_TOKEN_IN_HEADER(false, 6024, "'Bearer '로 시작하는 refresh token을 헤더에 입력해주세요.")
     ;
 
 

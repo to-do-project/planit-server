@@ -2,6 +2,7 @@ package com.planz.planit.src.service;
 
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponseStatus;
+import com.planz.planit.src.domain.deviceToken.DeviceTokenRepository;
 import com.planz.planit.src.domain.mail.MailDTO;
 import com.planz.planit.src.domain.planet.Planet;
 import com.planz.planit.src.domain.planet.PlanetColor;
@@ -180,14 +181,35 @@ public class UserService {
 
         // 인증번호 검증
         String authNumInRedis = redisService.getEmailAuthNumInRedis(email);
-        if(authNumInRedis == null){
+        if (authNumInRedis == null) {
             throw new BaseException(NOT_EXIST_AUTH_NUM_IN_REDIS);
-        }
-        else if (!authNum.equals(authNumInRedis)){
+        } else if (!authNum.equals(authNumInRedis)) {
             throw new BaseException(INVALID_AUTH_NUM);
-        }
-        else{
+        } else {
             return "인증이 완료되었습니다.";
         }
+    }
+
+    public void reissueAccessToken(String userId, String refreshToken, HttpServletResponse response) throws BaseException {
+
+        if (jwtTokenService.validateToken(refreshToken)) {
+
+            User userEntity = userRepository.findByuserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+
+            // access token 재발급
+            String newAccessToken = jwtTokenService.createAccessToken(userId, userEntity.getRole());
+
+            if (jwtTokenService.isRefreshReissue(refreshToken)) {
+                // refresh token 재발급
+                refreshToken = jwtTokenService.createRefreshToken(userId);
+            }
+
+            response.addHeader(ACCESS_TOKEN_HEADER_NAME, "Bearer " + newAccessToken);
+            response.addHeader(REFRESH_TOKEN_HEADER_NAME, "Bearer " + refreshToken);
+
+        } else {
+            throw new BaseException(INVALID_REFRESH_TOKEN);
+        }
+
     }
 }
