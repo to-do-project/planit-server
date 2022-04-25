@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
         uniqueConstraints = {
                 @UniqueConstraint(
                         name="subscribe_uk",
-                        columnNames = {"from_userId", "to_user_id"}
+                        columnNames = {"from_user_id", "to_user_id"}
                 )
         }
 )
@@ -27,7 +27,7 @@ public class Friend {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="friend_id")
-    private Long id;
+    private Long friendId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="from_user_id")

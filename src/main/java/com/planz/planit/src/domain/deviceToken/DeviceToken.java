@@ -19,7 +19,7 @@ public class DeviceToken {
     private Long deviceTokenId;
 
     @ManyToOne
-    @JoinColumn(name="user")
+    @JoinColumn(name="user_id")
     private User user;
 
     @Column(name="device_token")

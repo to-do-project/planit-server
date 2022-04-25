@@ -38,7 +38,7 @@ public class FriendService {
             User user = userService.findUser(userId);
             User toUser = userService.findUser(toUserId);
             //이미 관계가 존재하는지 확인하기
-            if(friendRepository.existsByFromUserIdAndToUserId(userId,toUserId)||friendRepository.existsByFromUserIdAndToUserId(toUserId,userId)){
+            if(friendRepository.existsByFromUserAndToUser(userId,toUserId)||friendRepository.existsByFromUserAndToUser(toUserId,userId)){
                 throw new BaseException(SERVER_ERROR);
             }
             //friend 객체 만들어주기
@@ -58,15 +58,15 @@ public class FriendService {
     public List<GetFriendResDTO> getFriends(Long userId) throws BaseException {
         try {
             //WAIT, FRIEND 상태인 친구만 불러오도록 함
-            List<Friend> byFromUserId = friendRepository.findByFromUserId(userId);
-            List<Friend> byToUserId = friendRepository.findByToUserId(userId);
+            List<Friend> byFromUserId = friendRepository.findByFromUser(userId);
+            List<Friend> byToUserId = friendRepository.findByToUser(userId);
             //데이터 정제하기 (상대방만 출력되게)
             List<GetFriendResDTO> result = new ArrayList<>();
             for (Friend friend : byToUserId) {
-                result.add(new GetFriendResDTO(friend.getFromUser().getId(),friend.getFromUser().getNickname(),friend.getFriendStatus().toString()));
+                result.add(new GetFriendResDTO(friend.getFromUser().getUserId(),friend.getFromUser().getNickname(),friend.getFriendStatus().toString()));
             }
             for (Friend friend : byFromUserId) {
-                result.add(new GetFriendResDTO(friend.getToUser().getId(),friend.getToUser().getNickname(),friend.getFriendStatus().toString()));
+                result.add(new GetFriendResDTO(friend.getToUser().getUserId(),friend.getToUser().getNickname(),friend.getFriendStatus().toString()));
             }
             return result;
         }catch(Exception e){

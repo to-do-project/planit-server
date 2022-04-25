@@ -49,6 +49,11 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    //은지 추가 코드
+    public User findUser(Long userId) throws BaseException {
+        return userRepository.findById(userId).orElseThrow(()-> new BaseException(NOT_EXIST_USER));
+    }
+
 
     public LoginResDTO join(JoinReqDTO reqDTO, HttpServletResponse response) throws BaseException {
 

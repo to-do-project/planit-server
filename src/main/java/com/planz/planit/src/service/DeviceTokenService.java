@@ -26,8 +26,8 @@ public class DeviceTokenService {
     public void createDeviceToken(Long userId, DeviceTokenReqDTO reqDTO) throws BaseException {
         //이미 존재하는지 확인
         try {
-            if (deviceTokenRepository.existsByUserIdAndDeviceToken(userId, reqDTO.getDeviceToken())) {
-                DeviceToken findToken = deviceTokenRepository.findDeviceTokenByUserIdAndDeviceToken(userId, reqDTO.getDeviceToken());
+            if (deviceTokenRepository.existsByUserAndDeviceToken(userId, reqDTO.getDeviceToken())) {
+                DeviceToken findToken = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userId, reqDTO.getDeviceToken());
                 findToken.changeUpdateAt();
                 deviceTokenRepository.save(findToken);
             }
@@ -46,7 +46,7 @@ public class DeviceTokenService {
     //로그아웃 시 디바이스 토큰 삭제 - DTO 수정 필요
     public void deleteDeviceToken(Long userId, DeviceTokenReqDTO reqDTO) throws BaseException {
         try{
-            DeviceToken findToken = deviceTokenRepository.findDeviceTokenByUserIdAndDeviceToken(userId, reqDTO.getDeviceToken());
+            DeviceToken findToken = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userId, reqDTO.getDeviceToken());
             deviceTokenRepository.delete(findToken);
         }catch(Exception e){
             throw new BaseException(DATABASE_ERROR);
@@ -55,7 +55,7 @@ public class DeviceTokenService {
 
     public void changeFlag(Long userId, ChangeFlagReqDTO reqDTO) throws BaseException {
         try{
-            DeviceToken findToken = deviceTokenRepository.findDeviceTokenByUserIdAndDeviceToken(userId, reqDTO.getDeviceToken());
+            DeviceToken findToken = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userId, reqDTO.getDeviceToken());
             findToken.changeFlag(DeviceTokenFlag.valueOf(reqDTO.getFlag()));
         }catch(Exception e){
             throw new BaseException(DATABASE_ERROR);
