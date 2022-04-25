@@ -45,20 +45,15 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         log.info("요청 URI " + request.getRequestURI());
 
-        // 회원가입 요청인 경우
-        if (request.getRequestURI().startsWith("/join")) {
+        // 회원가입 요청 or 액세스 토큰 재발급 요청 or 로그아웃 요청인 경우
+        if (request.getRequestURI().startsWith("/join") || request.getRequestURI().startsWith("/access-token") || request.getRequestURI().startsWith("/log-out")) {
             chain.doFilter(request, response);
             return;
         }
 
-        // 액세스 토큰 재발급 요청인 경우
-        if (request.getRequestURI().startsWith("/access-token")) {
-            chain.doFilter(request, response);
-            return;
-        }
 
         // 인증이 필요한 요청인 경우
-        log.info("인증이나 권한이 필요한 주고사 요청이 됨 => " + request.getRequestURI());
+        log.info("인증이나 권한이 필요한 주소가 요청이 됨 => " + request.getRequestURI());
 
         // 헤더에서 userId 받아오기
         String userId = request.getHeader(USER_ID_HEADER_NAME);
@@ -121,7 +116,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
 
         if (jwtTokenService.validateToken(jwtAccessToken) == false) {
-            log.error("유효하지 않은 access token입니다.");
+            log.error("만료된 access token입니다.");
             httpResponseService.errorRespond(response, INVALID_ACCESS_TOKEN);
             return false;
         }

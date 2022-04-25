@@ -2,7 +2,6 @@ package com.planz.planit.src.service;
 
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponseStatus;
-import com.planz.planit.src.domain.deviceToken.DeviceTokenRepository;
 import com.planz.planit.src.domain.mail.MailDTO;
 import com.planz.planit.src.domain.planet.Planet;
 import com.planz.planit.src.domain.planet.PlanetColor;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
@@ -209,6 +209,38 @@ public class UserService {
 
         } else {
             throw new BaseException(INVALID_REFRESH_TOKEN);
+        }
+
+    }
+
+    // 로그아웃
+    public void logout(String userId) throws BaseException {
+        User userEntity = userRepository.findByuserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+
+        // 리프래시 토큰 삭제
+        redisService.deleteRefreshTokenInRedis(userId);
+
+        // 디바이스 토큰 삭제 로직 추가!!!!!!!!!!!!!!!!!!!!!!!
+
+    }
+
+
+    public void withdrawal(String userId, String password) throws BaseException{
+        Long longUserId = Long.valueOf(userId);
+
+        // 비밀번호 검증
+        User userEntity = userRepository.findByuserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+        if (!passwordEncoder.matches(password, userEntity.getPassword())){
+            throw new BaseException(INVALID_PASSWORD);
+        }
+
+        // 회원 삭제
+        try {
+            planetRepository.deleteByUserIdInQuery(longUserId);
+            userRepository.deleteByUserIdInQuery(longUserId);
+        }
+        catch (Exception e){
+            throw new BaseException(FAIL_WITHDRAWAL);
         }
 
     }

@@ -59,7 +59,7 @@ public enum BaseResponseStatus {
     // 5000 : 필요시 만들어서 쓰세요
     // 6000 : 필요시 만들어서 쓰세요
 
-    INVALID_ACCESS_TOKEN(false, 6000, "유효하지 않은 access token 입니다."),
+    INVALID_ACCESS_TOKEN(false, 6000, "만료된 access token 입니다."),
     NOT_EXIST_USER(false, 6001, "존재하지 않는 사용자입니다."),
     INVALID_ID_OR_PWD(false, 6002, "이메일 혹은 비밀번호를 잘못 입력했습니다."),
     IO_EXCEPTION(false, 6003, "로그인 시도 중에 IOException이 발생했습니다."),
@@ -83,7 +83,10 @@ public enum BaseResponseStatus {
     NOT_EXIST_AUTH_NUM_IN_BODY(false, 6021, "인증번호를 입력해주세요."),
     INVALID_AUTH_NUM_FORM(false, 6022, "인증번호 형식이 올바르지 않습니다. (6자리 숫자)"),
     INVALID_REFRESH_TOKEN(false, 6023, "유효하지 않은 refresh token 입니다. 다시 로그인해주세요."),
-    NOT_EXIST_REFRESH_TOKEN_IN_HEADER(false, 6024, "'Bearer '로 시작하는 refresh token을 헤더에 입력해주세요.")
+    NOT_EXIST_REFRESH_TOKEN_IN_HEADER(false, 6024, "'Bearer '로 시작하는 refresh token을 헤더에 입력해주세요."),
+    FAIL_WITHDRAWAL(false, 6025, "User 테이블에서 해당 정보를 삭제하는데 실패했습니다."),
+    INVALID_PASSWORD(false, 6026, "비밀번호가 일치하지 않습니다."),
+    NOT_EXIST_PASSWORD(false, 6027, "비밀번호를 입력해주세요."),
     ;
 
 

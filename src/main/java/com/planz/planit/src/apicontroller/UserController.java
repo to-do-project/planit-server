@@ -3,10 +3,7 @@ package com.planz.planit.src.apicontroller;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponse;
 import com.planz.planit.config.BaseResponseStatus;
-import com.planz.planit.src.domain.user.dto.CheckAuthNumReqDTO;
-import com.planz.planit.src.domain.user.dto.CreateAuthNumReqDTO;
-import com.planz.planit.src.domain.user.dto.JoinReqDTO;
-import com.planz.planit.src.domain.user.dto.LoginResDTO;
+import com.planz.planit.src.domain.user.dto.*;
 import com.planz.planit.src.service.JwtTokenService;
 import com.planz.planit.src.service.UserService;
 import com.planz.planit.utils.ValidationRegex;
@@ -159,4 +156,35 @@ public class UserController {
     }
 
 
+    @PostMapping("/log-out")
+    public BaseResponse<String> logout(HttpServletRequest request){
+        String userId = request.getHeader(USER_ID_HEADER_NAME);
+
+        try{
+            // 형식적 Validation
+            ValidationUtils.checkUserIdInHeader(userId);
+
+            userService.logout(userId);
+            return new BaseResponse<>("로그아웃이 완료되었습니다. 클라이언트 단의 access token과 refresh token을 삭제해주세요.");
+        }
+        catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    // 회원탈퇴
+    @DeleteMapping("/api/user")
+    public BaseResponse<String> withdrawal(HttpServletRequest request, @RequestBody WithdrawalReqDTO reqDTO){
+        String userId = request.getHeader(USER_ID_HEADER_NAME);
+
+        try{
+            // Spring Security가 userId와 jwtAccessToken에 대한 validation 모두 완료!
+
+            userService.withdrawal(userId, reqDTO.getPassword());
+            return new BaseResponse<>("회원탈퇴가 완료되었습니다.");
+        }
+        catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 }
