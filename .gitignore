@@ -36,6 +36,4 @@ out/
 ### VS Code ###
 .vscode/
 /src/main/java/com/planz/planit/config/secret/
-/src/main/java/com/planz/planit/src/domain/user/
 /src/main/resources/application.yml
-/src/main/java/com/planz/planit/src/service/UserService.java

@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Builder
 @Entity
+@Table(name="Users")
 public class User {
 
     @Id
@@ -31,7 +32,7 @@ public class User {
     @Column(nullable = false, unique = true, length = 50)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name="pwd",nullable = false)
     private String password;
 
     @Column(nullable = false, unique = true, length = 20)
@@ -45,7 +46,7 @@ public class User {
     @Column(name = "profile_color", nullable = false)
     private UserProfileColor profileColor;
 
-    @Column(nullable = false)
+    @Column(name="user_point", nullable = false)
     private Integer point = 0;
 
     @Column(name = "mission_status", nullable = false)

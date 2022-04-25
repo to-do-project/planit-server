@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public interface FriendRepository extends JpaRepository<Friend,Long> {
 
-    @Query(value = "select f from Friend f where f.fromUser.id = :userId and f.friendStatus <> 'DELETE'")
-    public List<Friend> findByFromUserId(Long userId);
-    @Query(value = "select f from Friend f where f.toUser.id = :userId and f.friendStatus <> 'DELETE'")
-    public List<Friend> findByToUserId(Long userId);
-    public boolean existsByFromUserIdAndToUserId(Long userId,Long toUserId);
+    @Query(value = "select f from Friend f where f.fromUser.userId = :userId and f.friendStatus <> 'DELETE'")
+    public List<Friend> findByFromUser(Long userId);
+    @Query(value = "select f from Friend f where f.toUser.userId = :userId and f.friendStatus <> 'DELETE'")
+    public List<Friend> findByToUser(Long userId);
+    public boolean existsByFromUserAndToUser(Long userId,Long toUserId);
 }
