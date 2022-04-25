@@ -56,7 +56,8 @@ public enum BaseResponseStatus {
     PASSWORD_DECRYPTION_ERROR(false, 4012, "비밀번호 복호화에 실패하였습니다."),
 
 
-    // 5000 : 필요시 만들어서 쓰세요
+    // 5000 : 은지
+    NOT_EXIST_FLAG_ENUM(false,5000,"존재하지 않는 알림 설정입니다."),
     // 6000 : 필요시 만들어서 쓰세요
 
     INVALID_ACCESS_TOKEN(false, 6000, "만료된 access token 입니다."),
