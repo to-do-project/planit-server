@@ -36,12 +36,21 @@ public class RedisService {
         return stringRedisTemplate.expire(key, expireTime, TimeUnit.MILLISECONDS);
     }
 
-    // refresh 토큰 가져오기
-    public String getRefreshTokenInRedis(String deviceTokenId){
+    // refresh 토큰 비교하기
+    public boolean compareRefreshTokenInRedis(String deviceTokenId, String refreshTokenInHeader){
         String key = REFRESH_PREFIX + deviceTokenId;
 
         // 해당 userPk로 발급받은 refresh 토큰이 없다면 null 리턴
-        return valueOperations.get(key);
+        String refreshTokenInRedis = valueOperations.get(key);
+        if (refreshTokenInRedis == null){
+            return false;
+        }
+        else if (refreshTokenInRedis.equals(refreshTokenInHeader)){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     // refresh 토큰 삭제하기

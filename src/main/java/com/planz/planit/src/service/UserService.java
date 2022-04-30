@@ -206,17 +206,27 @@ public class UserService {
 
     public void reissueAccessToken(String userId, String refreshToken, String deviceToken, HttpServletResponse response) throws BaseException {
 
+        // refresh token이 만료되었는지 확인
         if (jwtTokenService.validateToken(refreshToken)) {
 
+            // userId로 유저 객체 조회
             User userEntity = userRepository.findByuserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+
+            // userId와 deviceToken 값으로 디바이스 토큰 객체 조회
+            DeviceToken deviceTokenEntity = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userEntity.getUserId(), deviceToken);
+            String deviceTokenId = deviceTokenEntity.getDeviceTokenId().toString();
+
+            // header의 refresh token과 redis의 refresh token 비교
+            if (!redisService.compareRefreshTokenInRedis(deviceTokenId, refreshToken)){
+                throw new BaseException(TWO_REFRESH_TOKEN_NOT_EQUAL);
+            }
 
             // access token 재발급
             String newAccessToken = jwtTokenService.createAccessToken(userId, userEntity.getRole());
 
             if (jwtTokenService.isRefreshReissue(refreshToken)) {
                 // refresh token 재발급
-                DeviceToken findDeviceToken = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userEntity.getUserId(), deviceToken);
-                refreshToken = jwtTokenService.createRefreshToken(findDeviceToken.getDeviceTokenId().toString());
+                refreshToken = jwtTokenService.createRefreshToken(deviceTokenId);
             }
 
             response.addHeader(ACCESS_TOKEN_HEADER_NAME, "Bearer " + newAccessToken);

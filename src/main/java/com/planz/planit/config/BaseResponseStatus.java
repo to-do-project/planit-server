@@ -88,6 +88,7 @@ public enum BaseResponseStatus {
     FAIL_WITHDRAWAL(false, 6025, "User 테이블에서 해당 정보를 삭제하는데 실패했습니다."),
     INVALID_PASSWORD(false, 6026, "비밀번호가 일치하지 않습니다."),
     NOT_EXIST_PASSWORD(false, 6027, "비밀번호를 입력해주세요."),
+    TWO_REFRESH_TOKEN_NOT_EQUAL(false, 6028, "헤더의 refresh token과 서버에 저장된 refresh token이 일치하지 않습니다.")
     ;
 
 
