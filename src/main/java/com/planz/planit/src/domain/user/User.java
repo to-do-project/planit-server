@@ -76,6 +76,7 @@ public class User {
         this.lastCheckAt = LocalDateTime.now();
     }
 
+    // 디바이스 토큰 값
     @Transient
     private String deviceToken;
 

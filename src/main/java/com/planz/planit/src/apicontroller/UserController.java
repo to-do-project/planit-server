@@ -3,6 +3,7 @@ package com.planz.planit.src.apicontroller;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponse;
 import com.planz.planit.config.BaseResponseStatus;
+import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
 import com.planz.planit.src.domain.user.dto.*;
 import com.planz.planit.src.service.JwtTokenService;
 import com.planz.planit.src.service.UserService;
@@ -40,7 +41,7 @@ public class UserController {
     }
 
     // 닉네임 형식 및 중복 확인
-    @GetMapping("join/dupli/nickname")
+    @GetMapping("/join/dupli/nickname")
     public BaseResponse<String> checkNickname(@RequestParam("nickname") String nickname){
 
         if (ValidationRegex.isRegexNickname(nickname) == false){
@@ -56,7 +57,7 @@ public class UserController {
     }
 
     // 이메일 형식 및 중복 확인
-    @GetMapping("join/dupli/email")
+    @GetMapping("/join/dupli/email")
     public BaseResponse<String> checkEmail(@RequestParam("email") String email){
 
         if(ValidationRegex.isRegexEmail(email) == false){
@@ -133,8 +134,17 @@ public class UserController {
     }
 
     // access token 재발급
-    @GetMapping("/access-token")
-    public BaseResponse<String> reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
+    @PostMapping("/access-token")
+    public BaseResponse<String> reissueAccessToken(HttpServletRequest request,
+                                                   HttpServletResponse response,
+                                                   @Valid @RequestBody DeviceTokenReqDTO reqDTO,
+                                                   BindingResult br) {
+
+        // 형식적 validation => DTO 수정 필요
+        if(br.hasErrors()){
+            String errorName = br.getAllErrors().get(0).getDefaultMessage();
+            return new BaseResponse<>(BaseResponseStatus.of(errorName));
+        }
 
         String userId = request.getHeader(USER_ID_HEADER_NAME);
         String refreshToken = jwtTokenService.getRefreshToken(request);
@@ -147,7 +157,7 @@ public class UserController {
                 return new BaseResponse<>(NOT_EXIST_REFRESH_TOKEN_IN_HEADER);
             }
 
-            userService.reissueAccessToken(userId, refreshToken, response);
+            userService.reissueAccessToken(userId, refreshToken, reqDTO.getDeviceToken(), response);
             return new BaseResponse<>("JWT Access Token을 새로 발급했습니다.");
         }
         catch (BaseException e){
@@ -157,14 +167,22 @@ public class UserController {
 
 
     @PostMapping("/log-out")
-    public BaseResponse<String> logout(HttpServletRequest request){
+    public BaseResponse<String> logout(HttpServletRequest request,
+                                       @Valid @RequestBody DeviceTokenReqDTO reqDTO,
+                                       BindingResult br){
+        // 형식적 validation => DTO 수정 필요
+        if(br.hasErrors()){
+            String errorName = br.getAllErrors().get(0).getDefaultMessage();
+            return new BaseResponse<>(BaseResponseStatus.of(errorName));
+        }
+
         String userId = request.getHeader(USER_ID_HEADER_NAME);
 
         try{
             // 형식적 Validation
             ValidationUtils.checkUserIdInHeader(userId);
 
-            userService.logout(userId);
+            userService.logout(userId, reqDTO);
             return new BaseResponse<>("로그아웃이 완료되었습니다. 클라이언트 단의 access token과 refresh token을 삭제해주세요.");
         }
         catch (BaseException e){
@@ -174,7 +192,7 @@ public class UserController {
 
     // 회원탈퇴
     @DeleteMapping("/api/user")
-    public BaseResponse<String> withdrawal(HttpServletRequest request, @RequestBody WithdrawalReqDTO reqDTO){
+    public BaseResponse<String> withdrawal(HttpServletRequest request, @Valid @RequestBody WithdrawalReqDTO reqDTO){
         String userId = request.getHeader(USER_ID_HEADER_NAME);
 
         try{

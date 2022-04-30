@@ -1,8 +1,13 @@
 package com.planz.planit.config.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.planz.planit.config.BaseException;
+import com.planz.planit.src.domain.deviceToken.DeviceToken;
+import com.planz.planit.src.domain.deviceToken.DeviceTokenRepository;
+import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
 import com.planz.planit.src.domain.user.UserCharacterColor;
 import com.planz.planit.src.domain.user.dto.LoginResDTO;
+import com.planz.planit.src.service.DeviceTokenService;
 import com.planz.planit.src.service.HttpResponseService;
 import com.planz.planit.config.security.auth.PrincipalDetails;
 import com.planz.planit.src.domain.user.dto.LoginReqDTO;
@@ -40,13 +45,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final JwtTokenService jwtTokenService;
     private final ObjectMapper objectMapper;
     private final HttpResponseService httpResponseService;
+    private final DeviceTokenService deviceTokenService;
+    private final DeviceTokenRepository deviceTokenRepository;
 
     @Autowired
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtTokenService jwtTokenService, ObjectMapper objectMapper, HttpResponseService httpResponseService) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtTokenService jwtTokenService, ObjectMapper objectMapper, HttpResponseService httpResponseService, DeviceTokenService deviceTokenService, DeviceTokenRepository deviceTokenRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenService = jwtTokenService;
         this.objectMapper = objectMapper;
         this.httpResponseService = httpResponseService;
+        this.deviceTokenService = deviceTokenService;
+        this.deviceTokenRepository = deviceTokenRepository;
     }
 
     // /login 요청이 오면, 로그인 시도를 위해서 자동으로 실행되는 함수
@@ -108,16 +117,22 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
         User loginUser = principalDetails.getUser();
 
+        // request로 받은 device token을 DB에 저장하기!!!!! => 수정 필요!!!
+        try {
+            deviceTokenService.createDeviceToken(loginUser.getUserId(), new DeviceTokenReqDTO(loginUser.getDeviceToken()));
+        } catch (BaseException e) {
+            log.error("로그인 후 DB에 디바이스 토큰 저장 도중에 에러 발생");
+            httpResponseService.errorRespond(response, e.getStatus());
+            e.printStackTrace();
+        }
+
         // access token, refresh token 생성해서 헤더에 담기
-        String jwtRefreshToken = jwtTokenService.createRefreshToken(loginUser.getUserId().toString());
+        DeviceToken findDeviceToken = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(loginUser.getUserId(), loginUser.getDeviceToken());
+        String jwtRefreshToken = jwtTokenService.createRefreshToken(findDeviceToken.getDeviceTokenId().toString());
         String jwtAccessToken = jwtTokenService.createAccessToken(loginUser.getUserId().toString(), loginUser.getRole());
 
         response.addHeader(ACCESS_TOKEN_HEADER_NAME, "Bearer " + jwtAccessToken);
         response.addHeader(REFRESH_TOKEN_HEADER_NAME, "Bearer " + jwtRefreshToken);
-
-        // request로 받은 device token을 DB에 저장하기!!!!! => 수정 필요!!!
-        log.info("userId : " + loginUser.getUserId());
-        log.info("deviceToken : " + loginUser.getDeviceToken());
 
 
         // 성공메시지 리턴하기
