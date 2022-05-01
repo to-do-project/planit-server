@@ -42,32 +42,30 @@ public class UserController {
 
     // 닉네임 형식 및 중복 확인
     @GetMapping("/join/dupli/nickname")
-    public BaseResponse<String> checkNickname(@RequestParam("nickname") String nickname){
+    public BaseResponse<String> checkNickname(@RequestParam("nickname") String nickname) {
 
-        if (ValidationRegex.isRegexNickname(nickname) == false){
+        if (ValidationRegex.isRegexNickname(nickname) == false) {
             return new BaseResponse<>(INVALID_NICKNAME_FORM);
         }
 
-        if(userService.isEmptyNickname(nickname)){
+        if (userService.isEmptyNickname(nickname)) {
             return new BaseResponse<>("사용가능한 닉네임입니다.");
-        }
-        else{
+        } else {
             return new BaseResponse<>(ALREADY_EXIST_NICKNAME);
         }
     }
 
     // 이메일 형식 및 중복 확인
     @GetMapping("/join/dupli/email")
-    public BaseResponse<String> checkEmail(@RequestParam("email") String email){
+    public BaseResponse<String> checkEmail(@RequestParam("email") String email) {
 
-        if(ValidationRegex.isRegexEmail(email) == false){
+        if (ValidationRegex.isRegexEmail(email) == false) {
             return new BaseResponse<>(INVALID_EMAIL_FORM);
         }
 
-        if(userService.isEmptyEmail(email)){
+        if (userService.isEmptyEmail(email)) {
             return new BaseResponse<>("사용가능한 이메일입니다.");
-        }
-        else{
+        } else {
             return new BaseResponse<>(ALREADY_EXIST_EMAIL);
         }
     }
@@ -75,18 +73,17 @@ public class UserController {
 
     @PostMapping("/join/auth/new-num")
     public BaseResponse<String> createAuthNum(@Valid @RequestBody CreateAuthNumReqDTO reqDTO,
-                                              BindingResult br){
+                                              BindingResult br) {
         // 형식적 validation
-        if(br.hasErrors()){
+        if (br.hasErrors()) {
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
         }
 
-        try{
+        try {
             userService.createAuthNum(reqDTO.getEmail());
             return new BaseResponse<>("해당 이메일로 인증번호를 발송했습니다.");
-        }
-        catch (BaseException e){
+        } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
 
@@ -94,18 +91,17 @@ public class UserController {
 
     @PostMapping("/join/auth/check-num")
     public BaseResponse<String> checkAuthNum(@Valid @RequestBody CheckAuthNumReqDTO reqDTO,
-                                             BindingResult br){
+                                             BindingResult br) {
         // 형식적 validation
-        if(br.hasErrors()){
+        if (br.hasErrors()) {
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
         }
 
-        try{
+        try {
             String result = userService.checkAuthNum(reqDTO.getEmail(), reqDTO.getAuthNum());
             return new BaseResponse<>(result);
-        }
-        catch (BaseException e){
+        } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
 
@@ -119,16 +115,15 @@ public class UserController {
         log.info("UserController.join() 호출");
 
         // 형식적 validation
-        if(br.hasErrors()){
+        if (br.hasErrors()) {
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
         }
 
-        try{
+        try {
             LoginResDTO result = userService.join(reqDTO, response);
             return new BaseResponse<>(result);
-        }
-        catch (BaseException e){
+        } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
     }
@@ -141,7 +136,7 @@ public class UserController {
                                                    BindingResult br) {
 
         // 형식적 validation => DTO 수정 필요
-        if(br.hasErrors()){
+        if (br.hasErrors()) {
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
         }
@@ -153,14 +148,13 @@ public class UserController {
             // 형식적 Validation
             ValidationUtils.checkUserIdInHeader(userId);
 
-            if(refreshToken == null){
+            if (refreshToken == null) {
                 return new BaseResponse<>(NOT_EXIST_REFRESH_TOKEN_IN_HEADER);
             }
 
             userService.reissueAccessToken(userId, refreshToken, reqDTO.getDeviceToken(), response);
             return new BaseResponse<>("JWT Access Token을 새로 발급했습니다.");
-        }
-        catch (BaseException e){
+        } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
     }
@@ -169,23 +163,22 @@ public class UserController {
     @PostMapping("/log-out")
     public BaseResponse<String> logout(HttpServletRequest request,
                                        @Valid @RequestBody DeviceTokenReqDTO reqDTO,
-                                       BindingResult br){
+                                       BindingResult br) {
         // 형식적 validation => DTO 수정 필요
-        if(br.hasErrors()){
+        if (br.hasErrors()) {
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
         }
 
         String userId = request.getHeader(USER_ID_HEADER_NAME);
 
-        try{
+        try {
             // 형식적 Validation
             ValidationUtils.checkUserIdInHeader(userId);
 
             userService.logout(userId, reqDTO);
             return new BaseResponse<>("로그아웃이 완료되었습니다. 클라이언트 단의 access token과 refresh token을 삭제해주세요.");
-        }
-        catch (BaseException e){
+        } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
     }
@@ -194,23 +187,22 @@ public class UserController {
     @DeleteMapping("/api/user")
     public BaseResponse<String> withdrawal(HttpServletRequest request,
                                            @Valid @RequestBody WithdrawalReqDTO reqDTO,
-                                           BindingResult br){
+                                           BindingResult br) {
 
         // 형식적 validation
-        if(br.hasErrors()){
+        if (br.hasErrors()) {
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
         }
 
         String userId = request.getHeader(USER_ID_HEADER_NAME);
 
-        try{
+        try {
             // Spring Security가 userId와 jwtAccessToken에 대한 validation 모두 완료!
 
             userService.withdrawal(userId, reqDTO.getPassword());
             return new BaseResponse<>("회원탈퇴가 완료되었습니다.");
-        }
-        catch (BaseException e){
+        } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
     }
@@ -218,21 +210,64 @@ public class UserController {
     // 임시 비밀번호 발송
     @PostMapping("/user/temporary/pwd")
     public BaseResponse<String> createTemporaryPwd(@Valid @RequestBody CreateTemporaryPwdReqDTO reqDTO,
-                                                   BindingResult br){
+                                                   BindingResult br) {
 
         // 형식적 validation
-        if(br.hasErrors()){
+        if (br.hasErrors()) {
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
         }
 
-        try{
+        try {
             userService.createTemporaryPwd(reqDTO.getEmail());
             return new BaseResponse<>("해당 이메일로 임시 비밀번호를 발송했습니다.");
-        }
-        catch (BaseException e){
+        } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
 
+    }
+
+    // 비밀번호 변경
+    @PatchMapping("/api/user/pwd")
+    public BaseResponse<String> modifyPassword(HttpServletRequest request,
+                                               @Valid @RequestBody ModifyPasswordReqDTO reqDTO,
+                                               BindingResult br) {
+        // 형식적 validation
+        if (br.hasErrors()) {
+            String errorName = br.getAllErrors().get(0).getDefaultMessage();
+            return new BaseResponse<>(BaseResponseStatus.of(errorName));
+        }
+
+        // 헤더에서 userId 가져오기
+        String userId = request.getHeader(USER_ID_HEADER_NAME);
+
+        try {
+            userService.modifyPassword(userId, reqDTO.getOldPassword(), reqDTO.getNewPassword());
+            return new BaseResponse<>("비밀번호 변경이 성공적으로 완료되었습니다.");
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    // 닉네임 변경
+    @PatchMapping("/api/user/nickname")
+    public BaseResponse<String> modifyNickname(HttpServletRequest request,
+                                               @Valid @RequestBody ModifyNicknameReqDTO reqDTO,
+                                               BindingResult br) {
+        // 형식적 validation
+        if (br.hasErrors()) {
+            String errorName = br.getAllErrors().get(0).getDefaultMessage();
+            return new BaseResponse<>(BaseResponseStatus.of(errorName));
+        }
+
+        // 헤더에서 userId 가져오기
+        String userId = request.getHeader(USER_ID_HEADER_NAME);
+
+        try {
+            userService.modifyNickname(userId, reqDTO.getNickname());
+            return new BaseResponse<>("닉네임 변경이 성공적으로 완료되었습니다.");
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
     }
 }

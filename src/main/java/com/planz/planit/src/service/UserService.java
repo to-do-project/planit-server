@@ -211,7 +211,7 @@ public class UserService {
         if (jwtTokenService.validateToken(refreshToken)) {
 
             // userId로 유저 객체 조회
-            User userEntity = userRepository.findByuserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+            User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
 
             // userId와 deviceToken 값으로 디바이스 토큰 객체 조회
             DeviceToken deviceTokenEntity = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userEntity.getUserId(), deviceToken);
@@ -242,7 +242,7 @@ public class UserService {
     // 로그아웃
     public void logout(String userId, DeviceTokenReqDTO reqDTO) throws BaseException {
         Long longUserId = Long.valueOf(userId);
-        User userEntity = userRepository.findByuserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+        User userEntity = userRepository.findByUserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
 
         // 리프래시 토큰 삭제
         DeviceToken findDeviceToken = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userEntity.getUserId(), reqDTO.getDeviceToken());
@@ -257,7 +257,7 @@ public class UserService {
         Long longUserId = Long.valueOf(userId);
 
         // 비밀번호 검증
-        User userEntity = userRepository.findByuserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+        User userEntity = userRepository.findByUserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
         if (!passwordEncoder.matches(password, userEntity.getPassword())) {
             throw new BaseException(INVALID_PASSWORD);
         }
@@ -333,5 +333,45 @@ public class UserService {
         }
 
         return password.toString();
+    }
+
+    // 비밀번호 변경
+    public void modifyPassword(String userId, String oldPassword, String newPassword) throws BaseException {
+
+        User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+
+        // 기존 비밀번호가 올바른지 확인
+        if(!passwordEncoder.matches(oldPassword, userEntity.getPassword())){
+            throw new BaseException(INVALID_PASSWORD);
+        }
+
+        // DB에 새로운 pwd 저장
+        try{
+            userEntity.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(userEntity);
+        }
+        catch (Exception e){
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // 닉네임 변경
+    public void modifyNickname(String userId, String nickname) throws BaseException {
+
+        User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+
+        // 닉네임 중복확인
+        if (!isEmptyNickname(nickname)) {
+            throw new BaseException(ALREADY_EXIST_NICKNAME);
+        }
+
+        // DB에 새로운 닉네임 저장
+        try{
+            userEntity.setNickname(nickname);
+            userRepository.save(userEntity);
+        }
+        catch (Exception e){
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
 }

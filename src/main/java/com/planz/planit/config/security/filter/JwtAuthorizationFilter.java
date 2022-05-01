@@ -142,7 +142,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             return null;
         }
 
-        User userEntity = userRepository.findByuserId(Long.valueOf(userPk)).orElse(null);
+        User userEntity = userRepository.findByUserId(Long.valueOf(userPk)).orElse(null);
 
         if (userEntity == null) {
             log.error("존재하지 않는 사용자입니다.");
