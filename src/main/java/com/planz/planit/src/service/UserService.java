@@ -2,6 +2,9 @@ package com.planz.planit.src.service;
 
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponseStatus;
+import com.planz.planit.src.domain.deviceToken.DeviceToken;
+import com.planz.planit.src.domain.deviceToken.DeviceTokenRepository;
+import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
 import com.planz.planit.src.domain.mail.MailDTO;
 import com.planz.planit.src.domain.planet.Planet;
 import com.planz.planit.src.domain.planet.PlanetColor;
@@ -12,11 +15,14 @@ import com.planz.planit.src.domain.user.dto.LoginResDTO;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -34,24 +40,28 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PlanetRepository planetRepository;
+    private final DeviceTokenRepository deviceTokenRepository;
     private final JwtTokenService jwtTokenService;
     private final MailService mailService;
     private final RedisService redisService;
+    private final DeviceTokenService deviceTokenService;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, PlanetRepository planetRepository, JwtTokenService jwtTokenService, MailService mailService, RedisService redisService, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PlanetRepository planetRepository, DeviceTokenRepository deviceTokenRepository, JwtTokenService jwtTokenService, MailService mailService, RedisService redisService, @Lazy DeviceTokenService deviceTokenService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.planetRepository = planetRepository;
+        this.deviceTokenRepository = deviceTokenRepository;
         this.jwtTokenService = jwtTokenService;
         this.mailService = mailService;
         this.redisService = redisService;
+        this.deviceTokenService = deviceTokenService;
         this.passwordEncoder = passwordEncoder;
     }
 
     //은지 추가 코드
     public User findUser(Long userId) throws BaseException {
-        return userRepository.findById(userId).orElseThrow(()-> new BaseException(NOT_EXIST_USER));
+        return userRepository.findById(userId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
     }
 
 
@@ -86,8 +96,7 @@ public class UserService {
             userRepository.save(userEntity);
 
             // request로 받은 device token을 DB에 저장하기!!!!! => 수정 필요!!!
-            log.info("userId : " + userEntity.getUserId());
-            log.info("deviceToken : " + userEntity.getDeviceToken());
+            deviceTokenService.createDeviceToken(userEntity.getUserId(), new DeviceTokenReqDTO(reqDTO.getDeviceToken()));
 
 
             // Planet 저장
@@ -102,7 +111,8 @@ public class UserService {
 
 
             // access token, refresh token 생성해서 헤더에 담기
-            String jwtRefreshToken = jwtTokenService.createRefreshToken(userEntity.getUserId().toString());
+            DeviceToken findDeviceToken = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userEntity.getUserId(), reqDTO.getDeviceToken());
+            String jwtRefreshToken = jwtTokenService.createRefreshToken(findDeviceToken.getDeviceTokenId().toString());
             String jwtAccessToken = jwtTokenService.createAccessToken(userEntity.getUserId().toString(), userEntity.getRole());
 
             response.addHeader(ACCESS_TOKEN_HEADER_NAME, "Bearer " + jwtAccessToken);
@@ -195,18 +205,29 @@ public class UserService {
         }
     }
 
-    public void reissueAccessToken(String userId, String refreshToken, HttpServletResponse response) throws BaseException {
+    public void reissueAccessToken(String userId, String refreshToken, String deviceToken, HttpServletResponse response) throws BaseException {
 
+        // refresh token이 만료되었는지 확인
         if (jwtTokenService.validateToken(refreshToken)) {
 
-            User userEntity = userRepository.findByuserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+            // userId로 유저 객체 조회
+            User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+
+            // userId와 deviceToken 값으로 디바이스 토큰 객체 조회
+            DeviceToken deviceTokenEntity = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userEntity.getUserId(), deviceToken);
+            String deviceTokenId = deviceTokenEntity.getDeviceTokenId().toString();
+
+            // header의 refresh token과 redis의 refresh token 비교
+            if (!redisService.compareRefreshTokenInRedis(deviceTokenId, refreshToken)){
+                throw new BaseException(TWO_REFRESH_TOKEN_NOT_EQUAL);
+            }
 
             // access token 재발급
             String newAccessToken = jwtTokenService.createAccessToken(userId, userEntity.getRole());
 
             if (jwtTokenService.isRefreshReissue(refreshToken)) {
                 // refresh token 재발급
-                refreshToken = jwtTokenService.createRefreshToken(userId);
+                refreshToken = jwtTokenService.createRefreshToken(deviceTokenId);
             }
 
             response.addHeader(ACCESS_TOKEN_HEADER_NAME, "Bearer " + newAccessToken);
@@ -219,34 +240,138 @@ public class UserService {
     }
 
     // 로그아웃
-    public void logout(String userId) throws BaseException {
-        User userEntity = userRepository.findByuserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+    public void logout(String userId, DeviceTokenReqDTO reqDTO) throws BaseException {
+        Long longUserId = Long.valueOf(userId);
+        User userEntity = userRepository.findByUserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
 
         // 리프래시 토큰 삭제
-        redisService.deleteRefreshTokenInRedis(userId);
+        DeviceToken findDeviceToken = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userEntity.getUserId(), reqDTO.getDeviceToken());
+        redisService.deleteRefreshTokenInRedis(findDeviceToken.getDeviceTokenId().toString());
 
         // 디바이스 토큰 삭제 로직 추가!!!!!!!!!!!!!!!!!!!!!!!
-
+        deviceTokenService.deleteDeviceToken(longUserId, reqDTO);
     }
 
 
-    public void withdrawal(String userId, String password) throws BaseException{
+    public void withdrawal(String userId, String password) throws BaseException {
         Long longUserId = Long.valueOf(userId);
 
         // 비밀번호 검증
-        User userEntity = userRepository.findByuserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
-        if (!passwordEncoder.matches(password, userEntity.getPassword())){
+        User userEntity = userRepository.findByUserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+        if (!passwordEncoder.matches(password, userEntity.getPassword())) {
             throw new BaseException(INVALID_PASSWORD);
         }
 
         // 회원 삭제
         try {
+            // 리프래시 토큰 삭제 +. 수정 필요!!!
+            List<Long> findDeviceTokenIdList = deviceTokenRepository.findAllByUserIdInQuery(userEntity.getUserId());
+            for (Long deviceTokenId : findDeviceTokenIdList) {
+                redisService.deleteRefreshTokenInRedis(deviceTokenId.toString());
+            }
+
+            deviceTokenRepository.deleteByUserIdInQuery(longUserId);
             planetRepository.deleteByUserIdInQuery(longUserId);
             userRepository.deleteByUserIdInQuery(longUserId);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             throw new BaseException(FAIL_WITHDRAWAL);
         }
 
+    }
+
+    // 임시 비밀번호 발송
+    @Transactional
+    public void createTemporaryPwd(String email) throws BaseException{
+
+        User userEntity = userRepository.findByEmail(email).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+
+        String myRandomPwd = randomPwd(email);
+
+        // 이메일로 임시 pwd 전송
+        try {
+            MailDTO mailDTO = MailDTO.builder()
+                    .address(email)
+                    .title("[PLAN-IT] 임시 비밀번호 안내")
+                    .content("발급받으신 임시 비밀번호는 " + myRandomPwd + " 입니다.")
+                    .build();
+
+            mailService.mailSend(mailDTO);
+        }
+        catch (BaseException e){
+            throw e;
+        }
+
+        // DB에 임시 pwd 저장
+        try{
+            userEntity.setPassword(passwordEncoder.encode(myRandomPwd));
+            userRepository.save(userEntity);
+        }
+        catch (Exception e){
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
+    // 랜덤으로 10자리 임시 비밀번호 생성
+    public String randomPwd(String email){
+
+        Random random = new Random(System.currentTimeMillis() + email.length());
+        StringBuffer password = new StringBuffer();
+
+        char[] charSet = new char[] {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+        };	//배열안의 문자 숫자는 원하는대로
+
+        int i, randomIndex;
+        for (i = 0; i < 10; i++) {
+            randomIndex = random.nextInt(charSet.length);
+            password.append(charSet[randomIndex]);
+        }
+
+        return password.toString();
+    }
+
+    // 비밀번호 변경
+    public void modifyPassword(String userId, String oldPassword, String newPassword) throws BaseException {
+
+        User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+
+        // 기존 비밀번호가 올바른지 확인
+        if(!passwordEncoder.matches(oldPassword, userEntity.getPassword())){
+            throw new BaseException(INVALID_PASSWORD);
+        }
+
+        // DB에 새로운 pwd 저장
+        try{
+            userEntity.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(userEntity);
+        }
+        catch (Exception e){
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // 닉네임 변경
+    public void modifyNickname(String userId, String nickname) throws BaseException {
+
+        User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+
+        // 닉네임 중복확인
+        if (!isEmptyNickname(nickname)) {
+            throw new BaseException(ALREADY_EXIST_NICKNAME);
+        }
+
+        // DB에 새로운 닉네임 저장
+        try{
+            userEntity.setNickname(nickname);
+            userRepository.save(userEntity);
+        }
+        catch (Exception e){
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
 }

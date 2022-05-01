@@ -46,7 +46,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         log.info("요청 URI " + request.getRequestURI());
 
         // 회원가입 요청 or 액세스 토큰 재발급 요청 or 로그아웃 요청인 경우
-        if (request.getRequestURI().startsWith("/join") || request.getRequestURI().startsWith("/access-token") || request.getRequestURI().startsWith("/log-out")) {
+        if (request.getRequestURI().startsWith("/join") || request.getRequestURI().startsWith("/access-token") || request.getRequestURI().startsWith("/log-out") || request.getRequestURI().startsWith("/user/temporary/pwd")) {
             chain.doFilter(request, response);
             return;
         }
@@ -142,7 +142,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             return null;
         }
 
-        User userEntity = userRepository.findByuserId(Long.valueOf(userPk)).orElse(null);
+        User userEntity = userRepository.findByUserId(Long.valueOf(userPk)).orElse(null);
 
         if (userEntity == null) {
             log.error("존재하지 않는 사용자입니다.");

@@ -3,7 +3,9 @@ package com.planz.planit.config.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.planz.planit.config.security.filter.JwtAuthenticationFilter;
 import com.planz.planit.config.security.filter.JwtAuthorizationFilter;
+import com.planz.planit.src.domain.deviceToken.DeviceTokenRepository;
 import com.planz.planit.src.domain.user.UserRepository;
+import com.planz.planit.src.service.DeviceTokenService;
 import com.planz.planit.src.service.HttpResponseService;
 import com.planz.planit.src.service.JwtTokenService;
 import lombok.extern.log4j.Log4j2;
@@ -23,13 +25,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final HttpResponseService httpResponseService;
+    private final DeviceTokenService deviceTokenService;
+    private final DeviceTokenRepository deviceTokenRepository;
 
     @Autowired
-    public WebSecurityConfig(JwtTokenService jwtTokenService, UserRepository userRepository, ObjectMapper objectMapper, HttpResponseService httpResponseService) {
+    public WebSecurityConfig(JwtTokenService jwtTokenService, UserRepository userRepository, ObjectMapper objectMapper, HttpResponseService httpResponseService, DeviceTokenService deviceTokenService, DeviceTokenRepository deviceTokenRepository) {
         this.jwtTokenService = jwtTokenService;
         this.userRepository = userRepository;
         this.objectMapper = objectMapper;
         this.httpResponseService = httpResponseService;
+        this.deviceTokenService = deviceTokenService;
+        this.deviceTokenRepository = deviceTokenRepository;
     }
 
 
@@ -49,7 +55,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .formLogin().disable()
                 .httpBasic().disable()  // rest api 만을 고려하여 기본 설정은 해제
-                .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtTokenService, objectMapper, httpResponseService))
+                .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtTokenService, objectMapper, httpResponseService, deviceTokenService, deviceTokenRepository))
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtTokenService, userRepository, httpResponseService))
 
                 .authorizeRequests()    // 요청에 대한 사용권한 체크

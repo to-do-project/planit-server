@@ -97,7 +97,7 @@ public class JwtTokenService {
     }
 
     // jwt refresh Token 생성
-    public String createRefreshToken(String userPk){
+    public String createRefreshToken(String deviceTokenId){
         log.info("createRefreshToken() 호출");
 
         Date now = new Date();
@@ -110,7 +110,7 @@ public class JwtTokenService {
                 .compact();
 
         // redis 저장
-        redisService.setRefreshTokenInRedis(userPk, refreshToken, REFRESH_TOKEN_EXPIRE_TIME);
+        redisService.setRefreshTokenInRedis(deviceTokenId, refreshToken, REFRESH_TOKEN_EXPIRE_TIME);
 
         return refreshToken;
     }

@@ -30,23 +30,32 @@ public class RedisService {
     // 나중에 key값이 usrePK값이 아닌 DeviceToken 테이블 PK로 변경되야함!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // refresh 토큰 저장하기
-    public Boolean setRefreshTokenInRedis(String userPk, String refreshToken, Long expireTime){
-        String key = REFRESH_PREFIX + userPk;
+    public Boolean setRefreshTokenInRedis(String deviceTokenId, String refreshToken, Long expireTime){
+        String key = REFRESH_PREFIX + deviceTokenId;
         valueOperations.set(key, refreshToken);
         return stringRedisTemplate.expire(key, expireTime, TimeUnit.MILLISECONDS);
     }
 
-    // refresh 토큰 가져오기
-    public String getRefreshTokenInRedis(String userPk){
-        String key = REFRESH_PREFIX + userPk;
+    // refresh 토큰 비교하기
+    public boolean compareRefreshTokenInRedis(String deviceTokenId, String refreshTokenInHeader){
+        String key = REFRESH_PREFIX + deviceTokenId;
 
         // 해당 userPk로 발급받은 refresh 토큰이 없다면 null 리턴
-        return valueOperations.get(key);
+        String refreshTokenInRedis = valueOperations.get(key);
+        if (refreshTokenInRedis == null){
+            return false;
+        }
+        else if (refreshTokenInRedis.equals(refreshTokenInHeader)){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     // refresh 토큰 삭제하기
-    public void deleteRefreshTokenInRedis(String userPk){
-        String key = REFRESH_PREFIX + userPk;
+    public void deleteRefreshTokenInRedis(String deviceTokenId){
+        String key = REFRESH_PREFIX + deviceTokenId;
         stringRedisTemplate.delete(key);
     }
 

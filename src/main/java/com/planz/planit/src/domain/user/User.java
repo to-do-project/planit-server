@@ -76,10 +76,19 @@ public class User {
         this.lastCheckAt = LocalDateTime.now();
     }
 
+    // 디바이스 토큰 값
     @Transient
     private String deviceToken;
 
     public void setDeviceToken(String deviceToken) {
         this.deviceToken = deviceToken;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 }
