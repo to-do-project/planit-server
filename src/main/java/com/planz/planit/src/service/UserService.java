@@ -1,9 +1,7 @@
 package com.planz.planit.src.service;
 
 import com.planz.planit.config.BaseException;
-import com.planz.planit.config.BaseResponseStatus;
 import com.planz.planit.src.domain.deviceToken.DeviceToken;
-import com.planz.planit.src.domain.deviceToken.DeviceTokenRepository;
 import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
 import com.planz.planit.src.domain.mail.MailDTO;
 import com.planz.planit.src.domain.planet.Planet;
@@ -19,11 +17,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
@@ -40,7 +36,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PlanetRepository planetRepository;
-    private final DeviceTokenRepository deviceTokenRepository;
     private final JwtTokenService jwtTokenService;
     private final MailService mailService;
     private final RedisService redisService;
@@ -48,10 +43,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, PlanetRepository planetRepository, DeviceTokenRepository deviceTokenRepository, JwtTokenService jwtTokenService, MailService mailService, RedisService redisService, @Lazy DeviceTokenService deviceTokenService, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PlanetRepository planetRepository, JwtTokenService jwtTokenService, MailService mailService, RedisService redisService, @Lazy DeviceTokenService deviceTokenService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.planetRepository = planetRepository;
-        this.deviceTokenRepository = deviceTokenRepository;
         this.jwtTokenService = jwtTokenService;
         this.mailService = mailService;
         this.redisService = redisService;
@@ -78,7 +72,7 @@ public class UserService {
         }
 
         try {
-
+            System.out.println("구역 1 - 유저 저장");
             // User 저장
             User userEntity = User.builder()
                     .email(reqDTO.getEmail())
@@ -95,10 +89,12 @@ public class UserService {
 
             userRepository.save(userEntity);
 
+            System.out.println("구역 2 - 디바이스 토큰 저장");
             // request로 받은 device token을 DB에 저장하기!!!!! => 수정 필요!!!
             deviceTokenService.createDeviceToken(userEntity.getUserId(), new DeviceTokenReqDTO(reqDTO.getDeviceToken()));
 
 
+            System.out.println("구역 3 - 플래닛 저장");
             // Planet 저장
             Planet planetEntity = Planet.builder()
                     .user(userEntity)
@@ -110,15 +106,21 @@ public class UserService {
             planetRepository.save(planetEntity);
 
 
+            System.out.println("구역 4.1 - jwt 토큰 생성1");
             // access token, refresh token 생성해서 헤더에 담기
-            DeviceToken findDeviceToken = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userEntity.getUserId(), reqDTO.getDeviceToken());
+            DeviceToken findDeviceToken = deviceTokenService.findDeviceTokenByUserIdAndDeviceToken(userEntity.getUserId(), reqDTO.getDeviceToken());
+
+            System.out.println("구역 4.2 - jwt 토큰 생성2");
             String jwtRefreshToken = jwtTokenService.createRefreshToken(findDeviceToken.getDeviceTokenId().toString());
+
+            System.out.println("구역 4.3 - jwt 토큰 생성3");
             String jwtAccessToken = jwtTokenService.createAccessToken(userEntity.getUserId().toString(), userEntity.getRole());
 
+            System.out.println("구역 5 - 헤더에 담기");
             response.addHeader(ACCESS_TOKEN_HEADER_NAME, "Bearer " + jwtAccessToken);
             response.addHeader(REFRESH_TOKEN_HEADER_NAME, "Bearer " + jwtRefreshToken);
 
-
+            System.out.println("구역 6 - 리턴");
             return LoginResDTO.builder()
                     .userId(userEntity.getUserId())
                     .planetId(planetEntity.getPlanetId())
@@ -214,7 +216,7 @@ public class UserService {
             User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
 
             // userId와 deviceToken 값으로 디바이스 토큰 객체 조회
-            DeviceToken deviceTokenEntity = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userEntity.getUserId(), deviceToken);
+            DeviceToken deviceTokenEntity = deviceTokenService.findDeviceTokenByUserIdAndDeviceToken(userEntity.getUserId(), deviceToken);
             String deviceTokenId = deviceTokenEntity.getDeviceTokenId().toString();
 
             // header의 refresh token과 redis의 refresh token 비교
@@ -245,7 +247,7 @@ public class UserService {
         User userEntity = userRepository.findByUserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
 
         // 리프래시 토큰 삭제
-        DeviceToken findDeviceToken = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(userEntity.getUserId(), reqDTO.getDeviceToken());
+        DeviceToken findDeviceToken = deviceTokenService.findDeviceTokenByUserIdAndDeviceToken(userEntity.getUserId(), reqDTO.getDeviceToken());
         redisService.deleteRefreshTokenInRedis(findDeviceToken.getDeviceTokenId().toString());
 
         // 디바이스 토큰 삭제 로직 추가!!!!!!!!!!!!!!!!!!!!!!!
@@ -265,12 +267,12 @@ public class UserService {
         // 회원 삭제
         try {
             // 리프래시 토큰 삭제 +. 수정 필요!!!
-            List<Long> findDeviceTokenIdList = deviceTokenRepository.findAllByUserIdInQuery(userEntity.getUserId());
+            List<Long> findDeviceTokenIdList = deviceTokenService.findUserAllDeviceToken(userEntity.getUserId());
             for (Long deviceTokenId : findDeviceTokenIdList) {
                 redisService.deleteRefreshTokenInRedis(deviceTokenId.toString());
             }
 
-            deviceTokenRepository.deleteByUserIdInQuery(longUserId);
+            deviceTokenService.deleteAllDeviceToken(longUserId);
             planetRepository.deleteByUserIdInQuery(longUserId);
             userRepository.deleteByUserIdInQuery(longUserId);
         } catch (Exception e) {
