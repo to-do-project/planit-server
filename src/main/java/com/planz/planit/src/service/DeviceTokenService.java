@@ -7,6 +7,7 @@ import com.planz.planit.src.domain.deviceToken.DeviceTokenRepository;
 import com.planz.planit.src.domain.deviceToken.dto.ChangeFlagReqDTO;
 import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
 import com.planz.planit.src.domain.user.User;
+import io.lettuce.core.dynamic.annotation.Param;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -86,6 +87,15 @@ public class DeviceTokenService {
             DeviceToken findToken = deviceTokenRepository.findDeviceTokenByUserIdAndDeviceToken(userId, reqDTO.getDeviceToken());
             findToken.changeFlag(DeviceTokenFlag.valueOf(reqDTO.getFlag()));
         }catch(Exception e){
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    public DeviceToken findDeviceTokenByUserIdAndDeviceToken(Long userId, String deviceToken) throws BaseException {
+        try{
+            return deviceTokenRepository.findDeviceTokenByUserIdAndDeviceToken(userId, deviceToken);
+        }
+        catch (Exception e){
             throw new BaseException(DATABASE_ERROR);
         }
     }

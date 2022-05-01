@@ -127,7 +127,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         }
 
         // access token, refresh token 생성해서 헤더에 담기
-        DeviceToken findDeviceToken = deviceTokenRepository.findDeviceTokenByUserAndDeviceToken(loginUser.getUserId(), loginUser.getDeviceToken());
+        DeviceToken findDeviceToken = deviceTokenRepository.findDeviceTokenByUserIdAndDeviceToken(loginUser.getUserId(), loginUser.getDeviceToken());
         String jwtRefreshToken = jwtTokenService.createRefreshToken(findDeviceToken.getDeviceTokenId().toString());
         String jwtAccessToken = jwtTokenService.createAccessToken(loginUser.getUserId().toString(), loginUser.getRole());
 
