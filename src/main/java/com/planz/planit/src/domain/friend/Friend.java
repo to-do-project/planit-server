@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+import static com.planz.planit.src.domain.friend.FriendStatus.WAIT;
+
 
 //https://github.com/moonsbeen626/clone_instargram/blob/master/src/main/java/moon/clone/instargram/domain/follow/Follow.java
 @Getter
@@ -30,26 +32,24 @@ public class Friend {
     private Long friendId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="from_user_id")
+    @JoinColumn(name="from_user_id",nullable = false)
     private User fromUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="to_user_id")
+    @JoinColumn(name="to_user_id",nullable = false)
     private User toUser;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="friend_status")
-    private FriendStatus friendStatus;
+    @Column(name="friend_status",nullable = false)
+    private FriendStatus friendStatus=WAIT;
 
-    @Column(name="create_at")
-    private LocalDateTime createAt;
+    @Column(name="create_at",nullable = false)
+    private LocalDateTime createAt = LocalDateTime.now();
 
     @Builder
     public Friend(User fromUser,User toUser){
         this.fromUser = fromUser;
         this.toUser = toUser;
-        this.friendStatus = FriendStatus.WAIT;
-        this.createAt = LocalDateTime.now();
     }
 
     //친구 수락 및 친구 거절

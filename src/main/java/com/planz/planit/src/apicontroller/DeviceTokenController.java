@@ -7,17 +7,24 @@ import com.planz.planit.src.domain.deviceToken.dto.ChangeFlagReqDTO;
 import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
 import com.planz.planit.src.service.DeviceTokenService;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import static com.planz.planit.config.BaseResponseStatus.SUCCESS;
 
+@Slf4j
 @RestController
-@RequestMapping("/api")
+@RequestMapping
 public class DeviceTokenController {
+    @Value("${jwt.user-id-header-name}")
+    private String USER_ID_HEADER_NAME;
+
     private final DeviceTokenService deviceTokenService;
 
     @Autowired
@@ -25,10 +32,12 @@ public class DeviceTokenController {
         this.deviceTokenService = deviceTokenService;
     }
 
-    @PostMapping("/device-token/{userId}")
+    @PostMapping("/device-token")
     @ApiOperation(value="유저 디바이스 토큰 생성")
-    public BaseResponse createDeviceToken(@PathVariable Long userId, @RequestBody DeviceTokenReqDTO reqDTO){
+    public BaseResponse createDeviceToken(HttpServletRequest request, @RequestBody DeviceTokenReqDTO reqDTO){
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try{
+            log.info("DeviceTokenController.createDeviceToken()");
             deviceTokenService.createDeviceToken(userId,reqDTO);
             return new BaseResponse(SUCCESS);
         }catch(BaseException e){
@@ -40,9 +49,10 @@ public class DeviceTokenController {
      *유저 디바이스 토큰 갱신 구현 필요!!!!!
      */
 
-    @PatchMapping("/device-token/{userId}")
+    @PatchMapping("/device-token")
     @ApiOperation(value="알림 설정 on off")
-    public BaseResponse changeFlag(@PathVariable Long userId, @Valid @RequestBody ChangeFlagReqDTO reqDTO, BindingResult br){
+    public BaseResponse changeFlag(HttpServletRequest request, @Valid @RequestBody ChangeFlagReqDTO reqDTO, BindingResult br){
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         if(br.hasErrors()){
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
