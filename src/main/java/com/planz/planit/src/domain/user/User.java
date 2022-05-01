@@ -83,4 +83,8 @@ public class User {
     public void setDeviceToken(String deviceToken) {
         this.deviceToken = deviceToken;
     }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 import javax.servlet.http.HttpServletResponse;
@@ -276,5 +277,61 @@ public class UserService {
             throw new BaseException(FAIL_WITHDRAWAL);
         }
 
+    }
+
+    // 임시 비밀번호 발송
+    @Transactional
+    public void createTemporaryPwd(String email) throws BaseException{
+
+        User userEntity = userRepository.findByEmail(email).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+
+        String myRandomPwd = randomPwd(email);
+
+        // 이메일로 임시 pwd 전송
+        try {
+            MailDTO mailDTO = MailDTO.builder()
+                    .address(email)
+                    .title("[PLAN-IT] 임시 비밀번호 안내")
+                    .content("발급받으신 임시 비밀번호는 " + myRandomPwd + " 입니다.")
+                    .build();
+
+            mailService.mailSend(mailDTO);
+        }
+        catch (BaseException e){
+            throw e;
+        }
+
+        // DB에 임시 pwd 저장
+        try{
+            userEntity.setPassword(passwordEncoder.encode(myRandomPwd));
+            userRepository.save(userEntity);
+        }
+        catch (Exception e){
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
+    // 랜덤으로 10자리 임시 비밀번호 생성
+    public String randomPwd(String email){
+
+        Random random = new Random(System.currentTimeMillis() + email.length());
+        StringBuffer password = new StringBuffer();
+
+        char[] charSet = new char[] {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+        };	//배열안의 문자 숫자는 원하는대로
+
+        int i, randomIndex;
+        for (i = 0; i < 10; i++) {
+            randomIndex = random.nextInt(charSet.length);
+            password.append(charSet[randomIndex]);
+        }
+
+        return password.toString();
     }
 }

@@ -192,7 +192,16 @@ public class UserController {
 
     // 회원탈퇴
     @DeleteMapping("/api/user")
-    public BaseResponse<String> withdrawal(HttpServletRequest request, @Valid @RequestBody WithdrawalReqDTO reqDTO){
+    public BaseResponse<String> withdrawal(HttpServletRequest request,
+                                           @Valid @RequestBody WithdrawalReqDTO reqDTO,
+                                           BindingResult br){
+
+        // 형식적 validation
+        if(br.hasErrors()){
+            String errorName = br.getAllErrors().get(0).getDefaultMessage();
+            return new BaseResponse<>(BaseResponseStatus.of(errorName));
+        }
+
         String userId = request.getHeader(USER_ID_HEADER_NAME);
 
         try{
@@ -204,5 +213,26 @@ public class UserController {
         catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
+    }
+
+    // 임시 비밀번호 발송
+    @PostMapping("/user/temporary/pwd")
+    public BaseResponse<String> createTemporaryPwd(@Valid @RequestBody CreateTemporaryPwdReqDTO reqDTO,
+                                                   BindingResult br){
+
+        // 형식적 validation
+        if(br.hasErrors()){
+            String errorName = br.getAllErrors().get(0).getDefaultMessage();
+            return new BaseResponse<>(BaseResponseStatus.of(errorName));
+        }
+
+        try{
+            userService.createTemporaryPwd(reqDTO.getEmail());
+            return new BaseResponse<>("해당 이메일로 임시 비밀번호를 발송했습니다.");
+        }
+        catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+
     }
 }
