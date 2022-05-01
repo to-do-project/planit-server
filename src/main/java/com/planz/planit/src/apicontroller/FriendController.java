@@ -1,15 +1,17 @@
 package com.planz.planit.src.apicontroller;
 
+import com.google.api.Http;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponse;
 import com.planz.planit.src.domain.friend.Friend;
 import com.planz.planit.src.domain.friend.dto.AcceptReqDTO;
-import com.planz.planit.src.domain.friend.dto.FollowReqDTO;
 import com.planz.planit.src.domain.friend.dto.GetFriendResDTO;
 import com.planz.planit.src.service.FriendService;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static com.planz.planit.config.BaseResponseStatus.SERVER_ERROR;
@@ -18,6 +20,9 @@ import static com.planz.planit.config.BaseResponseStatus.SUCCESS;
 @RestController
 @RequestMapping("/api")
 public class FriendController {
+    @Value("${jwt.user-id-header-name}")
+    private String USER_ID_HEADER_NAME;
+
     private final FriendService friendService;
 
     public FriendController(FriendService friendService) {
@@ -30,14 +35,15 @@ public class FriendController {
      * @param toUserId
      * @Return 새로 생성된 follow 객체
      */
-    @PostMapping("/friend/{toUserId}")
+    @PostMapping("/friends/{toUserId}")
     @ApiOperation(value = "친구 요청 api")
-    public BaseResponse<Friend> followUser(@PathVariable Long toUserId, @RequestBody FollowReqDTO followReqDTO) throws BaseException {
+    public BaseResponse<Friend> followUser(HttpServletRequest request, @PathVariable Long toUserId) throws BaseException {
         /*
         Authnetificattion 과정
          */
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try{
-            friendService.save(followReqDTO.getUserId(),toUserId);
+            friendService.save(userId,toUserId);
             return new BaseResponse<>(SUCCESS);
         }catch(BaseException e){
             return new BaseResponse<>(e.getStatus());
@@ -53,9 +59,10 @@ public class FriendController {
      * DTO로 변환해야 함
      * @return
      */
-    @GetMapping("/friend/{userId}")
+    @GetMapping("/friends")
     @ApiOperation("친구 목록 조회 api")
-    public BaseResponse<List<GetFriendResDTO>> getFriends(@PathVariable Long userId) throws BaseException{
+    public BaseResponse<List<GetFriendResDTO>> getFriends(HttpServletRequest request) throws BaseException{
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try {
             List<GetFriendResDTO> friends = friendService.getFriends(userId);
             return new BaseResponse<>(friends);
@@ -68,10 +75,11 @@ public class FriendController {
      * 수락 - true
      * 거절 - false
      */
-    @PatchMapping("/friend/{userId}")
+    @PatchMapping("/friends")
     @ApiOperation("친구 요청 수락/거절/삭제 api")
-    public BaseResponse acceptFriends(@PathVariable Long userId, @RequestBody AcceptReqDTO acceptReqDTO){
-       try {
+    public BaseResponse acceptFriends(HttpServletRequest request, @RequestBody AcceptReqDTO acceptReqDTO){
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
+        try {
            if (friendService.acceptFriend(acceptReqDTO)) {
                return new BaseResponse<>(SUCCESS);
            }

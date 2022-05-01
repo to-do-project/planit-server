@@ -60,6 +60,13 @@ public class DeviceToken {
         this.deviceToken = deviceToken;
     }
 
+    @Override
+    public String toString() {
+        return "\ndeviceTokenId: "+this.getDeviceTokenId()
+                +"\n userId: "+this.user.getUserId()
+                +"\n deviceToken: "+this.deviceToken;
+    }
+
     //updateAt 갱신 메소드
     public void changeUpdateAt(){
         this.updateAt = now();

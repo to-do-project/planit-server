@@ -93,6 +93,7 @@ public class DeviceTokenService {
 
     public DeviceToken findDeviceTokenByUserIdAndDeviceToken(Long userId, String deviceToken) throws BaseException {
         try{
+            log.info("findDeviceTokenByUserIdAndDeviceToken() 호출");
             return deviceTokenRepository.findDeviceTokenByUserIdAndDeviceToken(userId, deviceToken);
         }
         catch (Exception e){

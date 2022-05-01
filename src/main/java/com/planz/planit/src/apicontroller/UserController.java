@@ -9,6 +9,7 @@ import com.planz.planit.src.service.JwtTokenService;
 import com.planz.planit.src.service.UserService;
 import com.planz.planit.utils.ValidationRegex;
 import com.planz.planit.utils.ValidationUtils;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -267,6 +268,19 @@ public class UserController {
             userService.modifyNickname(userId, reqDTO.getNickname());
             return new BaseResponse<>("닉네임 변경이 성공적으로 완료되었습니다.");
         } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    //유저 검색 - 은지 추가
+    //닉네임 혹은 이메일을 완전하게 입력해야한다.
+    @PatchMapping("/api/users")
+    @ApiOperation("닉네임, 이메일로 유저 검색")
+    public BaseResponse<SearchUserResDTO> searchUsers(@RequestParam("keyword")String keyword){
+        try{
+            SearchUserResDTO searchUserResDTO = userService.searchUsers(keyword);
+            return new BaseResponse<>(searchUserResDTO);
+        }catch(BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
     }

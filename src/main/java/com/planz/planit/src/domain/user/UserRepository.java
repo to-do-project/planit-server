@@ -16,6 +16,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByNickname(String nickname);
     Optional<User> findByUserId(Long userId);
 
+    @Query("select u from User u where u.nickname is :nickname or u.email is :email")
+    Optional<User> findByNicknameOrEmail(@Param("nickname")String nickname,@Param("email") String email);
 
     @Transactional
     @Modifying

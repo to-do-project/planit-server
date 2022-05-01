@@ -10,6 +10,7 @@ import com.planz.planit.src.domain.planet.PlanetRepository;
 import com.planz.planit.src.domain.user.*;
 import com.planz.planit.src.domain.user.dto.JoinReqDTO;
 import com.planz.planit.src.domain.user.dto.LoginResDTO;
+import com.planz.planit.src.domain.user.dto.SearchUserResDTO;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -375,5 +376,21 @@ public class UserService {
         catch (Exception e){
             throw new BaseException(DATABASE_ERROR);
         }
+    }
+
+    //닉네임 혹은 이메일로 유저 검색
+    public SearchUserResDTO searchUsers(String keyword) throws BaseException {
+        //유저 검색
+        User userEntity = userRepository.findByNicknameOrEmail(keyword,keyword).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+        //행성 검색 (행성 레벨)
+        Planet userPlanet = planetRepository.findByUserId(userEntity.getUserId()).orElseThrow(() -> new BaseException(NOT_EXIST_PLANET_INFO));
+
+        try{
+            //dto 만들기
+            return new SearchUserResDTO(userEntity.getUserId(),userEntity.getNickname(),userEntity.getProfileColor().toString(),userPlanet.getLevel());
+        }catch(Exception e){
+            throw new BaseException(FAILED_TO_SEARCH_USER);
+        }
+
     }
 }
