@@ -3,6 +3,7 @@ package com.planz.planit.src.domain.deviceToken;
 import com.planz.planit.src.domain.friend.FriendStatus;
 import com.planz.planit.src.domain.user.User;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.tomcat.jni.Local;
 
@@ -10,9 +11,19 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 import static com.planz.planit.src.domain.deviceToken.DeviceTokenFlag.ALL;
+import static java.time.LocalDateTime.now;
 
+@Getter
 @Entity
 @NoArgsConstructor
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name="devicetoken_uk",
+                        columnNames = {"user_id", "device_token"}
+                )
+        }
+)
 public class DeviceToken {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="device_token_id")
@@ -22,42 +33,36 @@ public class DeviceToken {
     @JoinColumn(name="user_id")
     private User user;
 
-    @Column(name="device_token")
+    @Column(name="device_token", nullable = false)
     private String deviceToken;
 
     @Column(name="friendFlag")
-    private int friendFlag;
+    private int friendFlag = 1;
     @Column(name="group_flag")
-    private int groupFlag;
+    private int groupFlag = 1;
     @Column(name="notice_flag")
-    private int noticeFlag;
+    private int noticeFlag = 1;
     @Column(name="setting_flag")
-    private int settingFlag;
+    private int settingFlag = 1;
 
     @Column(name="all_flag")
-    private int allFlag;
+    private int allFlag = 1;
 
-    @Column(name="create_at")
-    private LocalDateTime createAt;
+    @Column(name="create_at",nullable = false)
+    private LocalDateTime createAt= now();
 
-    @Column(name="update_at")
-    private LocalDateTime updateAt;
+    @Column(name="update_at",nullable=false)
+    private LocalDateTime updateAt=now();
 
     @Builder
     public DeviceToken(User user,String deviceToken){
         this.user = user;
-        //초기 설정은 알림 설정 모두 켜져 있는걸로
-        this.friendFlag=1;
-        this.groupFlag=1;
-        this.noticeFlag=1;
-        this.settingFlag=1;
-        this.createAt = LocalDateTime.now();
-        this.updateAt = LocalDateTime.now();
+        this.deviceToken = deviceToken;
     }
 
     //updateAt 갱신 메소드
     public void changeUpdateAt(){
-        this.updateAt = LocalDateTime.now();
+        this.updateAt = now();
     }
 
     public void changeFlag(DeviceTokenFlag flag){
@@ -67,15 +72,19 @@ public class DeviceToken {
                 break;
             case FRIEND:
                 this.friendFlag = this.friendFlag==1?0:1;
+                this.allFlag = 0;
                 break;
             case GROUP:
                 this.groupFlag = this.groupFlag==1?0:1;
+                this.allFlag = 0;
                 break;
             case SETTING:
                 this.settingFlag = this.settingFlag==1?0:1;
+                this.allFlag = 0;
                 break;
             case NOTICE:
                 this.noticeFlag = this.noticeFlag==1?0:1;
+                this.allFlag = 0;
                 break;
         }
     }
