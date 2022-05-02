@@ -60,6 +60,8 @@ public enum BaseResponseStatus {
     NOT_EXIST_FLAG_ENUM(false,5000,"존재하지 않는 알림 설정입니다."),
     FCM_SEND_ERROR(false,5001,"푸시 알림 전송에 실패했습니다"),
     FAILED_TO_DELETE_DEVICE_TOKEN(false,5002,"디바이스 토큰 삭제에 실패했습니다."),
+    NOT_EXIST_PLANET_INFO(false,5003,"행성 정보가 존재하지 않습니다."),
+    FAILED_TO_SEARCH_USER(false,5004,"유저 조회에 실패했습니다."),
     // 6000 : 필요시 만들어서 쓰세요
 
     INVALID_ACCESS_TOKEN(false, 6000, "만료된 access token 입니다."),

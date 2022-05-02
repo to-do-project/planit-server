@@ -38,3 +38,4 @@ out/
 /src/main/java/com/planz/planit/config/secret/
 /src/main/resources/application.yml
 /src/main/resources/firebase/
+/src/test/java/com/planz/planit/src/
