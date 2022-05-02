@@ -73,7 +73,6 @@ public class UserService {
         }
 
         try {
-            System.out.println("구역 1 - 유저 저장");
             // User 저장
             User userEntity = User.builder()
                     .email(reqDTO.getEmail())
@@ -90,12 +89,10 @@ public class UserService {
 
             userRepository.save(userEntity);
 
-            System.out.println("구역 2 - 디바이스 토큰 저장");
             // request로 받은 device token을 DB에 저장하기!!!!! => 수정 필요!!!
             deviceTokenService.createDeviceToken(userEntity.getUserId(), new DeviceTokenReqDTO(reqDTO.getDeviceToken()));
 
 
-            System.out.println("구역 3 - 플래닛 저장");
             // Planet 저장
             Planet planetEntity = Planet.builder()
                     .user(userEntity)
@@ -107,21 +104,16 @@ public class UserService {
             planetRepository.save(planetEntity);
 
 
-            System.out.println("구역 4.1 - jwt 토큰 생성1");
             // access token, refresh token 생성해서 헤더에 담기
             DeviceToken findDeviceToken = deviceTokenService.findDeviceTokenByUserIdAndDeviceToken(userEntity.getUserId(), reqDTO.getDeviceToken());
 
-            System.out.println("구역 4.2 - jwt 토큰 생성2");
             String jwtRefreshToken = jwtTokenService.createRefreshToken(findDeviceToken.getDeviceTokenId().toString());
 
-            System.out.println("구역 4.3 - jwt 토큰 생성3");
             String jwtAccessToken = jwtTokenService.createAccessToken(userEntity.getUserId().toString(), userEntity.getRole());
 
-            System.out.println("구역 5 - 헤더에 담기");
             response.addHeader(ACCESS_TOKEN_HEADER_NAME, "Bearer " + jwtAccessToken);
             response.addHeader(REFRESH_TOKEN_HEADER_NAME, "Bearer " + jwtRefreshToken);
 
-            System.out.println("구역 6 - 리턴");
             return LoginResDTO.builder()
                     .userId(userEntity.getUserId())
                     .planetId(planetEntity.getPlanetId())
