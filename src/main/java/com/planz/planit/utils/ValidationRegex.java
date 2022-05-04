@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 public class ValidationRegex {
     // 이메일 형식 체크
     public static boolean isRegexEmail(String target) {
-        if (target.length() > 50){
+        if (target.length() > 30){
             return false;
         }
 
@@ -28,7 +28,7 @@ public class ValidationRegex {
 
     // 닉네임 형식 체크
     public static boolean isRegexNickname(String target){
-        String regex = "^[A-Za-z0-9ㄱ-ㅎ가-힣]{1,20}$";
+        String regex = "^[A-Za-z0-9ㄱ-ㅎ가-힣]{1,8}$";
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(target);
         return matcher.find();

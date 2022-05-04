@@ -14,6 +14,7 @@ import com.planz.planit.src.domain.user.dto.LoginReqDTO;
 import com.planz.planit.src.domain.user.User;
 import com.planz.planit.src.service.JwtTokenService;
 import com.planz.planit.utils.ValidationRegex;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -109,6 +110,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 
 
+    @SneakyThrows
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
 

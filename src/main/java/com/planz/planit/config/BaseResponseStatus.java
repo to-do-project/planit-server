@@ -48,6 +48,7 @@ public enum BaseResponseStatus {
      */
     DATABASE_ERROR(false, 4000, "데이터베이스 연결에 실패하였습니다."),
     SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
+    REDIS_ERROR(false, 4002, "Redis 연결에 실패했습니다."),
 
     //[PATCH] /users/{userId}
     MODIFY_FAIL_USERNAME(false,4014,"유저네임 수정 실패"),
@@ -74,10 +75,10 @@ public enum BaseResponseStatus {
     NOT_EXIST_USER_ID_IN_HEADER(false, 6007, "userId를 헤더에 입력해주세요"),
     NOT_EXIST_ACCESS_TOKEN_IN_HEADER(false, 6008, "access token을 헤더에 입력해주세요."),
     NOT_EXIST_LOGIN_REQ_DTO(false, 6009, "email, password, deviceToken을 모두 입력해주세요."),
-    INVALID_EMAIL_FORM(false, 6010, "이메일 형식이 올바르지 않습니다. (50자 이내)"),
+    INVALID_EMAIL_FORM(false, 6010, "이메일 형식이 올바르지 않습니다. (30자 이내)"),
     INVALID_PWD_FORM(false, 6011, "비밀번호 형식이 올바르지 않습니다. (영문+숫자 6~15자)"),
     NOT_EXIST_JOIN_REQ_DTO(false, 6012, "email, password, nickname, planetColor, deviceToken을 모두 입력해주세요."),
-    INVALID_NICKNAME_FORM(false, 6013, "닉네임 형식이 올바르지 않습니다. (영문+한글+숫자 20자 이내)"),
+    INVALID_NICKNAME_FORM(false, 6013, "닉네임 형식이 올바르지 않습니다. (영문+한글+숫자 8자 이내)"),
     INVALID_PLANET_COLOR_FORM(false, 6014, "행성 색깔이 올바르지 않습니다. (RED, GREEN, BLUE 중 하나)"),
     ALREADY_EXIST_EMAIL(false, 6015, "이미 존재하는 이메일입니다."),
     ALREADY_EXIST_NICKNAME(false, 6016, "이미 존재하는 닉네임입니다."),
@@ -95,7 +96,8 @@ public enum BaseResponseStatus {
     TWO_REFRESH_TOKEN_NOT_EQUAL(false, 6028, "헤더의 refresh token과 서버에 저장된 refresh token이 일치하지 않습니다."),
     NOT_EXIST_OLD_PASSWORD(false, 6029, "기존 비밀번호를 입력해주세요."),
     NOT_EXIST_NEW_PASSWORD(false, 6030, "새로운 비밀번호를 입력해주세요."),
-    NOT_EXIST_NICKNAME(false, 6031, "새로운 닉네임을 입력해주세요.")
+    NOT_EXIST_NICKNAME(false, 6031, "새로운 닉네임을 입력해주세요."),
+    NOT_EXIST_DEVISE_TOKEN(false, 6032, "디바이스 토큰을 입력해주세요.")
     ;
 
 

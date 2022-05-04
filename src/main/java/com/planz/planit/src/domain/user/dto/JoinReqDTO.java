@@ -17,7 +17,7 @@ import javax.validation.constraints.Size;
 public class JoinReqDTO {
 
     @NotBlank(message = "NOT_EXIST_JOIN_REQ_DTO")
-    @Size(max = 50, message = "INVALID_EMAIL_FORM")
+    @Size(max = 30, message = "INVALID_EMAIL_FORM")
     @Pattern(regexp = "^[A-Za-z0-9._^%$~#+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$", message = "INVALID_EMAIL_FORM")
     private String email;
 
@@ -27,8 +27,8 @@ public class JoinReqDTO {
     private String password;
 
     @NotBlank(message = "NOT_EXIST_JOIN_REQ_DTO")
-    @Size(max = 20, message = "INVALID_NICKNAME_FORM")
-    @Pattern(regexp = "^[A-Za-z0-9ㄱ-ㅎ가-힣]{1,20}$", message = "INVALID_NICKNAME_FORM")
+    @Size(max = 8, message = "INVALID_NICKNAME_FORM")
+    @Pattern(regexp = "^[A-Za-z0-9ㄱ-ㅎ가-힣]{1,8}$", message = "INVALID_NICKNAME_FORM")
     private String nickname;
 
     @NotBlank(message = "NOT_EXIST_JOIN_REQ_DTO")
