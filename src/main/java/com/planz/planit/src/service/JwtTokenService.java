@@ -1,5 +1,6 @@
 package com.planz.planit.src.service;
 
+import com.planz.planit.config.BaseException;
 import com.planz.planit.src.domain.user.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -47,10 +48,12 @@ public class JwtTokenService {
         this.redisService = redisService;
     }
 
-    // Request Header에서 access token 값을 가져옵니다.
+    /**
+     * Request Header에서 access token 값을 가져와서 리턴한다. (Bearer 문자열은 제외하고 토큰 값만 리턴)
+     * 1. Request Header에 access token이 없으면 null 리턴
+     * 2. access token이 Bearer로 시작하지 않으면 null 리턴
+     */
     public String getAccessToken(HttpServletRequest request){
-        log.info("getAccessToken() 호출");
-
         String jwtAccessHeader = request.getHeader(ACCESS_TOKEN_HEADER_NAME);
 
         if (jwtAccessHeader == null || !jwtAccessHeader.startsWith("Bearer ")){
@@ -62,10 +65,13 @@ public class JwtTokenService {
         return jwtAccessToken;
     }
 
-    // Request Header에서 refresh token 값을 가져옵니다.
-    public String getRefreshToken(HttpServletRequest request){
-        log.info("getRefreshToken() 호출");
 
+    /**
+     * Request Header에서 refresh token 값을 가져와서 리턴한다. (Bearer 문자열은 제외하고 토큰 값만 리턴)
+     * 1. Request Header에 refresh token이 없으면 null 리턴
+     * 2. refresh token이 Bearer로 시작하지 않으면 null 리턴
+     */
+    public String getRefreshToken(HttpServletRequest request){
         String jwtRefreshHeader = request.getHeader(REFRESH_TOKEN_HEADER_NAME);
 
         if (jwtRefreshHeader == null || !jwtRefreshHeader.startsWith("Bearer ")){
@@ -78,10 +84,12 @@ public class JwtTokenService {
     }
 
 
-    // jwt access Token 생성
+    /**
+     * jwt access Token을 생성해서 리턴한다.
+     * 1. payload에 userId와 role이 저장된다.
+     * 2. 만료 시간은 30분
+     */
     public String createAccessToken(String userPk, UserRole role){
-        log.info("createAccessToken() 호출");
-
         Date now = new Date();
 
         Claims claims = Jwts.claims().setSubject(userPk); // JWT payload에 저장되는 정보단위
@@ -96,10 +104,13 @@ public class JwtTokenService {
                 .compact();
     }
 
-    // jwt refresh Token 생성
-    public String createRefreshToken(String deviceTokenId){
-        log.info("createRefreshToken() 호출");
 
+    /**
+     * jwt refresh Token을 생성해서 리턴한다.
+     * 1. 생성한 jwt refresh token은 redis에 저장한다.
+     * 2. 만료 시간은 10일
+     */
+    public String createRefreshToken(String deviceTokenId) throws BaseException {
         Date now = new Date();
 
         String refreshToken = Jwts.builder()
@@ -115,19 +126,20 @@ public class JwtTokenService {
         return refreshToken;
     }
 
-
-    // 토큰에서 회원 정보 추출
+    /**
+     * jwt access Token에서 userId 추출하기
+     */
     public String getUserPkInAccessToken(String jwtAccessToken){
-        log.info("JwtTokenProvider.getUserPk() 호출");
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(jwtAccessToken).getBody().getSubject();
     }
 
 
-    // 토큰의 유효성 + 만료일자 확인
+    /**
+     * 토큰의 유효성 + 만료일자 확인하기 (access token, refresh token)
+     */
     public boolean validateToken(String jwtToken){
 
         try{
-            log.info("validateAccessToken() 호출");
             Jws<Claims> claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(jwtToken);
             return !claims.getBody().getExpiration().before(new Date());
         }
@@ -136,7 +148,11 @@ public class JwtTokenService {
         }
     }
 
-    // refresh 남은 유효기간 확인
+    /**
+     * refresh token의 남은 유효기간 확인
+     * 1. refresh token의 유효기간이 2일 이하로 남았으면 true 리턴
+     * 2. refresh token의 유효기간이 3일 이상으로 남았으면 false 리턴
+     */
     public boolean isRefreshReissue(String jwtRefreshToken){
         try{
             Date now = new Date();

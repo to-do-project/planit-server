@@ -29,13 +29,13 @@ public class User {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private Planet planet;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true, length = 30)
     private String email;
 
     @Column(name="pwd",nullable = false)
     private String password;
 
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(nullable = false, unique = true, length = 8)
     private String nickname;
 
     @Enumerated(EnumType.STRING)

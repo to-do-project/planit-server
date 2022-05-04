@@ -16,7 +16,7 @@ import javax.validation.constraints.Size;
 public class CheckAuthNumReqDTO {
 
     @NotBlank(message = "NOT_EXIST_EMAIL")
-    @Size(max = 50, message = "INVALID_EMAIL_FORM")
+    @Size(max = 30, message = "INVALID_EMAIL_FORM")
     @Pattern(regexp = "^[A-Za-z0-9._^%$~#+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$", message = "INVALID_EMAIL_FORM")
     private String email;
 

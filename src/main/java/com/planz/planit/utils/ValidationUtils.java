@@ -17,14 +17,12 @@ public class ValidationUtils {
     public static void checkUserIdInHeader(String userId) throws BaseException {
 
         if (userId == null) {
-            log.error("userId를 헤더에 입력해주세요");
             throw new BaseException(NOT_EXIST_USER_ID_IN_HEADER);
         }
 
         try {
             Long.valueOf(userId);
         } catch (NumberFormatException e) {
-            log.error("유효하지 않은 userId입니다. 숫자형태로 입력해주세요.");
             throw new BaseException(INVALID_USER_ID);
         }
     }
