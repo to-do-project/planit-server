@@ -65,6 +65,7 @@ public enum BaseResponseStatus {
     FAILED_TO_SEARCH_USER(false,5004,"유저 조회에 실패했습니다."),
     // 6000 : 필요시 만들어서 쓰세요
 
+    // 회원가입 & 로그인 관련 BaseResponseStatus
     INVALID_ACCESS_TOKEN(false, 6000, "만료된 access token 입니다."),
     NOT_EXIST_USER(false, 6001, "존재하지 않는 사용자입니다."),
     INVALID_ID_OR_PWD(false, 6002, "이메일 혹은 비밀번호를 잘못 입력했습니다."),
@@ -97,7 +98,11 @@ public enum BaseResponseStatus {
     NOT_EXIST_OLD_PASSWORD(false, 6029, "기존 비밀번호를 입력해주세요."),
     NOT_EXIST_NEW_PASSWORD(false, 6030, "새로운 비밀번호를 입력해주세요."),
     NOT_EXIST_NICKNAME(false, 6031, "새로운 닉네임을 입력해주세요."),
-    NOT_EXIST_DEVISE_TOKEN(false, 6032, "디바이스 토큰을 입력해주세요.")
+    NOT_EXIST_DEVISE_TOKEN(false, 6032, "디바이스 토큰을 입력해주세요."),
+
+
+    // 아이템 관련 BaseResponseStatus
+    INVALID_INVENTORY_CATEGORY(false, 6100, "유효한 인벤토리 카테고리를 path variable로 입력해주세요. (plant, road, rock, etc)"),
     ;
 
 
