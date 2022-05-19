@@ -1,7 +1,6 @@
 package com.planz.planit.src.domain.inventory;
 
 import com.planz.planit.src.domain.item.Item;
-import com.planz.planit.src.domain.item.PlanetItem;
 import com.planz.planit.src.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,7 +37,7 @@ public class Inventory {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
-    private PlanetItem planetItem;
+    private Item planetItem;
 
     private int count;
 
@@ -49,4 +48,7 @@ public class Inventory {
     private List<Position> itemPlacement = new ArrayList<>();
 
 
+    public void setCount(int count) {
+        this.count = count;
+    }
 }

@@ -1,6 +1,5 @@
 package com.planz.planit.src.domain.inventory.dto;
 
-import com.planz.planit.src.domain.item.PlanetItem;
 import com.planz.planit.src.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +15,6 @@ import javax.persistence.ManyToOne;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetInventoryResDTO {
-    private Long inventoryId;
     private Long itemId;
     private int count;
 }

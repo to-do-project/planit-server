@@ -91,4 +91,8 @@ public class User {
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
+
+    public void setPoint(Integer point) {
+        this.point = point;
+    }
 }

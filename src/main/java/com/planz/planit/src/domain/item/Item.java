@@ -9,9 +9,9 @@ import javax.persistence.*;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "DTYPE")
 public class Item {
 
     @Id
@@ -22,12 +22,21 @@ public class Item {
     private String code;
     private String name;
     private String description;
+
+    // 아이템 가격
     private int price;
 
-    public Item(String code, String name, String description, int price) {
-        this.code = code;
-        this.name = name;
-        this.description = description;
-        this.price = price;
-    }
+    // 배치 최대 수량
+    @Column(name = "max_cnt")
+    private int maxCnt;
+
+    // 캐릭터 아이템 or 행성 아이템
+    @Enumerated(EnumType.STRING)
+    private ItemType type;
+
+    // 종류 + 종류 코드
+    // 캐릭터 옷, 기본 건축물, 식물, 길, 바위, 기타
+    @Enumerated(EnumType.STRING)
+    private ItemCategory category;
+
 }
