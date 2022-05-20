@@ -5,7 +5,6 @@ import com.planz.planit.config.BaseException;
 import com.planz.planit.src.domain.deviceToken.DeviceToken;
 import com.planz.planit.src.domain.deviceToken.DeviceTokenRepository;
 import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
-import com.planz.planit.src.domain.user.UserCharacterColor;
 import com.planz.planit.src.domain.user.dto.LoginResDTO;
 import com.planz.planit.src.service.DeviceTokenService;
 import com.planz.planit.src.service.HttpResponseService;
@@ -143,7 +142,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .planetId(loginUser.getPlanet().getPlanetId())
                 .email(loginUser.getEmail())
                 .nickname(loginUser.getNickname())
-                .characterColor(loginUser.getCharacterColor().name())
+                .characterItem(loginUser.getCharacterItem())
                 .profileColor(loginUser.getProfileColor().name())
                 .point(loginUser.getPoint())
                 .missionStatus(loginUser.getMissionStatus())

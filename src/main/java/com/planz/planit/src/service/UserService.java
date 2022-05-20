@@ -3,6 +3,7 @@ package com.planz.planit.src.service;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.src.domain.deviceToken.DeviceToken;
 import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
+import com.planz.planit.src.domain.item.CharacterItem;
 import com.planz.planit.src.domain.mail.MailDTO;
 import com.planz.planit.src.domain.planet.Planet;
 import com.planz.planit.src.domain.planet.PlanetColor;
@@ -101,7 +102,7 @@ public class UserService {
                     .email(reqDTO.getEmail())
                     .password(passwordEncoder.encode(reqDTO.getPassword()))
                     .nickname(reqDTO.getNickname())
-                    .characterColor(UserCharacterColor.WHITE)
+                    .characterItem(CharacterItem.SPACESUIT_01.getItemId())
                     .profileColor(UserProfileColor.WHITE)
                     .point(0)
                     .missionStatus(1)
@@ -140,7 +141,7 @@ public class UserService {
                     .planetId(planetEntity.getPlanetId())
                     .email(userEntity.getEmail())
                     .nickname(userEntity.getNickname())
-                    .characterColor(userEntity.getCharacterColor().name())
+                    .characterItem(userEntity.getCharacterItem())
                     .profileColor(userEntity.getProfileColor().name())
                     .point(userEntity.getPoint())
                     .missionStatus(userEntity.getMissionStatus())
@@ -499,5 +500,16 @@ public class UserService {
             throw new BaseException(FAILED_TO_SEARCH_USER);
         }
 
+    }
+
+    // 현재 사용중인 캐릭터 아이템(옷) 변경
+    public void changeCharacterItem(User user, Long itemId) throws BaseException {
+        try{
+            user.setCharacterItem(itemId);
+            saveUser(user);
+        }
+        catch (BaseException e){
+            throw e;
+        }
     }
 }

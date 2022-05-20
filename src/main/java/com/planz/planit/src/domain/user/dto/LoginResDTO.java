@@ -1,7 +1,5 @@
 package com.planz.planit.src.domain.user.dto;
 
-import com.planz.planit.src.domain.user.UserCharacterColor;
-import com.planz.planit.src.domain.user.UserProfileColor;
 import lombok.*;
 
 @Getter
@@ -18,7 +16,7 @@ public class LoginResDTO {
 
     private String nickname;
 
-    private String characterColor;
+    private Long characterItem;
 
     private String profileColor;
 

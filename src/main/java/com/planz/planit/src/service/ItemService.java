@@ -30,7 +30,7 @@ public class ItemService {
     private final ClosetService closetService;
 
     @Autowired
-    public ItemService(ItemRepository itemRepository, UserService userService, @Lazy InventoryService inventoryService, ClosetService closetService) {
+    public ItemService(ItemRepository itemRepository, UserService userService, @Lazy InventoryService inventoryService, @Lazy ClosetService closetService) {
         this.itemRepository = itemRepository;
         this.userService = userService;
         this.inventoryService = inventoryService;

@@ -118,7 +118,8 @@ public enum BaseResponseStatus {
     INVALID_ITEM_ID(false, 6113, "존재하지 않는 itemId입니다."),
     NOT_EXIST_ITEM_TOTAL_PRICE(false, 6114, "지불할 가격을 입력해주세요."),
     INVALID_ITEM_TOTAL_PRICE(false, 6115, "지불할 가격을 잘못 계산했습니다. (서버와 아이템 정보가 불일치할 가능성 존재)"),
-    OVER_ITEM_COUNT(false, 6116, "보유하고 있는 아이템 개수보다 많은 아이템을 배치할 수 없습니다.");
+    OVER_ITEM_COUNT(false, 6116, "보유하고 있는 아이템 개수보다 많은 아이템을 배치할 수 없습니다."),
+    NOT_OWN_CHARACTER_ITEM(false, 6117, "해당 사용자가 소유하고 있지 않은 캐릭터 itemId 입니다.");
 
 
     private final boolean isSuccess;

@@ -8,7 +8,6 @@ import com.planz.planit.src.domain.inventory.dto.PlacePlanetItemsReqDTO;
 import com.planz.planit.src.service.InventoryService;
 import com.planz.planit.utils.ValidationRegex;
 import io.swagger.annotations.ApiOperation;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.BindingResult;
@@ -21,7 +20,6 @@ import java.util.List;
 
 import static com.planz.planit.config.BaseResponseStatus.INVALID_INVENTORY_CATEGORY;
 
-@Log4j2
 @RestController
 @RequestMapping("/api/inventory")
 public class InventoryController {
@@ -38,7 +36,7 @@ public class InventoryController {
 
     /**
      * 카테고리 별로 인벤토리에서 보유 중인 행성 아이템 목록을 반환한다.
-     * => List(inventoryId, itemId, count) 반환
+     * => List(itemId, count) 반환
      * @param request, category
      * @return List<GetInventoryResDTO>
      */
