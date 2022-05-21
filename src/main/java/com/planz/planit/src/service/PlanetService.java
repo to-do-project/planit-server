@@ -75,6 +75,7 @@ public class PlanetService {
     public GetPlanetMainInfoResDTO getPlanetMainInfo(Long targetUserId) throws BaseException {
 
         try {
+
             // 타켓 유저 조회
             User user = userService.findUser(targetUserId);
 
