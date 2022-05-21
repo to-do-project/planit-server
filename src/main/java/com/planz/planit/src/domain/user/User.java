@@ -98,4 +98,8 @@ public class User {
     public void setCharacterItem(Long characterItem) {
         this.characterItem = characterItem;
     }
+
+    public void setProfileColor(UserProfileColor profileColor) {
+        this.profileColor = profileColor;
+    }
 }

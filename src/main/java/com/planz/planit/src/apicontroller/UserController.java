@@ -354,6 +354,35 @@ public class UserController {
         }
     }
 
+    /**
+     * 프로필 색상을 변경한다.
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @RequestBody profileColor
+     * @return 결과 메세지
+     */
+    @PatchMapping("/api/user/profile")
+    @ApiOperation(value = "프로필 색상 변경 API")
+    public BaseResponse<String> modifyProfile(HttpServletRequest request,
+                                              @Valid @RequestBody ModifyProfileReqDTO reqDTO,
+                                              BindingResult br){
+
+        // 형식적 validation
+        if(br.hasErrors()){
+            String errorName = br.getAllErrors().get(0).getDefaultMessage();
+            return new BaseResponse<>(BaseResponseStatus.of(errorName));
+        }
+
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME));
+
+        try{
+            userService.modifyProfile(userId, reqDTO.getProfileColor());
+            return new BaseResponse<>("프로필 색상 변경이 성공적으로 완료되었습니다.");
+        }
+        catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
     //유저 검색 - 은지 추가
     //닉네임 혹은 이메일을 완전하게 입력해야한다.
     @PatchMapping("/api/users")

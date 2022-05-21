@@ -119,7 +119,11 @@ public enum BaseResponseStatus {
     NOT_EXIST_ITEM_TOTAL_PRICE(false, 6114, "지불할 가격을 입력해주세요."),
     INVALID_ITEM_TOTAL_PRICE(false, 6115, "지불할 가격을 잘못 계산했습니다. (서버와 아이템 정보가 불일치할 가능성 존재)"),
     OVER_ITEM_COUNT(false, 6116, "보유하고 있는 아이템 개수보다 많은 아이템을 배치할 수 없습니다."),
-    NOT_OWN_CHARACTER_ITEM(false, 6117, "해당 사용자가 소유하고 있지 않은 캐릭터 itemId 입니다.");
+    NOT_OWN_CHARACTER_ITEM(false, 6117, "해당 사용자가 소유하고 있지 않은 캐릭터 itemId 입니다."),
+    NOT_EXIST_PLANET(false, 6118, "해당 유저의 행성을 찾을 수 없습니다."),
+    NOT_EXIST_PROFILE_COLOR(false, 6119, "변경할 프로필 색상을 입력해주세요. (LightRed, Yellow, Green, SkyBlue, Blue, LightPurple, Purple, Pink, Gray, Black)"),
+    INVALID_PROFILE_COLOR(false, 6120, "유효하지 않은 프로필 색상입니다. (LightRed, Yellow, Green, SkyBlue, Blue, LightPurple, Purple, Pink, Gray, Black)")
+    ;
 
 
     private final boolean isSuccess;

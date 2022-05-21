@@ -12,8 +12,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     @Query(value = "select i from Item i where i.itemId = :itemId and i.type = :type")
     Optional<Item> findItemByIdAndType(@Param("itemId") Long itemId, @Param("type") ItemType type);
 
-    @Query(value = "select i.itemId from Item i where i.type = :type")
-    List<Long> findItemIdsByType(@Param("type") ItemType type);
+    @Query(value = "select i.itemId from Item i where i.type = :type and i.price > 0")
+    List<Long> findStoreItemIdsByType(@Param("type") ItemType type);
 
     @Override
     Optional<Item> findById(Long itemId);

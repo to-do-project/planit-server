@@ -1,19 +1,20 @@
 package com.planz.planit.src.service;
 
 import com.planz.planit.config.BaseException;
+import com.planz.planit.src.domain.closet.Closet;
 import com.planz.planit.src.domain.deviceToken.DeviceToken;
 import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
-import com.planz.planit.src.domain.item.CharacterItem;
+import com.planz.planit.src.domain.inventory.Inventory;
+import com.planz.planit.src.domain.item.BasicItem;
+import com.planz.planit.src.domain.item.Item;
 import com.planz.planit.src.domain.mail.MailDTO;
 import com.planz.planit.src.domain.planet.Planet;
 import com.planz.planit.src.domain.planet.PlanetColor;
-import com.planz.planit.src.domain.planet.PlanetRepository;
 import com.planz.planit.src.domain.user.*;
 import com.planz.planit.src.domain.user.dto.JoinReqDTO;
 import com.planz.planit.src.domain.user.dto.LoginResDTO;
 import com.planz.planit.src.domain.user.dto.SearchUserResDTO;
 import lombok.extern.log4j.Log4j2;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -46,25 +47,30 @@ public class UserService {
     };    //배열안의 문자 숫자는 원하는대로
 
     private final UserRepository userRepository;
-    private final PlanetRepository planetRepository;
     private final JwtTokenService jwtTokenService;
     private final MailService mailService;
     private final RedisService redisService;
     private final DeviceTokenService deviceTokenService;
     private final PasswordEncoder passwordEncoder;
     private final PlanetService planetService;
+    private final InventoryService inventoryService;
+    private final ClosetService closetService;
+    private final ItemService itemService;
     private final Random random;
 
+
     @Autowired
-    public UserService(UserRepository userRepository, PlanetRepository planetRepository, JwtTokenService jwtTokenService, MailService mailService, RedisService redisService, @Lazy DeviceTokenService deviceTokenService, PasswordEncoder passwordEncoder, PlanetService planetService, Random random) {
+    public UserService(UserRepository userRepository, JwtTokenService jwtTokenService, MailService mailService, RedisService redisService, @Lazy DeviceTokenService deviceTokenService, PasswordEncoder passwordEncoder, @Lazy PlanetService planetService, @Lazy InventoryService inventoryService, @Lazy ClosetService closetService, @Lazy ItemService itemService, Random random) {
         this.userRepository = userRepository;
-        this.planetRepository = planetRepository;
         this.jwtTokenService = jwtTokenService;
         this.mailService = mailService;
         this.redisService = redisService;
         this.deviceTokenService = deviceTokenService;
         this.passwordEncoder = passwordEncoder;
         this.planetService = planetService;
+        this.inventoryService = inventoryService;
+        this.closetService = closetService;
+        this.itemService = itemService;
         this.random = random;
     }
 
@@ -102,8 +108,8 @@ public class UserService {
                     .email(reqDTO.getEmail())
                     .password(passwordEncoder.encode(reqDTO.getPassword()))
                     .nickname(reqDTO.getNickname())
-                    .characterItem(CharacterItem.SPACESUIT_01.getItemId())
-                    .profileColor(UserProfileColor.WHITE)
+                    .characterItem(BasicItem.SPACESUIT_01.getItemId())
+                    .profileColor(UserProfileColor.LightRed)
                     .point(0)
                     .missionStatus(1)
                     .userStatus(UserStatus.VALID)
@@ -125,6 +131,33 @@ public class UserService {
                     .color(PlanetColor.valueOf(reqDTO.getPlanetColor()))
                     .build();
             planetService.savePlanet(planetEntity);
+
+
+            // Inventory 테이블에 기본 행성 아이템(집, 포탈) insert
+            Item basicHouse = itemService.findItemByItemId(BasicItem.HOUSE_01.getItemId());
+            Inventory basicHouseInventory = Inventory.builder()
+                    .user(userEntity)
+                    .planetItem(basicHouse)
+                    .count(1)
+                    .build();
+            inventoryService.saveInventory(basicHouseInventory);
+
+            Item basicPortal = itemService.findItemByItemId(BasicItem.PORTAL_00.getItemId());
+            Inventory basicPortalInventory = Inventory.builder()
+                    .user(userEntity)
+                    .planetItem(basicPortal)
+                    .count(1)
+                    .build();
+            inventoryService.saveInventory(basicPortalInventory);
+
+
+            // Closet 테이블에 기본 캐릭터 아이템(기본 옷) insert
+            Item basicSuit = itemService.findItemByItemId(BasicItem.SPACESUIT_01.getItemId());
+            Closet basicSuitCloset = Closet.builder()
+                    .user(userEntity)
+                    .item(basicSuit)
+                    .build();
+            closetService.saveCloset(basicSuitCloset);
 
 
             // access token, refresh token 생성해서 헤더에 담기
@@ -275,7 +308,7 @@ public class UserService {
             }
 
             // userId로 유저 객체 조회
-            User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+            User userEntity = findUser(Long.valueOf(userId));
 
             // userId와 deviceToken 값으로 디바이스 토큰 객체 조회
             DeviceToken deviceTokenEntity = deviceTokenService.findDeviceTokenByUserIdAndDeviceToken(userEntity.getUserId(), deviceToken);
@@ -313,7 +346,7 @@ public class UserService {
     public void logout(String userId, DeviceTokenReqDTO reqDTO) throws BaseException {
         try {
             Long longUserId = Long.valueOf(userId);
-            User userEntity = userRepository.findByUserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+            User userEntity = findUser(longUserId);
 
             // 리프래시 토큰 삭제
             DeviceToken findDeviceToken = deviceTokenService.findDeviceTokenByUserIdAndDeviceToken(userEntity.getUserId(), reqDTO.getDeviceToken());
@@ -342,7 +375,7 @@ public class UserService {
             Long longUserId = Long.valueOf(userId);
 
             // 비밀번호 검증
-            User userEntity = userRepository.findByUserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+            User userEntity = findUser(longUserId);
             if (!passwordEncoder.matches(password, userEntity.getPassword())) {
                 throw new BaseException(INVALID_PASSWORD);
             }
@@ -445,7 +478,7 @@ public class UserService {
     public void modifyPassword(String userId, String oldPassword, String newPassword) throws BaseException {
 
         try {
-            User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+            User userEntity = findUser(Long.valueOf(userId));
 
             // 기존 비밀번호가 올바른지 확인
             if (!passwordEncoder.matches(oldPassword, userEntity.getPassword())) {
@@ -463,14 +496,14 @@ public class UserService {
 
     /**
      * 닉네임 변경
-     * 1. 기존 비밀번호가 올바른지 확인
-     * 2. DB에 새로운 pwd 저장
+     * 1. 닉네임 중복 확인
+     * 2. DB에 새로운 닉네임 저장
      */
     @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void modifyNickname(String userId, String nickname) throws BaseException {
 
         try {
-            User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+            User userEntity = findUser(Long.valueOf(userId));
 
             // 닉네임 중복확인
             if (!isEmptyNickname(nickname)) {
@@ -486,12 +519,31 @@ public class UserService {
         }
     }
 
+    /**
+     * 프로필 색상 변경
+     * 1. DB에 새로운 프로필 색상 저장
+     */
+    public void modifyProfile(Long userId, String profileColor) throws BaseException{
+        try{
+            // DB에 새로운 프로필 색상 저장
+            User userEntity = findUser(userId);
+
+            userEntity.setProfileColor(UserProfileColor.of(profileColor));
+
+            saveUser(userEntity);
+        }
+        catch (BaseException e){
+            throw e;
+        }
+
+    }
+
     //닉네임 혹은 이메일로 유저 검색
     public SearchUserResDTO searchUsers(String keyword) throws BaseException {
         //유저 검색
         User userEntity = userRepository.findByNicknameOrEmail(keyword, keyword).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
         //행성 검색 (행성 레벨)
-        Planet userPlanet = planetRepository.findByUserId(userEntity.getUserId()).orElseThrow(() -> new BaseException(NOT_EXIST_PLANET_INFO));
+        Planet userPlanet = planetService.findPlanetByUserId(userEntity.getUserId());
 
         try {
             //dto 만들기
@@ -512,4 +564,6 @@ public class UserService {
             throw e;
         }
     }
+
+
 }

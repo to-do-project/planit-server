@@ -64,8 +64,8 @@ public class ItemService {
             User user = userService.findUser(userId);
 
             // 2. 아이템 목록 조회
-            List<Long> characterItemIdList = findItemIdsByType(ItemType.CHARACTER_ITEM);
-            List<Long> planetItemIdList = findItemIdsByType(ItemType.PLANET_ITEM);
+            List<Long> characterItemIdList = findStoreItemIdsByType(ItemType.CHARACTER_ITEM);
+            List<Long> planetItemIdList = findStoreItemIdsByType(ItemType.PLANET_ITEM);
 
             // 3. GetItemStoreInfoResDTO 반환
             return GetItemStoreInfoResDTO.builder()
@@ -81,10 +81,10 @@ public class ItemService {
         }
     }
 
-    public List<Long> findItemIdsByType(ItemType type) throws BaseException {
+    public List<Long> findStoreItemIdsByType(ItemType type) throws BaseException {
 
         try{
-            return itemRepository.findItemIdsByType(type);
+            return itemRepository.findStoreItemIdsByType(type);
         }
         catch (Exception e){
             log.error("findItemIdsByType() : itemRepository.findItemIdsByType(type) 실행 중 데이터베이스 에러 발생");
