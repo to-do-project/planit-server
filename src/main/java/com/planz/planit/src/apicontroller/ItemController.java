@@ -3,17 +3,14 @@ package com.planz.planit.src.apicontroller;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponse;
 import com.planz.planit.config.BaseResponseStatus;
-import com.planz.planit.src.domain.item.ItemCategory;
 import com.planz.planit.src.domain.item.dto.BuyItemReqDTO;
 import com.planz.planit.src.domain.item.dto.BuyItemResDTO;
 import com.planz.planit.src.domain.item.dto.GetItemInfoResDTO;
 import com.planz.planit.src.domain.item.dto.GetItemStoreInfoResDTO;
 import com.planz.planit.src.service.ItemService;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,9 +34,8 @@ public class ItemController {
 
     /**
      * 아이템 스토어 전체 화면에서 필요한 모든 정보를 넘겨준다.
-     * => 닉네임, 보유 포인트, 캐릭터 아이템 아이디 리스트, 행성 아이템 아이디 리스트 반환
-     * @param request
-     * @return GetItemStoreInfoResDTO
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @return 닉네임, 보유 포인트, 캐릭터 아이템 아이디 리스트, 행성 아이템 아이디 리스트
      */
     @GetMapping("")
     @ApiOperation(value = "아이템 스토어 전체 목록 조회 API")
@@ -56,9 +52,9 @@ public class ItemController {
 
     /**
      * 아이템 스토어에서 특정 아이템의 세부 정보를 넘겨준다.
-     * => 아이템 아이디, 아이템 이름, 아이템 설명, 아이템 가격, 아이템 종류, 구매할 수 있는 최소 & 최대 수량 반환
-     * @param request, itemId
-     * @return GetItemInfoResDTO
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @PathVariable itemId
+     * @return 아이템 아이디, 아이템 이름, 아이템 설명, 아이템 가격, 아이템 종류, 구매할 수 있는 최소 & 최대 수량
      */
     @GetMapping("/items/{itemId}")
     @ApiOperation(value = "아이템 스토어 세부 정보 조회 API")
@@ -76,9 +72,9 @@ public class ItemController {
 
     /**
      * 아이템 스토어에서 특정 아이템을 구매한다.
-     * => 아이템 아이디, 업데이트된 구매할 수 있는 최소 & 최대 수량, 업데이트된 보유 포인트 반환
-     * @param request, itemId, count, totalPrice
-     * @return BuyItemResDTO
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @RequestBody itemId, count, totalPrice
+     * @return 아이템 아이디, 업데이트된 구매할 수 있는 최소 & 최대 수량, 업데이트된 보유 포인트 반환
      */
     @PostMapping("/item")
     @ApiOperation(value = "아이템 스토어 구매 API")

@@ -36,9 +36,9 @@ public class InventoryController {
 
     /**
      * 카테고리 별로 인벤토리에서 보유 중인 행성 아이템 목록을 반환한다.
-     * => List(inventoryId, itemId, totalCount, placedCount, remainingCount) 반환
-     * @param request, category
-     * @return List<GetInventoryResDTO>
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @PathVariable category
+     * @return List(itemId, totalCount, placedCount, remainingCount)
      */
     @GetMapping("/planet-items/{category}")
     @ApiOperation(value = "보유한 행성 아이템 목록 조회 API")
@@ -49,7 +49,6 @@ public class InventoryController {
             return new BaseResponse<>(INVALID_INVENTORY_CATEGORY);
         }
 
-        // Spring Security가 userId와 jwtAccessToken에 대한 validation 모두 완료!
         String userId = request.getHeader(USER_ID_HEADER_NAME);
 
         try {
@@ -60,33 +59,12 @@ public class InventoryController {
         }
     }
 
-/*    @PostMapping("/planet-item")
-    @ApiOperation(value = "행성 아이템 구매하기")
-    public BaseResponse<String> buyPlanetItem(HttpServletRequest request,
-                                              @Valid @RequestBody BuyPlanetItemReqDTO reqDTO,
-                                              BindingResult br) {
-        // 형식적 validation
-        if (br.hasErrors()) {
-            String errorName = br.getAllErrors().get(0).getDefaultMessage();
-            return new BaseResponse<>(BaseResponseStatus.of(errorName));
-        }
-
-        // Spring Security가 userId와 jwtAccessToken에 대한 validation 모두 완료!
-        String userId = request.getHeader(USER_ID_HEADER_NAME);
-
-
-        try {
-            inventoryService.buyPlanetItem(userId, reqDTO.getItemId(), reqDTO.getCount());
-            return new BaseResponse<>("성공적으로 행성 아이템을 구매했습니다.");
-        } catch (BaseException e) {
-            return new BaseResponse<>(e.getStatus());
-        }
-
-    }*/
 
     /**
      * 보유한 행성 아이템 (기본 건축물, 식물, 돌, 길, 기타)을 배치한다. => 행성에 적용
-     * @param request, PlacePlanetItemsReqDTO
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @RequestBody PlacePlanetItemsReqDTO
+     *              => itemPositionList(itemId, positionList(posX, posY)) 리스트
      * @return 결과 메세지
      */
     @PatchMapping("/planet-items/placement")
@@ -100,7 +78,6 @@ public class InventoryController {
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
         }
 
-        // Spring Security가 userId와 jwtAccessToken에 대한 validation 모두 완료!
         String userId = request.getHeader(USER_ID_HEADER_NAME);
 
         try{

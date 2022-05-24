@@ -26,10 +26,9 @@ public class ClosetController {
     }
 
     /**
-     * 보유 중인 캐릭터 아이템 목록을 반환한다.
-     * => List(itemId) 반환
-     * @param request
-     * @return GetClosetResDTO
+     * 보유 중인 캐릭터 아이템 아이디 목록을 반환한다.
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @return List(itemId)
      */
     @GetMapping("/character-items")
     @ApiOperation(value = "보유한 캐릭터 아이템 목록 조회 API")
@@ -48,7 +47,8 @@ public class ClosetController {
 
     /**
      * 보유한 캐릭터 아이템을 적용한다.
-     * @param request, itemId
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @PathVariable itemId
      * @return 결과 메세지
      */
     @PatchMapping("/character-items/{itemId}")

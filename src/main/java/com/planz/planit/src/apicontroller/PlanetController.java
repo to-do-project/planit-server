@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 
 import static com.planz.planit.config.BaseResponseStatus.NOT_FRIEND_RELATION;
 
@@ -38,6 +37,12 @@ public class PlanetController {
         this.userService = userService;
     }
 
+    /**
+     * 타겟 유저의 행성 관련 정보를 모두 반환한다.
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @PathVariable targetUserId
+     * @return 행성 레벨, 현재 사용중인 캐릭터 아이템 아이디, 현재 사용중인 행성 아이템 아이디 + 위치
+     */
     @GetMapping("/main/{targetUserId}")
     @ApiOperation(value = "행성 메인 화면 조회 API")
     public BaseResponse<GetPlanetMainInfoResDTO> getPlanetMainInfo(HttpServletRequest request, @PathVariable Long targetUserId){

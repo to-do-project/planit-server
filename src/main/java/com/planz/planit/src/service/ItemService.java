@@ -38,24 +38,13 @@ public class ItemService {
     }
 
 
-/*    public Item findPlanetItemById(Long itemId) throws BaseException {
-
-        return itemRepository.findItemByIdAndType(itemId, ItemType.PLANET_ITEM).orElseThrow(
-                () -> {
-                    log.error("findPlanetItemById() : itemRepository.findItemByIdAndType() 실행 중 데이터베이스 에러 발생헸거나, " +
-                            "입력으로 들어온 itemId에 해당하는 행성 아이템이 존재하지 않음");
-                    return new BaseException(INVALID_PLANET_ITEM_ID);
-                }
-        );
-    }*/
-
-
-    /** 아이템 스토어 전체 목록 조회 API
-     * 아이템 스토어 전체 화면에서 필요한 모든 정보를 넘겨준다.
+    /**
+     * 아이템 스토어 전체 목록 조회 API
+     * => 아이템 스토어 전체 화면에서 필요한 모든 정보를 넘겨준다.
      * => 닉네임, 보유 포인트, 캐릭터 아이템 아이디 리스트, 행성 아이템 아이디 리스트 반환
-     * @param userId
-     * @return GetItemStoreInfoResDTO
-     * @throws BaseException
+     * 1. 유저 정보 조회
+     * 2. 아이템 목록 조회
+     * 3. 결과 반환
      */
     public GetItemStoreInfoResDTO getItemStoreInfo(Long userId) throws BaseException{
 
@@ -81,6 +70,10 @@ public class ItemService {
         }
     }
 
+    /**
+     * 아이템 타입(PlanetItem / CharacterItem) 별로 스토어에서 판매중인 itemId 리스트를 반환한다.
+     * 스토어에서 판매중인 아이템은 가격이 1원 이상이다.
+     */
     public List<Long> findStoreItemIdsByType(ItemType type) throws BaseException {
 
         try{
@@ -88,17 +81,20 @@ public class ItemService {
         }
         catch (Exception e){
             log.error("findItemIdsByType() : itemRepository.findItemIdsByType(type) 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
 
     }
 
     /**
-     * 아이템 스토어에서 특정 아이템의 세부 정보를 넘겨준다.
+     * 아이템 스토어 세부 정보 조회 API
+     * => 아이템 스토어에서 특정 아이템의 세부 정보를 넘겨준다.
      * => 아이템 아이디, 아이템 이름, 아이템 설명, 아이템 가격, 아이템 종류, 구매할 수 있는 최소 & 최대 수량 반환
-     * @param itemId
-     * @return GetItemInfoResDTO
-     * @throws BaseException
+     * 1. 아이템 정보 조회
+     * 2. 유저 정보 조회
+     * 3. maxCnt, minCnt 계산
+     * 4. 결과 반환
      */
     public GetItemInfoResDTO getItemInfo(Long userId, Long itemId) throws BaseException{
 
@@ -133,8 +129,10 @@ public class ItemService {
         }
     }
 
-
-    // 구매할 수 있는 최대 아이템 개수 계산
+    /**
+     * 구매할 수 있는 최대 아이템 개수 계산한다.
+     * 구매할 수 있는 최대 아이템 개수 = 아이템의 배치 최대 수량 - 현재 아이템 보유 수량
+     */
     public int calculateMaxCnt(User user, Item item) throws BaseException {
 
         int maxCnt = item.getMaxCnt();
@@ -158,6 +156,11 @@ public class ItemService {
         return maxCnt;
     }
 
+
+    /**
+     * itemId로 하나의 아이템을 조회한다.
+     * 해당 itemId를 가진 아이템이 없으면 BaseException을 throw
+     */
     public Item findItemByItemId(Long itemId) throws BaseException {
         try {
             return itemRepository.findById(itemId).orElseThrow(() -> new BaseException(INVALID_ITEM_ID));
@@ -174,11 +177,16 @@ public class ItemService {
 
 
     /**
+     * 아이템 스토어 구매 API
      * 아이템 스토어에서 특정 아이템을 구매한다.
      * => 아이템 아이디, 업데이트된 구매할 수 있는 최소 & 최대 수량, 업데이트된 보유 포인트 반환
-     * @param userId, itemId, count, totalPrice
-     * @return BuyItemResDTO
-     * @throws BaseException
+     * 1. 아이템 정보 조회
+     * 2. totalPrice에 대한 논리적 validation
+     * 3. point에 대한 논리적 validation
+     * 4. count에 대한 논리적 validation
+     * 5. 아이템 구매
+     * 6. User의 point 갱신
+     * 7. 결과 반환
      */
     @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public BuyItemResDTO buyItem(Long userId, Long itemId, int count, int totalPrice) throws BaseException{

@@ -38,27 +38,35 @@ public class PlanetService {
     }
 
 
-    // Planet 저장
+    /**
+     * Planet 저장
+     */
     public void savePlanet(Planet planetEntity) throws BaseException {
         try {
             planetRepository.save(planetEntity);
         } catch (Exception e) {
             log.error("savePlanet() : planetRepository.save(planetEntity) 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
     }
 
-    // Planet 삭제
+    /**
+     * Planet 삭제
+     */
     public void deletePlanet(Long longUserId) throws BaseException {
         try {
             planetRepository.deleteByUserIdInQuery(longUserId);
         } catch (Exception e) {
             log.error("deletePlanet() : planetRepository.deleteByUserIdInQuery(longUserId) 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
     }
 
-    // Planet 조회
+    /**
+     * Planet 조회
+     */
     public Planet findPlanetByUserId(Long userId) throws BaseException {
         try {
             return planetRepository.findByUserId(userId).orElseThrow(() -> new BaseException(NOT_EXIST_PLANET_INFO));
@@ -71,18 +79,26 @@ public class PlanetService {
         }
     }
 
-    // 행성 메인 화면 정보 조회회
+
+    /**
+     * 행성 메인 화면 조회 API
+     * 타겟 유저의 행성 관련 정보를 모두 반환한다.
+     * (행성 레벨, 현재 사용중인 캐릭터 아이템 아이디, 현재 사용중인 행성 아이템 아이디 + 위치) 반환
+     * 1. 타켓 유저 조회
+     * 2. 타겟 유저의 행성 조회
+     * 3. 타겟 유저가 현재 사용중인 행성 아이템 목록 조회
+     * 4. 결과 반환
+     */
     public GetPlanetMainInfoResDTO getPlanetMainInfo(Long targetUserId) throws BaseException {
 
         try {
-
-            // 타켓 유저 조회
+            // 1. 타켓 유저 조회
             User user = userService.findUser(targetUserId);
 
-            // 타겟 유저의 행성 조회
+            // 2. 타겟 유저의 행성 조회
             Planet planet = findPlanetByUserId(targetUserId);
 
-            // 타겟 유저가 현재 사용중인 행성 아이템 목록 조회
+            // 3. 타겟 유저가 현재 사용중인 행성 아이템 목록 조회
             List<ItemPositionDTO> planetItemList = new ArrayList<>();
 
             List<Inventory> inventoryList = inventoryService.findInventoryListByUser(user);
@@ -106,6 +122,7 @@ public class PlanetService {
                 }
             }
 
+            // 4. 결과 반환
             return GetPlanetMainInfoResDTO.builder()
                     .level(planet.getLevel())
                     .characterItem(user.getCharacterItem())

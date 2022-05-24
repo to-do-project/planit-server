@@ -1,7 +1,6 @@
 package com.planz.planit.src.service;
 
 import com.planz.planit.config.BaseException;
-import com.planz.planit.config.BaseResponseStatus;
 import com.planz.planit.src.domain.closet.Closet;
 import com.planz.planit.src.domain.closet.ClosetRepository;
 import com.planz.planit.src.domain.closet.dto.GetClosetResDTO;
@@ -31,7 +30,10 @@ public class ClosetService {
         this.itemService = itemService;
     }
 
-    // 해당 유저가 해당 캐릭터 아이템을 가지고 있는지 확인
+    /**
+     * 해당 유저가 해당 캐릭터 아이템을 보유하고 있는지 확인
+     * 보유하고 있으면 true, 보유하고 있지 않으면 false를 리턴한다.
+     */
     public boolean existsClosetByItemAndUser(Item item, User user) throws BaseException {
         try {
             return closetRepository.existsByItemAndUser(item, user);
@@ -43,7 +45,9 @@ public class ClosetService {
         }
     }
 
-    // closet 저장
+    /**
+     * closet 저장 혹은 업데이트
+     */
     public void saveCloset(Closet closetEntity) throws BaseException {
         try{
             closetRepository.save(closetEntity);
@@ -57,19 +61,22 @@ public class ClosetService {
 
 
     /**
+     * 보유한 캐릭터 아이템 목록 조회 API
      * 보유 중인 캐릭터 아이템 목록을 반환한다.
-     * @param userId
-     * @return GetClosetResDTO
-     * @throws BaseException
+     * 1. 유저 조회
+     * 2. 유저가 가지고 있는 캐릭터 아이템 목록 조회
+     * 3. 결과 반환
      */
     public GetClosetResDTO getCloset(Long userId) throws BaseException{
         try{
-            GetClosetResDTO result = new GetClosetResDTO();
-
-            // 유저가 가지고 있는 캐릭터 아이템 목록 조회
+            // 1. 유저 조회
             User user = userService.findUser(userId);
+
+            // 2. 유저가 가지고 있는 캐릭터 아이템 목록 조회
             List<Closet> closetList = findClosetListByUser(user);
 
+            // 3. 결과 반환
+            GetClosetResDTO result = new GetClosetResDTO();
             for (Closet closet : closetList) {
                 result.getCharacterItemIdList().add(closet.getItem().getItemId());
             }
@@ -80,6 +87,9 @@ public class ClosetService {
         }
     }
 
+    /**
+     * 해당 user가 가지고 있는 Closet 리스트 조회
+     */
     public List<Closet> findClosetListByUser(User user) throws BaseException {
         try{
             return closetRepository.findByUser(user);
@@ -92,22 +102,28 @@ public class ClosetService {
     }
 
     /**
+     * 보유한 캐릭터 아이템 적용 API
      * 보유한 캐릭터 아이템을 적용한다.
-     * @param userId, itemId
-     * @throws BaseException
+     * 1. 유저 조회
+     * 2. 아이템 조회
+     * 3. itemId에 대한 논리적 validation => 해당 캐릭터 아이템을 보유하고 있는지
+     * 4. 사용자가 현재 사용 중인 캐릭터 아이템 변경
      */
     public void applyCharacterItem(Long userId, Long itemId) throws BaseException {
         try{
 
+            // 1. 유저 조회
             User user = userService.findUser(userId);
+
+            // 2. 아이템 조회
             Item item = itemService.findItemByItemId(itemId);
 
-            // itemId에 대한 논리적 validation => 해당 캐릭터 아이템을 보유하고 있는지
+            // 3. itemId에 대한 논리적 validation => 해당 캐릭터 아이템을 보유하고 있는지
             if(!existsClosetByItemAndUser(item, user)){
                 throw new BaseException(NOT_OWN_CHARACTER_ITEM);
             }
 
-            // 사용자가 현재 사용 중인 캐릭터 아이템 변경
+            // 4. 사용자가 현재 사용 중인 캐릭터 아이템 변경
             userService.changeCharacterItem(user, itemId);
 
         }
