@@ -12,10 +12,10 @@ public interface PlanetRepository extends JpaRepository<Planet, Long> {
 
     @Transactional
     @Modifying
-    @Query("delete from Planet p where p.user.userId is :userId")
+    @Query("delete from Planet p where p.user.userId = :userId")
     void deleteByUserIdInQuery(@Param("userId") Long userId);
 
-    @Query("select p from Planet p where p.user.userId is :userId")
+    @Query("select p from Planet p where p.user.userId = :userId")
     Optional<Planet> findByUserId(@Param("userId") Long userId);
 
 }

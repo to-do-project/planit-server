@@ -4,6 +4,7 @@ import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponseStatus;
 import com.planz.planit.src.domain.friend.Friend;
 import com.planz.planit.src.domain.friend.FriendRepository;
+import com.planz.planit.src.domain.friend.FriendStatus;
 import com.planz.planit.src.domain.friend.dto.AcceptReqDTO;
 import com.planz.planit.src.domain.friend.dto.GetFriendResDTO;
 import com.planz.planit.src.domain.user.User;
@@ -87,5 +88,18 @@ public class FriendService {
     }
     }
 
+    // 서로 친구 관계인지 확인 - 혜지 추가
+    public boolean isFriend(User myUser, User friendUser) throws BaseException{
+        try {
+            boolean result1 = friendRepository.existsByFromUserAndToUserAndFriendStatus(myUser, friendUser, FriendStatus.FRIEND);
+            boolean result2 = friendRepository.existsByFromUserAndToUserAndFriendStatus(friendUser, myUser, FriendStatus.FRIEND);
+            return (result1 | result2);
+        }
+        catch (Exception e){
+            log.error("isFriend() : friendRepository.existsByFromUserAndToUserAndFriendStatus() 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 
 }

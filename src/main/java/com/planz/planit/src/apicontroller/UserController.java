@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import java.io.IOException;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
 
@@ -350,6 +349,35 @@ public class UserController {
             userService.modifyNickname(userId, reqDTO.getNickname());
             return new BaseResponse<>("닉네임 변경이 성공적으로 완료되었습니다.");
         } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    /**
+     * 프로필 색상을 변경한다.
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @RequestBody profileColor
+     * @return 결과 메세지
+     */
+    @PatchMapping("/api/user/profile")
+    @ApiOperation(value = "프로필 색상 변경 API")
+    public BaseResponse<String> modifyProfile(HttpServletRequest request,
+                                              @Valid @RequestBody ModifyProfileReqDTO reqDTO,
+                                              BindingResult br){
+
+        // 형식적 validation
+        if(br.hasErrors()){
+            String errorName = br.getAllErrors().get(0).getDefaultMessage();
+            return new BaseResponse<>(BaseResponseStatus.of(errorName));
+        }
+
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME));
+
+        try{
+            userService.modifyProfile(userId, reqDTO.getProfileColor());
+            return new BaseResponse<>("프로필 색상 변경이 성공적으로 완료되었습니다.");
+        }
+        catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
     }
