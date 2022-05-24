@@ -172,6 +172,8 @@ public class UserService {
             return LoginResDTO.builder()
                     .userId(userEntity.getUserId())
                     .planetId(planetEntity.getPlanetId())
+                    .planetColor(planetEntity.getColor().name())
+                    .planetLevel(planetEntity.getLevel())
                     .email(userEntity.getEmail())
                     .nickname(userEntity.getNickname())
                     .characterItem(userEntity.getCharacterItem())

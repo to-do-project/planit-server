@@ -102,7 +102,7 @@ public enum BaseResponseStatus {
 
 
     // 아이템 관련 BaseResponseStatus
-    INVALID_INVENTORY_CATEGORY(false, 6100, "유효한 인벤토리 카테고리를 path variable로 입력해주세요. (plant, road, rock, etc)"),
+    INVALID_INVENTORY_CATEGORY(false, 6100, "유효한 인벤토리 카테고리를 path variable로 입력해주세요. (plant, road, stone, etc)"),
     NOT_EXIST_ITEM_ID(false, 6101, "구매할 itemId를 입력해주세요."),
     NOT_EXIST_ITEM_COUNT(false, 6102, "구매할 아이템 개수를 입력해주세요."),
     INVALID_ITEM_COUNT(false, 6103, "구매할 아이템 개수는 1개 이상이어야 합니다."),

@@ -36,7 +36,7 @@ public class ValidationRegex {
 
     // 행성 아이템 카테고리 형식 체크
     public static boolean isRegexInventoryCategory(String target){
-        String regex = "^(plant|road|rock|etc)$";
+        String regex = "^(plant|road|stone|etc)$";
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(target);
         return matcher.find();

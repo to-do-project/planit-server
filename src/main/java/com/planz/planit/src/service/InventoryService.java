@@ -43,7 +43,8 @@ public class InventoryService {
 
     /**
      * 카테고리 별로 인벤토리에서 보유 중인 행성 아이템 목록을 반환한다.
-     * => List(inventoryId, itemId, count) 반환
+     * => List(inventoryId, itemId, totalCount, placedCount, remainingCount) 반환
+     *
      * @param userId, category
      * @return List<GetInventoryResDTO>
      * @throws BaseException
@@ -55,9 +56,15 @@ public class InventoryService {
             List<Inventory> inventoryList = findInventoryItemsByCategory(userId, ItemCategory.valueOf(category));
 
             for (Inventory inventory : inventoryList) {
+
+                int totalCount = inventory.getCount();
+                int placedCount = inventory.getItemPlacement().size();
+
                 result.add(GetInventoryResDTO.builder()
                         .itemId(inventory.getPlanetItem().getItemId())
-                        .count(inventory.getCount())
+                        .totalCount(totalCount)
+                        .placedCount(placedCount)
+                        .remainingCount(totalCount - placedCount)
                         .build());
             }
 
@@ -68,7 +75,6 @@ public class InventoryService {
     }
 
     /**
-     *
      * userId와 category를 이용해서, 인벤토리 리스트 조회하기
      * => 특정 사용자의 모든 인벤토리 정보를 카테고리 별로 조회하기
      */
@@ -134,8 +140,7 @@ public class InventoryService {
                             .count(0)
                             .build());
             return inventory;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             log.error("findInventoryByUserAndItem() : inventoryRepository.findByUserAndPlanetItem(user, planetItem) 실행 중 데이터베이스 에러 발생");
             e.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
@@ -165,17 +170,17 @@ public class InventoryService {
     }*/
 
 
-
     /**
      * 보유한 행성 아이템 (기본 건축물, 식물, 돌, 길, 기타)을 배치한다. => 행성에 적용
+     *
      * @param userId, InventoryPositionDTOList
-     * => userid, inventoryPositionList(inventoryId, positionList(posX, posY))
+     *                => userid, inventoryPositionList(inventoryId, positionList(posX, posY))
      * @throws BaseException
      */
     @Transactional(rollbackFor = {Exception.class, BaseException.class})
-    public void placePlanetItems(Long userId, List<ItemPositionDTO> itemPositionDTOList) throws BaseException{
+    public void placePlanetItems(Long userId, List<ItemPositionDTO> itemPositionDTOList) throws BaseException {
 
-        try{
+        try {
 
             // 1. 유저 정보 조회 => 존재하지 않는 아이템이면 BaseException throw
             User user = userService.findUser(userId);
@@ -193,7 +198,7 @@ public class InventoryService {
 
                 // request로 받은 inventoryId로, 유저가 가지고 있는 Inventory 데이터 조회
                 Inventory findInventory = inventoryHashMap.remove(itemPositionDTO.getItemId());
-                if (findInventory == null){
+                if (findInventory == null) {
                     // 해당 유저가 보유한 인벤토리 아이템이 맞는지 확인
                     // request에 itemId를 중복으로 입력했는지 확인
                     throw new BaseException(NOT_OWN_OR_INVALID_ITEM_ID);
@@ -201,7 +206,7 @@ public class InventoryService {
 
                 // 보유 아이템 개수 validation
                 int requestCnt = itemPositionDTO.getPositionList().size();
-                if (requestCnt > findInventory.getCount()){
+                if (requestCnt > findInventory.getCount()) {
                     throw new BaseException(OVER_ITEM_COUNT);
                 }
 
@@ -210,7 +215,7 @@ public class InventoryService {
                 for (PositionDTO positionDTO : itemPositionDTO.getPositionList()) {
                     positionHashSet.add(new Position(positionDTO.getPosX(), positionDTO.getPosY()));
                 }
-                for (Position position : positionHashSet){
+                for (Position position : positionHashSet) {
                     findInventory.getItemPlacement().add(
                             Position.builder()
                                     .posX(position.getPosX())
@@ -220,8 +225,7 @@ public class InventoryService {
 
                 saveInventory(findInventory);
             }
-        }
-        catch (BaseException e){
+        } catch (BaseException e) {
             throw e;
         }
 
@@ -232,8 +236,7 @@ public class InventoryService {
     public List<Inventory> findInventoryListByUser(User user) throws BaseException {
         try {
             return inventoryRepository.findByUser(user);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             log.error("findInventoryListByUser() : inventoryRepository.findByUser(user) 실행 중 데이터베이스 에러 발생");
             e.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
@@ -244,8 +247,7 @@ public class InventoryService {
     public Integer findInventoryCount(Long userId, Long itemId) throws BaseException {
         try {
             return inventoryRepository.findInventoryCount(userId, itemId).orElse(0);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             log.error("findInventoryCount() : inventoryRepository.findInventoryCount(userId, itemId) 실행 중 데이터베이스 에러 발생");
             e.printStackTrace();
             throw new BaseException(DATABASE_ERROR);

@@ -12,6 +12,10 @@ public class LoginResDTO {
 
     private Long planetId;
 
+    private Integer planetLevel;
+
+    private String planetColor;
+
     private String email;
 
     private String nickname;

@@ -36,7 +36,7 @@ public class InventoryController {
 
     /**
      * 카테고리 별로 인벤토리에서 보유 중인 행성 아이템 목록을 반환한다.
-     * => List(itemId, count) 반환
+     * => List(inventoryId, itemId, totalCount, placedCount, remainingCount) 반환
      * @param request, category
      * @return List<GetInventoryResDTO>
      */
