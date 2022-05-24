@@ -3,10 +3,10 @@ package com.planz.planit;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+//@SpringBootTest
 class PlanitApplicationTests {
 
-	@Test
+	//@Test
 	void contextLoads() {
 	}
 
