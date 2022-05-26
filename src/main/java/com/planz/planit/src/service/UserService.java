@@ -5,6 +5,7 @@ import com.planz.planit.src.domain.closet.Closet;
 import com.planz.planit.src.domain.deviceToken.DeviceToken;
 import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
 import com.planz.planit.src.domain.inventory.Inventory;
+import com.planz.planit.src.domain.inventory.Position;
 import com.planz.planit.src.domain.item.BasicItem;
 import com.planz.planit.src.domain.item.Item;
 import com.planz.planit.src.domain.mail.MailDTO;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -87,7 +89,8 @@ public class UserService {
      * 3. User 테이블 insert
      * 4. DeviceToken 테이블 insert
      * 5. Planet 테이블 insert
-     * 6. Inventory 테이블에 기본 행성 아이템(집, 포탈) insert
+     * 6-1. Inventory 테이블에 기본 행성 아이템(집, 포탈) insert
+     * 6-2. 포탈 : (-3.82, 4.8), 집 : (3.73, 5.2) 배치
      * 7. Closet 테이블에 기본 캐릭터 아이템(기본 옷) insert
      * 8. access token, refresh token 생성해서 헤더에 담기
      */
@@ -136,13 +139,20 @@ public class UserService {
             planetService.savePlanet(planetEntity);
 
 
-            // 6. Inventory 테이블에 기본 행성 아이템(집, 포탈) insert
+            /// 6-1. Inventory 테이블에 기본 행성 아이템(집, 포탈) insert
+            // 6-2. 포탈 : (-3.82, 4.8), 집 : (3.73, 5.2) 배치
             Item basicHouse = itemService.findItemByItemId(BasicItem.HOUSE_01.getItemId());
             Inventory basicHouseInventory = Inventory.builder()
                     .user(userEntity)
                     .planetItem(basicHouse)
                     .count(1)
+                    .itemPlacement(new ArrayList<Position>())
                     .build();
+            basicHouseInventory.getItemPlacement().add(
+                    Position.builder()
+                            .posX(3.73f)
+                            .posY(5.2f)
+                            .build());
             inventoryService.saveInventory(basicHouseInventory);
 
             Item basicPortal = itemService.findItemByItemId(BasicItem.PORTAL_00.getItemId());
@@ -150,7 +160,14 @@ public class UserService {
                     .user(userEntity)
                     .planetItem(basicPortal)
                     .count(1)
+                    .itemPlacement(new ArrayList<Position>())
                     .build();
+
+            basicPortalInventory.getItemPlacement().add(
+                    Position.builder()
+                            .posX(-3.82f)
+                            .posY(4.8f)
+                            .build());
             inventoryService.saveInventory(basicPortalInventory);
 
 
