@@ -11,3 +11,4 @@ dev 서버 2차 자동 배포
 dev 서버 3차 자동 배포
 - application.yml 추가
 - 자동 배포 테스트
+- application.yml을 dev, local 환경으로 분리
