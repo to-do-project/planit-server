@@ -10,3 +10,4 @@ dev 서버 2차 자동 배포
 
 dev 서버 3차 자동 배포
 - application.yml 추가
+- 자동 배포 테스트
