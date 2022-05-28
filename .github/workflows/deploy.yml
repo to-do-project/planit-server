@@ -13,6 +13,7 @@ on:
 name: Deploy Spring boot to Amazon EC2
 env:
   PROJECT_NAME: planit-server
+  RESOURCE_PATH: ./src/main/resources/application.yml
 
 jobs:
   deploy:
@@ -27,13 +28,11 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-        
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-        shell: bash
-
-      - name: Build with Gradle
-        run: ./gradlew build
+          
+      - name: Set yml file 
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: ${{ env.RESOURCE_PATH }} 
         env:
           server.port: ${{ secrets.SERVER_PORT }}
           spring.application.name: ${{ secrets.APPLICATION_NAME }}
@@ -63,6 +62,13 @@ jobs:
           jwt.access-token-header-name: ${{ secrets.ACCESS_TOKEN_HEADER_NAME }} 
           jwt.refresh-token-header-name: ${{ secrets.REFRESH_TOKEN_HEADER_NAME }} 
           jwt.user-id-header-name: ${{ secrets.USER_ID_HEADER_NAME }} 
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        shell: bash
+
+      - name: Build with Gradle
+        run: ./gradlew build
         shell: bash
         
       - name: Make zip file
