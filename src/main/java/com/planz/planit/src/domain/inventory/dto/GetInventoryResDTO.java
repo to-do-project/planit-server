@@ -6,7 +6,8 @@ import lombok.Getter;
 @Getter
 @Builder
 public class GetInventoryResDTO {
-    private Long itemId;
+
+    private String itemCode;
 
     // 보유 중인 아이템 전체 개수
     private int totalCount;

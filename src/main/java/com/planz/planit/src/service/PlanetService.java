@@ -116,7 +116,7 @@ public class PlanetService {
 
                     planetItemList.add(
                             ItemPositionDTO.builder()
-                                    .itemId(inventory.getPlanetItem().getItemId())
+                                    .itemCode(inventory.getPlanetItem().getCode())
                                     .positionList(positionList)
                                     .build());
                 }

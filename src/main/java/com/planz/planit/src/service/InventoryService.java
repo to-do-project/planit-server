@@ -57,7 +57,7 @@ public class InventoryService {
                 int placedCount = inventory.getItemPlacement().size();
 
                 result.add(GetInventoryResDTO.builder()
-                        .itemId(inventory.getPlanetItem().getItemId())
+                        .itemCode(inventory.getPlanetItem().getCode())
                         .totalCount(totalCount)
                         .placedCount(placedCount)
                         .remainingCount(totalCount - placedCount)
@@ -134,21 +134,21 @@ public class InventoryService {
 
             // 2. 기존 아이템 배치 삭제
             List<Inventory> inventoryList = findInventoryListByUser(user);
-            HashMap<Long, Inventory> inventoryHashMap = new HashMap<>();
+            HashMap<String, Inventory> inventoryHashMap = new HashMap<>();
             for (Inventory inventory : inventoryList) {
                 inventory.getItemPlacement().clear();
-                inventoryHashMap.put(inventory.getPlanetItem().getItemId(), inventory);
+                inventoryHashMap.put(inventory.getPlanetItem().getCode(), inventory);
             }
 
             // 3. 새로운 아이템 배치 저장
             for (ItemPositionDTO itemPositionDTO : itemPositionDTOList) {
 
                 // request로 받은 inventoryId로, 유저가 가지고 있는 Inventory 데이터 조회
-                Inventory findInventory = inventoryHashMap.remove(itemPositionDTO.getItemId());
+                Inventory findInventory = inventoryHashMap.remove(itemPositionDTO.getItemCode());
                 if (findInventory == null) {
                     // 해당 유저가 보유한 인벤토리 아이템이 맞는지 확인
-                    // request에 itemId를 중복으로 입력했는지 확인
-                    throw new BaseException(NOT_OWN_OR_INVALID_ITEM_ID);
+                    // request에 item code를 중복으로 입력했는지 확인
+                    throw new BaseException(NOT_OWN_OR_INVALID_ITEM_CODE);
                 }
 
                 // 보유 아이템 개수 validation
@@ -174,8 +174,6 @@ public class InventoryService {
         }
 
     }
-
-
 
 
     /**
