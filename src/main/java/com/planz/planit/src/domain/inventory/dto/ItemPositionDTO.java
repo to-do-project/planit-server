@@ -16,8 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 public class ItemPositionDTO {
 
-    @NotNull(message = "NOT_EXIST_PLACE_ITEM_ID")
-    private Long itemId;
+    @NotNull(message = "NOT_EXIST_PLACE_ITEM_CODE")
+    private String itemCode;
 
     @NotEmpty(message = "NOT_EXIST_POSITION_LIST")
     @Valid
