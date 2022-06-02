@@ -124,6 +124,8 @@ public class PlanetService {
 
             // 4. 결과 반환
             return GetPlanetMainInfoResDTO.builder()
+                    .userId(targetUserId)
+                    .planetColor(planet.getColor().name())
                     .level(planet.getLevel())
                     .characterItem(user.getCharacterItem())
                     .planetItemList(planetItemList)
