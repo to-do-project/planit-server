@@ -10,6 +10,12 @@ import java.util.List;
 @Getter
 public class GetPlanetMainInfoResDTO {
 
+    // 유저 아이디
+    private Long userId;
+
+    // 행성 색깔
+    private String planetColor;
+
     // 행성 레벨
     private Integer level;
 
