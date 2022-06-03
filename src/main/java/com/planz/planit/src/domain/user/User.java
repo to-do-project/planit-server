@@ -102,4 +102,8 @@ public class User {
     public void setProfileColor(UserProfileColor profileColor) {
         this.profileColor = profileColor;
     }
+
+    public void setMissionStatus(Integer missionStatus) {
+        this.missionStatus = missionStatus;
+    }
 }

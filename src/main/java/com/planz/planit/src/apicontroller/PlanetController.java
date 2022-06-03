@@ -3,6 +3,7 @@ package com.planz.planit.src.apicontroller;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponse;
 import com.planz.planit.src.domain.planet.dto.GetPlanetMainInfoResDTO;
+import com.planz.planit.src.domain.planet.dto.GetPlanetMyInfoResDTO;
 import com.planz.planit.src.domain.user.User;
 import com.planz.planit.src.service.FriendService;
 import com.planz.planit.src.service.PlanetService;
@@ -61,6 +62,24 @@ public class PlanetController {
             }
 
             return new BaseResponse<>(planetService.getPlanetMainInfo(targetUserId));
+        }
+        catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    /**
+     * 나의 행성 정보를 조회한다.
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @return 행성 나이, 행성 레벨, 보유 포인트, 평균 목표 완성률, 좋아요 받은 수, 좋아요 누른 수
+     */
+    @GetMapping("/my-info")
+    @ApiOperation("나의 행성 정보 조회 API")
+    public BaseResponse<GetPlanetMyInfoResDTO> getPlanetMyInfo(HttpServletRequest request){
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME));
+
+        try{
+            return new BaseResponse<>(planetService.getPlanetMyInfo(userId));
         }
         catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
