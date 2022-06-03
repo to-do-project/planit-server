@@ -394,4 +394,37 @@ public class UserController {
             return new BaseResponse<>(e.getStatus());
         }
     }
+
+
+    /**
+     * 운영자 미션 받기 여부를 변경한다.
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @PathVariable status
+     * @return 결과 메세지
+     */
+    @PatchMapping("/api/setting/operator-mission/{status}")
+    @ApiOperation("운영자 미션 받기 설정 API")
+    public BaseResponse<String> convertMissionStatus(HttpServletRequest request, @PathVariable int status){
+
+        // status에 대한 형식적 validation
+        if (status != 0 && status != 1){
+            return new BaseResponse<>(INVALID_MISSION_STATUS);
+        }
+
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME));
+
+        try{
+            userService.convertMissionStatus(userId, status);
+            if (status == 0){
+                return new BaseResponse<>("운영자 미션 받기를 비활성화했습니다.");
+            }
+            else{
+                return new BaseResponse<>("운영자 미션 받기를 활성화했습니다.");
+            }
+
+        }
+        catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 }

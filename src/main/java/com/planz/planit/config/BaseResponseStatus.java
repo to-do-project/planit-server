@@ -123,7 +123,11 @@ public enum BaseResponseStatus {
     NOT_EXIST_PLANET(false, 6118, "해당 유저의 행성을 찾을 수 없습니다."),
     NOT_EXIST_PROFILE_COLOR(false, 6119, "변경할 프로필 색상을 입력해주세요. (LightRed, Yellow, Green, SkyBlue, Blue, LightPurple, Purple, Pink, Gray, Black)"),
     INVALID_PROFILE_COLOR(false, 6120, "유효하지 않은 프로필 색상입니다. (LightRed, Yellow, Green, SkyBlue, Blue, LightPurple, Purple, Pink, Gray, Black)"),
-    NOT_FRIEND_RELATION(false, 6121, "서로 친구 관계가 아니기 때문에, 행성 메인 화면을 조회할 수 없습니다.")
+    NOT_FRIEND_RELATION(false, 6121, "서로 친구 관계가 아니기 때문에, 행성 메인 화면을 조회할 수 없습니다."),
+
+
+    // 설정 관련 BaseResponseStatus
+    INVALID_MISSION_STATUS(false, 6200, "유효하지 않은 status (path variable) 값 입니다. 0 (운영자 미션 안받기) 또는 1 (운영자 미션 받기)을 입력해주세요.")
     ;
 
 

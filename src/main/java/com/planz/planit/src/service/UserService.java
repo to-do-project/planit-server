@@ -611,4 +611,27 @@ public class UserService {
     }
 
 
+    /**
+     * 운영자 미션 받기 설정 API
+     * 운영자 미션 받기 여부를 변경한다.
+     * 1. 유저 찾기
+     * 2. 해당 유저의 missionStatus 값 변경
+     * 3. 다시 저장
+     */
+    public void convertMissionStatus(Long userId, int status) throws BaseException{
+
+        try{
+            // 1. 유저 찾기
+            User user = findUser(userId);
+
+            // 2. 해당 유저의 missionStatus 값 변경
+            user.setMissionStatus(status);
+
+            // 3. 다시 저장
+            saveUser(user);
+        }
+        catch (BaseException e){
+            throw e;
+        }
+    }
 }
