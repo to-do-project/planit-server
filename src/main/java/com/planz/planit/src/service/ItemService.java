@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
@@ -53,8 +54,21 @@ public class ItemService {
             User user = userService.findUser(userId);
 
             // 2. 아이템 목록 조회
-            List<Long> characterItemIdList = findStoreItemIdsByType(ItemType.CHARACTER_ITEM);
-            List<Long> planetItemIdList = findStoreItemIdsByType(ItemType.PLANET_ITEM);
+            List<Long> characterItemIdList = new ArrayList<>();
+            List<Item> characterItemList = findStoreItemsByType(ItemType.CHARACTER_ITEM);
+            for (Item item : characterItemList) {
+                if(calculateMaxCnt(user, item) > 0){
+                    characterItemIdList.add(item.getItemId());
+                }
+            }
+
+            List<Long> planetItemIdList = new ArrayList<>();
+            List<Item> planetItemList = findStoreItemsByType(ItemType.PLANET_ITEM);
+            for (Item item : planetItemList) {
+                if(calculateMaxCnt(user, item) > 0){
+                    planetItemIdList.add(item.getItemId());
+                }
+            }
 
             // 3. GetItemStoreInfoResDTO 반환
             return GetItemStoreInfoResDTO.builder()
@@ -74,13 +88,13 @@ public class ItemService {
      * 아이템 타입(PlanetItem / CharacterItem) 별로 스토어에서 판매중인 itemId 리스트를 반환한다.
      * 스토어에서 판매중인 아이템은 가격이 1원 이상이다.
      */
-    public List<Long> findStoreItemIdsByType(ItemType type) throws BaseException {
+    public List<Item> findStoreItemsByType(ItemType type) throws BaseException {
 
         try{
-            return itemRepository.findStoreItemIdsByType(type);
+            return itemRepository.findStoreItemsByType(type);
         }
         catch (Exception e){
-            log.error("findItemIdsByType() : itemRepository.findItemIdsByType(type) 실행 중 데이터베이스 에러 발생");
+            log.error("findStoreItemsByType() : itemRepository.findStoreItemsByType(type) 실행 중 데이터베이스 에러 발생");
             e.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
