@@ -132,7 +132,7 @@ public class UserService {
             // 5. Planet 테이블 insert
             Planet planetEntity = Planet.builder()
                     .user(userEntity)
-                    .level(0)
+                    .level(1)
                     .exp(0)
                     .color(PlanetColor.valueOf(reqDTO.getPlanetColor()))
                     .build();

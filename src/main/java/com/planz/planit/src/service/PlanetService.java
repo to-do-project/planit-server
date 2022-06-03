@@ -8,11 +8,14 @@ import com.planz.planit.src.domain.inventory.dto.PositionDTO;
 import com.planz.planit.src.domain.planet.Planet;
 import com.planz.planit.src.domain.planet.PlanetRepository;
 import com.planz.planit.src.domain.planet.dto.GetPlanetMainInfoResDTO;
+import com.planz.planit.src.domain.planet.dto.GetPlanetMyInfoResDTO;
 import com.planz.planit.src.domain.user.User;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -132,6 +135,49 @@ public class PlanetService {
                     .build();
 
         } catch (BaseException e) {
+            throw e;
+        }
+    }
+
+    /**
+     * 나의 행성 정보 조회 API
+     * (행성 나이, 행성 레벨, 보유 포인트, 평균 목표 완성률, 좋아요 받은 수, 좋아요 누른 수) 반환
+     * 1. 유저 조회
+     * 2. 행성 조회
+     * 3. 행성 나이 계산
+     * 4. 평균 목표 완성률 계산
+     * 5. 좋아요 받은 수 계산
+     * 6. 좋아요 누른 수 계산
+     */
+    public GetPlanetMyInfoResDTO getPlanetMyInfo(Long userId) throws BaseException{
+        try {
+            // 1. 유저 조회
+            User user = userService.findUser(userId);
+
+            // 2. 행성 조회
+            Planet planet = user.getPlanet();
+
+            // 3. 행성 나이 계산
+            LocalDateTime today = LocalDateTime.now();
+            LocalDateTime createAt = user.getCreateAt();
+            long age = ChronoUnit.DAYS.between(createAt, today) + 1;
+
+            // 4. 평균 목표 완성률 계산
+
+            // 5. 좋아요 받은 수 계산
+
+            // 6. 좋아요 누른 수 계산
+
+            return GetPlanetMyInfoResDTO.builder()
+                    .age(age)
+                    .level(planet.getLevel())
+                    .point(user.getPoint())
+                    .avgGoalCompleteRate(0)
+                    .getFavoriteCount(0)
+                    .putFavoriteCount(0)
+                    .build();
+        }
+        catch (BaseException e){
             throw e;
         }
     }
