@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import java.io.IOException;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
 
@@ -354,6 +353,35 @@ public class UserController {
         }
     }
 
+    /**
+     * 프로필 색상을 변경한다.
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @RequestBody profileColor
+     * @return 결과 메세지
+     */
+    @PatchMapping("/api/user/profile")
+    @ApiOperation(value = "프로필 색상 변경 API")
+    public BaseResponse<String> modifyProfile(HttpServletRequest request,
+                                              @Valid @RequestBody ModifyProfileReqDTO reqDTO,
+                                              BindingResult br){
+
+        // 형식적 validation
+        if(br.hasErrors()){
+            String errorName = br.getAllErrors().get(0).getDefaultMessage();
+            return new BaseResponse<>(BaseResponseStatus.of(errorName));
+        }
+
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME));
+
+        try{
+            userService.modifyProfile(userId, reqDTO.getProfileColor());
+            return new BaseResponse<>("프로필 색상 변경이 성공적으로 완료되었습니다.");
+        }
+        catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
     //유저 검색 - 은지 추가
     //닉네임 혹은 이메일을 완전하게 입력해야한다.
     @PatchMapping("/api/users")
@@ -363,6 +391,39 @@ public class UserController {
             SearchUserResDTO searchUserResDTO = userService.searchUsers(keyword);
             return new BaseResponse<>(searchUserResDTO);
         } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+
+    /**
+     * 운영자 미션 받기 여부를 변경한다.
+     * @RequestHeader User-Id, Jwt-Access-Token
+     * @PathVariable status
+     * @return 결과 메세지
+     */
+    @PatchMapping("/api/setting/operator-mission/{status}")
+    @ApiOperation("운영자 미션 받기 설정 API")
+    public BaseResponse<String> convertMissionStatus(HttpServletRequest request, @PathVariable int status){
+
+        // status에 대한 형식적 validation
+        if (status != 0 && status != 1){
+            return new BaseResponse<>(INVALID_MISSION_STATUS);
+        }
+
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME));
+
+        try{
+            userService.convertMissionStatus(userId, status);
+            if (status == 0){
+                return new BaseResponse<>("운영자 미션 받기를 비활성화했습니다.");
+            }
+            else{
+                return new BaseResponse<>("운영자 미션 받기를 활성화했습니다.");
+            }
+
+        }
+        catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
     }

@@ -1,18 +1,21 @@
 package com.planz.planit.src.service;
 
 import com.planz.planit.config.BaseException;
+import com.planz.planit.src.domain.closet.Closet;
 import com.planz.planit.src.domain.deviceToken.DeviceToken;
 import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
+import com.planz.planit.src.domain.inventory.Inventory;
+import com.planz.planit.src.domain.inventory.Position;
+import com.planz.planit.src.domain.item.BasicItem;
+import com.planz.planit.src.domain.item.Item;
 import com.planz.planit.src.domain.mail.MailDTO;
 import com.planz.planit.src.domain.planet.Planet;
 import com.planz.planit.src.domain.planet.PlanetColor;
-import com.planz.planit.src.domain.planet.PlanetRepository;
 import com.planz.planit.src.domain.user.*;
 import com.planz.planit.src.domain.user.dto.JoinReqDTO;
 import com.planz.planit.src.domain.user.dto.LoginResDTO;
 import com.planz.planit.src.domain.user.dto.SearchUserResDTO;
 import lombok.extern.log4j.Log4j2;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -45,25 +49,30 @@ public class UserService {
     };    //배열안의 문자 숫자는 원하는대로
 
     private final UserRepository userRepository;
-    private final PlanetRepository planetRepository;
     private final JwtTokenService jwtTokenService;
     private final MailService mailService;
     private final RedisService redisService;
     private final DeviceTokenService deviceTokenService;
     private final PasswordEncoder passwordEncoder;
     private final PlanetService planetService;
+    private final InventoryService inventoryService;
+    private final ClosetService closetService;
+    private final ItemService itemService;
     private final Random random;
 
+
     @Autowired
-    public UserService(UserRepository userRepository, PlanetRepository planetRepository, JwtTokenService jwtTokenService, MailService mailService, RedisService redisService, @Lazy DeviceTokenService deviceTokenService, PasswordEncoder passwordEncoder, PlanetService planetService, Random random) {
+    public UserService(UserRepository userRepository, JwtTokenService jwtTokenService, MailService mailService, RedisService redisService, @Lazy DeviceTokenService deviceTokenService, PasswordEncoder passwordEncoder, @Lazy PlanetService planetService, @Lazy InventoryService inventoryService, @Lazy ClosetService closetService, @Lazy ItemService itemService, Random random) {
         this.userRepository = userRepository;
-        this.planetRepository = planetRepository;
         this.jwtTokenService = jwtTokenService;
         this.mailService = mailService;
         this.redisService = redisService;
         this.deviceTokenService = deviceTokenService;
         this.passwordEncoder = passwordEncoder;
         this.planetService = planetService;
+        this.inventoryService = inventoryService;
+        this.closetService = closetService;
+        this.itemService = itemService;
         this.random = random;
     }
 
@@ -80,29 +89,33 @@ public class UserService {
      * 3. User 테이블 insert
      * 4. DeviceToken 테이블 insert
      * 5. Planet 테이블 insert
+     * 6-1. Inventory 테이블에 기본 행성 아이템(집, 포탈) insert
+     * 6-2. 포탈 : (-3.82, 4.8), 집 : (3.73, 5.2) 배치
+     * 7. Closet 테이블에 기본 캐릭터 아이템(기본 옷) insert
+     * 8. access token, refresh token 생성해서 헤더에 담기
      */
     @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public LoginResDTO join(JoinReqDTO reqDTO, HttpServletResponse response) throws BaseException {
 
         try {
 
-            // 닉네임 존재 여부 확인
+            // 1. 닉네임 존재 여부 확인
             if (!isEmptyNickname(reqDTO.getNickname())) {
                 throw new BaseException(ALREADY_EXIST_NICKNAME);
             }
 
-            // 이메일 존재 여부 확인
+            // 2. 이메일 존재 여부 확인
             if (!isEmptyEmail(reqDTO.getEmail())) {
                 throw new BaseException(ALREADY_EXIST_EMAIL);
             }
 
-            // User 테이블 insert
+            // 3. User 테이블 insert
             User userEntity = User.builder()
                     .email(reqDTO.getEmail())
                     .password(passwordEncoder.encode(reqDTO.getPassword()))
                     .nickname(reqDTO.getNickname())
-                    .characterColor(UserCharacterColor.WHITE)
-                    .profileColor(UserProfileColor.WHITE)
+                    .characterItem(BasicItem.SPACESUIT_01.getItemId())
+                    .profileColor(UserProfileColor.LightRed)
                     .point(0)
                     .missionStatus(1)
                     .userStatus(UserStatus.VALID)
@@ -112,21 +125,62 @@ public class UserService {
             saveUser(userEntity);
 
 
-            // DeviceToken 테이블 insert
+            // 4. DeviceToken 테이블 insert
             deviceTokenService.createDeviceToken(userEntity.getUserId(), new DeviceTokenReqDTO(reqDTO.getDeviceToken()));
 
 
-            // Planet 테이블 insert
+            // 5. Planet 테이블 insert
             Planet planetEntity = Planet.builder()
                     .user(userEntity)
-                    .level(0)
+                    .level(1)
                     .exp(0)
                     .color(PlanetColor.valueOf(reqDTO.getPlanetColor()))
                     .build();
             planetService.savePlanet(planetEntity);
 
 
-            // access token, refresh token 생성해서 헤더에 담기
+            /// 6-1. Inventory 테이블에 기본 행성 아이템(집, 포탈) insert
+            // 6-2. 포탈 : (-3.82, 4.8), 집 : (3.73, 5.2) 배치
+            Item basicHouse = itemService.findItemByItemId(BasicItem.HOUSE_01.getItemId());
+            Inventory basicHouseInventory = Inventory.builder()
+                    .user(userEntity)
+                    .planetItem(basicHouse)
+                    .count(1)
+                    .itemPlacement(new ArrayList<Position>())
+                    .build();
+            basicHouseInventory.getItemPlacement().add(
+                    Position.builder()
+                            .posX(3.73f)
+                            .posY(5.2f)
+                            .build());
+            inventoryService.saveInventory(basicHouseInventory);
+
+            Item basicPortal = itemService.findItemByItemId(BasicItem.PORTAL_00.getItemId());
+            Inventory basicPortalInventory = Inventory.builder()
+                    .user(userEntity)
+                    .planetItem(basicPortal)
+                    .count(1)
+                    .itemPlacement(new ArrayList<Position>())
+                    .build();
+
+            basicPortalInventory.getItemPlacement().add(
+                    Position.builder()
+                            .posX(-3.82f)
+                            .posY(4.8f)
+                            .build());
+            inventoryService.saveInventory(basicPortalInventory);
+
+
+            // 7. Closet 테이블에 기본 캐릭터 아이템(기본 옷) insert
+            Item basicSuit = itemService.findItemByItemId(BasicItem.SPACESUIT_01.getItemId());
+            Closet basicSuitCloset = Closet.builder()
+                    .user(userEntity)
+                    .item(basicSuit)
+                    .build();
+            closetService.saveCloset(basicSuitCloset);
+
+
+            // 8. access token, refresh token 생성해서 헤더에 담기
             DeviceToken findDeviceToken = deviceTokenService.findDeviceTokenByUserIdAndDeviceToken(userEntity.getUserId(), reqDTO.getDeviceToken());
 
             String jwtRefreshToken = jwtTokenService.createRefreshToken(findDeviceToken.getDeviceTokenId().toString());
@@ -138,9 +192,11 @@ public class UserService {
             return LoginResDTO.builder()
                     .userId(userEntity.getUserId())
                     .planetId(planetEntity.getPlanetId())
+                    .planetColor(planetEntity.getColor().name())
+                    .planetLevel(planetEntity.getLevel())
                     .email(userEntity.getEmail())
                     .nickname(userEntity.getNickname())
-                    .characterColor(userEntity.getCharacterColor().name())
+                    .characterItem(userEntity.getCharacterItem())
                     .profileColor(userEntity.getProfileColor().name())
                     .point(userEntity.getPoint())
                     .missionStatus(userEntity.getMissionStatus())
@@ -153,11 +209,15 @@ public class UserService {
     }
 
 
+    /**
+     * user 저장 혹은 업데이트
+     */
     public void saveUser(User userEntity) throws BaseException {
         try {
             userRepository.save(userEntity);
         } catch (Exception e) {
             log.error("saveUser() : userRepository.save(userEntity) 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
     }
@@ -170,6 +230,7 @@ public class UserService {
             return userRepository.findByEmail(email).isEmpty();
         } catch (Exception e) {
             log.error("isEmptyEmail() : userRepository.findByEmail() 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
     }
@@ -182,6 +243,7 @@ public class UserService {
             return userRepository.findByNickname(nickname).isEmpty();
         } catch (Exception e) {
             log.error("isEmptyNickname() : userRepository.findByNickname() 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
     }
@@ -196,12 +258,12 @@ public class UserService {
     public void createAuthNum(String email) throws BaseException {
 
         try {
-            // 이메일 존재 여부 확인
+            // 1. 이메일 존재 여부 확인
             if (!isEmptyEmail(email)) {
                 throw new BaseException(ALREADY_EXIST_EMAIL);
             }
 
-            // 6자리 인증번호 이메일 발송
+            // 2. 6자리 인증번호 이메일 발송
             String myRandomNum = randomNumber(email);
             MailDTO mailDTO = MailDTO.builder()
                     .address(email)
@@ -210,7 +272,7 @@ public class UserService {
                     .build();
             mailService.mailSend(mailDTO);
 
-            // 인증번호 Redis에 저장
+            // 3. 인증번호 Redis에 저장
             redisService.setEmailAuthNumInRedis(email, myRandomNum);
 
         } catch (BaseException e) {
@@ -241,12 +303,12 @@ public class UserService {
      */
     public void checkAuthNum(String email, String authNum) throws BaseException {
         try {
-            // 이메일 존재 여부 확인
+            // 1. 이메일 존재 여부 확인
             if (!isEmptyEmail(email)) {
                 throw new BaseException(ALREADY_EXIST_EMAIL);
             }
 
-            // 인증번호 검증
+            // 2. 인증번호 검증
             String authNumInRedis = redisService.getEmailAuthNumInRedis(email);
             if (authNumInRedis == null) {
                 throw new BaseException(NOT_EXIST_AUTH_NUM_IN_REDIS);
@@ -268,28 +330,28 @@ public class UserService {
     public void reissueAccessToken(String userId, String refreshToken, String deviceToken, HttpServletResponse response) throws BaseException {
 
         try {
-            // refresh token이 만료되었는지 확인
+            // 1. refresh token이 만료되었는지 확인
             if (!jwtTokenService.validateToken(refreshToken)) {
                 throw new BaseException(INVALID_REFRESH_TOKEN);
             }
 
             // userId로 유저 객체 조회
-            User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+            User userEntity = findUser(Long.valueOf(userId));
 
             // userId와 deviceToken 값으로 디바이스 토큰 객체 조회
             DeviceToken deviceTokenEntity = deviceTokenService.findDeviceTokenByUserIdAndDeviceToken(userEntity.getUserId(), deviceToken);
             String deviceTokenId = deviceTokenEntity.getDeviceTokenId().toString();
 
-            // header의 refresh token과 redis의 refresh token 비교
+            // 2. header의 refresh token과 redis의 refresh token 비교
             if (!redisService.compareRefreshTokenInRedis(deviceTokenId, refreshToken)) {
                 throw new BaseException(TWO_REFRESH_TOKEN_NOT_EQUAL);
             }
 
-            // access token 재발급
+            // 3. access token 재발급
             String newAccessToken = jwtTokenService.createAccessToken(userId, userEntity.getRole());
 
             if (jwtTokenService.isRefreshReissue(refreshToken)) {
-                // refresh token 재발급
+                // 4. refresh token 재발급
                 refreshToken = jwtTokenService.createRefreshToken(deviceTokenId);
             }
 
@@ -312,7 +374,7 @@ public class UserService {
     public void logout(String userId, DeviceTokenReqDTO reqDTO) throws BaseException {
         try {
             Long longUserId = Long.valueOf(userId);
-            User userEntity = userRepository.findByUserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+            User userEntity = findUser(longUserId);
 
             // 리프래시 토큰 삭제
             DeviceToken findDeviceToken = deviceTokenService.findDeviceTokenByUserIdAndDeviceToken(userEntity.getUserId(), reqDTO.getDeviceToken());
@@ -341,7 +403,7 @@ public class UserService {
             Long longUserId = Long.valueOf(userId);
 
             // 비밀번호 검증
-            User userEntity = userRepository.findByUserId(longUserId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+            User userEntity = findUser(longUserId);
             if (!passwordEncoder.matches(password, userEntity.getPassword())) {
                 throw new BaseException(INVALID_PASSWORD);
             }
@@ -367,12 +429,16 @@ public class UserService {
 
     }
 
+    /**
+     * User 삭제
+     */
     public void deleteUser(Long longUserId) throws BaseException {
         try {
             userRepository.deleteByUserIdInQuery(longUserId);
         }
         catch (Exception e){
             log.error("deleteUser() : userRepository.deleteByUserIdInQuery(longUserId) 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
             throw new BaseException(FAIL_WITHDRAWAL);
         }
     }
@@ -410,7 +476,10 @@ public class UserService {
     }
 
 
-    // 랜덤으로 10자리 임시 비밀번호 생성
+
+    /**
+     * 랜덤으로 10자리 임시 비밀번호 생성
+     */
     public String randomPwd(String email) {
 
         random.setSeed(System.currentTimeMillis() + email.length());
@@ -444,7 +513,7 @@ public class UserService {
     public void modifyPassword(String userId, String oldPassword, String newPassword) throws BaseException {
 
         try {
-            User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+            User userEntity = findUser(Long.valueOf(userId));
 
             // 기존 비밀번호가 올바른지 확인
             if (!passwordEncoder.matches(oldPassword, userEntity.getPassword())) {
@@ -462,14 +531,14 @@ public class UserService {
 
     /**
      * 닉네임 변경
-     * 1. 기존 비밀번호가 올바른지 확인
-     * 2. DB에 새로운 pwd 저장
+     * 1. 닉네임 중복 확인
+     * 2. DB에 새로운 닉네임 저장
      */
     @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void modifyNickname(String userId, String nickname) throws BaseException {
 
         try {
-            User userEntity = userRepository.findByUserId(Long.valueOf(userId)).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+            User userEntity = findUser(Long.valueOf(userId));
 
             // 닉네임 중복확인
             if (!isEmptyNickname(nickname)) {
@@ -485,12 +554,37 @@ public class UserService {
         }
     }
 
-    //닉네임 혹은 이메일로 유저 검색
+    /**
+     * 프로필 색상 변경
+     * 1. 유저 조회
+     * 2. User의 profileColor 변경
+     * 3. DB에 저장
+     */
+    public void modifyProfile(Long userId, String profileColor) throws BaseException{
+        try{
+            // 1. 유저 조회
+            User userEntity = findUser(userId);
+
+            // 2. User의 profileColor 변경
+            userEntity.setProfileColor(UserProfileColor.of(profileColor));
+
+            // 3. DB에 저장
+            saveUser(userEntity);
+        }
+        catch (BaseException e){
+            throw e;
+        }
+
+    }
+
+    /**
+     * 닉네임 혹은 이메일로 유저 검색
+     */
     public SearchUserResDTO searchUsers(String keyword) throws BaseException {
         //유저 검색
         User userEntity = userRepository.findByNicknameOrEmail(keyword, keyword).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
         //행성 검색 (행성 레벨)
-        Planet userPlanet = planetRepository.findByUserId(userEntity.getUserId()).orElseThrow(() -> new BaseException(NOT_EXIST_PLANET_INFO));
+        Planet userPlanet = planetService.findPlanetByUserId(userEntity.getUserId());
 
         try {
             //dto 만들기
@@ -499,5 +593,45 @@ public class UserService {
             throw new BaseException(FAILED_TO_SEARCH_USER);
         }
 
+    }
+
+
+
+    /**
+     * 현재 사용중인 캐릭터 아이템(옷) 변경
+     */
+    public void changeCharacterItem(User user, Long itemId) throws BaseException {
+        try{
+            user.setCharacterItem(itemId);
+            saveUser(user);
+        }
+        catch (BaseException e){
+            throw e;
+        }
+    }
+
+
+    /**
+     * 운영자 미션 받기 설정 API
+     * 운영자 미션 받기 여부를 변경한다.
+     * 1. 유저 찾기
+     * 2. 해당 유저의 missionStatus 값 변경
+     * 3. 다시 저장
+     */
+    public void convertMissionStatus(Long userId, int status) throws BaseException{
+
+        try{
+            // 1. 유저 찾기
+            User user = findUser(userId);
+
+            // 2. 해당 유저의 missionStatus 값 변경
+            user.setMissionStatus(status);
+
+            // 3. 다시 저장
+            saveUser(user);
+        }
+        catch (BaseException e){
+            throw e;
+        }
     }
 }
