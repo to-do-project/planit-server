@@ -37,7 +37,7 @@ public class FriendService {
         User user = userService.findUser(userId);
         User toUser = userService.findUser(toUserId);
         //이미 관계가 존재하는지 확인하기
-        if(friendRepository.existsByFromUserAndToUser(userId,toUserId)+friendRepository.existsByFromUserAndToUser(toUserId,userId)!=0){
+        if(isFriend(user,toUser)){
             throw new BaseException(ALREADY_EXIST_FRIEND);
         }
         try {
@@ -85,13 +85,6 @@ public class FriendService {
         } catch (Exception e){
             throw new BaseException(DATABASE_ERROR);
     }
-    }
-
-    public boolean checkFriend(Long userId, Long friendId){
-        if(friendRepository.existsByFromUserAndToUser(userId,friendId)+friendRepository.existsByFromUserAndToUser(friendId,userId)==0){
-            return false;
-        }
-        return true;
     }
 
     // 서로 친구 관계인지 확인 - 혜지 추가
