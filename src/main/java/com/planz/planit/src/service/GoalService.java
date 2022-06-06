@@ -211,7 +211,9 @@ public class GoalService {
         //검색하려는 친구 DTO 가져오기
         GoalSearchUserResDTO findUserDTO = userService.goalSearchUsers(nickname);
         //친구인지 확인하기
-        if(!friendService.checkFriend(userId, findUserDTO.getUserId())){
+        User user = userService.findUser(userId);
+        User findUser = userService.findUser(findUserDTO.getUserId());
+        if(!friendService.isFriend(user,findUser)){
             throw new BaseException(NOT_EXIST_FRIEND);
         }
         return findUserDTO;

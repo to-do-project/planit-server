@@ -92,8 +92,6 @@ public class User {
         this.nickname = nickname;
     }
 
-<<<<<<< HEAD
-=======
     public void setPoint(Integer point) {
         this.point = point;
     }
@@ -109,5 +107,4 @@ public class User {
     public void setMissionStatus(Integer missionStatus) {
         this.missionStatus = missionStatus;
     }
->>>>>>> dev
 }
