@@ -8,6 +8,7 @@ import com.planz.planit.src.domain.planet.Planet;
 import com.planz.planit.src.domain.planet.PlanetColor;
 import com.planz.planit.src.domain.planet.PlanetRepository;
 import com.planz.planit.src.domain.user.*;
+import com.planz.planit.src.domain.user.dto.GoalSearchUserResDTO;
 import com.planz.planit.src.domain.user.dto.JoinReqDTO;
 import com.planz.planit.src.domain.user.dto.LoginResDTO;
 import com.planz.planit.src.domain.user.dto.SearchUserResDTO;
@@ -485,6 +486,12 @@ public class UserService {
         }
     }
 
+    /**
+     * 친구 검색 API
+     * @param keyword
+     * @return
+     * @throws BaseException
+     */
     //닉네임 혹은 이메일로 유저 검색
     public SearchUserResDTO searchUsers(String keyword) throws BaseException {
         //유저 검색
@@ -498,6 +505,17 @@ public class UserService {
         } catch (Exception e) {
             throw new BaseException(FAILED_TO_SEARCH_USER);
         }
+    }
 
+    /**
+     * 그룹 목표 생성 시 친구 닉네임 검색
+     * @param nickname
+     * @return
+     * @throws BaseException
+     */
+    public GoalSearchUserResDTO goalSearchUsers(String nickname) throws BaseException {
+        //유저 검색
+        User findUser = userRepository.findByNickname(nickname).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+        return new GoalSearchUserResDTO(findUser.getUserId(), findUser.getNickname());
     }
 }

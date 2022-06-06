@@ -3,20 +3,18 @@ package com.planz.planit.src.domain.goal;
 import com.planz.planit.src.domain.user.User;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class Goal {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="goal_id")
     private Long goalId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="manager_id",nullable = false)
-    private User manager;
 
     @Column(nullable=false)
     private String title;
@@ -33,10 +31,14 @@ public class Goal {
     private LocalDateTime createAt = LocalDateTime.now();
 
     @Builder
-    public Goal(User manager, String title, GroupCategory groupFlag, OpenCategory openFlag){
-        this.manager = manager;
+    public Goal(String title, GroupCategory groupFlag, OpenCategory openFlag){
         this.title = title;
         this.groupFlag = groupFlag;
+        this.openFlag = openFlag;
+    }
+
+    public void modifyGoal(String title,OpenCategory openFlag){
+        this.title=title;
         this.openFlag = openFlag;
     }
 

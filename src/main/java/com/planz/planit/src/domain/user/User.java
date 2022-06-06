@@ -1,6 +1,7 @@
 package com.planz.planit.src.domain.user;
 
 import com.planz.planit.src.domain.planet.Planet;
+import com.planz.planit.src.domain.todo.dto.LikeUserResDTO;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -91,4 +92,5 @@ public class User {
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
+
 }
