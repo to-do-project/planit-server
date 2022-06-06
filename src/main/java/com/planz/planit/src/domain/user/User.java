@@ -39,9 +39,8 @@ public class User {
     @Column(nullable = false, unique = true, length = 8)
     private String nickname;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "character_color", nullable = false)
-    private UserCharacterColor characterColor;
+    @Column(name = "character_item", nullable = false)
+    private Long characterItem;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "profile_color", nullable = false)
@@ -93,4 +92,22 @@ public class User {
         this.nickname = nickname;
     }
 
+<<<<<<< HEAD
+=======
+    public void setPoint(Integer point) {
+        this.point = point;
+    }
+
+    public void setCharacterItem(Long characterItem) {
+        this.characterItem = characterItem;
+    }
+
+    public void setProfileColor(UserProfileColor profileColor) {
+        this.profileColor = profileColor;
+    }
+
+    public void setMissionStatus(Integer missionStatus) {
+        this.missionStatus = missionStatus;
+    }
+>>>>>>> dev
 }

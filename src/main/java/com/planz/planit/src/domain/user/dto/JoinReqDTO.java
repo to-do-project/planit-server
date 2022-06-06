@@ -32,7 +32,7 @@ public class JoinReqDTO {
     private String nickname;
 
     @NotBlank(message = "NOT_EXIST_JOIN_REQ_DTO")
-    @Pattern(regexp = "^RED|GREEN|BLUE$", message = "INVALID_PLANET_COLOR_FORM")
+    @Pattern(regexp = "^(RED|GREEN|BLUE)$", message = "INVALID_PLANET_COLOR_FORM")
     private String planetColor;
 
     @NotBlank(message = "NOT_EXIST_JOIN_REQ_DTO")
