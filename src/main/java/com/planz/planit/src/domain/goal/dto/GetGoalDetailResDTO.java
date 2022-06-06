@@ -16,5 +16,6 @@ public class GetGoalDetailResDTO {
     private Long goalId;
     private String goalTitle;
     private int goalPercentage;
+    private String openFlag;
     private List<GetGoalMemberDetailDTO> goalMemberDetails = new ArrayList<>();
 }

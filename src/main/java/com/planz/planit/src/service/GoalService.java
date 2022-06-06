@@ -225,7 +225,7 @@ public class GoalService {
         //DTO에 값 넣기 (goalId, title)
         getGoalDetailResDTO.setGoalId(goal.getGoalId());
         getGoalDetailResDTO.setGoalTitle(goal.getTitle());
-
+        getGoalDetailResDTO.setOpenFlag(goal.getOpenFlag().toString());
         //goalMemberList
         List<GoalMember> goalMembers = getGoalMembers(goalId);
 
@@ -245,7 +245,7 @@ public class GoalService {
                 getTodoMemberDTO.setTodoMemberId(todoMember.getTodoMemberId());
                 getTodoMemberDTO.setTodoTitle(todoMember.getTodo().getTitle());
                 getTodoMemberDTO.setCompleteFlag(todoMember.getCompleteFlag().toString());
-                //좋아요 정보 넣기(리스트..)
+
                 List<User> todoMemberLikes = todoMember.getTodoMemberLikes().stream().map(TodoMemberLike::getUser).collect(Collectors.toList());
                 getTodoMemberDTO.setLikeCount(todoMemberLikes.size()); //좋아요 개수
                 List<LikeUserResDTO> likeUserResDTOS = new ArrayList<>();
