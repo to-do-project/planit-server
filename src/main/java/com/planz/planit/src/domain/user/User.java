@@ -1,6 +1,7 @@
 package com.planz.planit.src.domain.user;
 
 import com.planz.planit.src.domain.planet.Planet;
+import com.planz.planit.src.domain.todo.dto.LikeUserResDTO;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -91,6 +92,8 @@ public class User {
         this.nickname = nickname;
     }
 
+<<<<<<< HEAD
+=======
     public void setPoint(Integer point) {
         this.point = point;
     }
@@ -106,4 +109,5 @@ public class User {
     public void setMissionStatus(Integer missionStatus) {
         this.missionStatus = missionStatus;
     }
+>>>>>>> dev
 }

@@ -16,8 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.planz.planit.config.BaseResponseStatus.DATABASE_ERROR;
-import static com.planz.planit.config.BaseResponseStatus.SERVER_ERROR;
+import static com.planz.planit.config.BaseResponseStatus.*;
 
 @Slf4j
 @Service
@@ -34,14 +33,14 @@ public class FriendService {
     @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void save(long userId, long toUserId) throws BaseException {
         //엔티티 가져오기- 에러처리
+        //탈퇴한 유저 - 데이터 없으면 서버에러 처리
+        User user = userService.findUser(userId);
+        User toUser = userService.findUser(toUserId);
+        //이미 관계가 존재하는지 확인하기
+        if(friendRepository.existsByFromUserAndToUser(userId,toUserId)+friendRepository.existsByFromUserAndToUser(toUserId,userId)!=0){
+            throw new BaseException(ALREADY_EXIST_FRIEND);
+        }
         try {
-            //탈퇴한 유저 - 데이터 없으면 서버에러 처리
-            User user = userService.findUser(userId);
-            User toUser = userService.findUser(toUserId);
-            //이미 관계가 존재하는지 확인하기
-            if(friendRepository.existsByFromUserAndToUser(userId,toUserId)||friendRepository.existsByFromUserAndToUser(toUserId,userId)){
-                throw new BaseException(SERVER_ERROR);
-            }
             //friend 객체 만들어주기
             Friend friend = Friend.builder()
                     .fromUser(user)
@@ -64,10 +63,10 @@ public class FriendService {
             //데이터 정제하기 (상대방만 출력되게)
             List<GetFriendResDTO> result = new ArrayList<>();
             for (Friend friend : byToUserId) {
-                result.add(new GetFriendResDTO(friend.getFromUser().getUserId(),friend.getFromUser().getNickname(),friend.getFriendStatus().toString()));
+                result.add(new GetFriendResDTO(friend.getFromUser().getUserId(),friend.getFromUser().getNickname(),friend.getFromUser().getProfileColor().toString(),friend.getFriendStatus().toString()));
             }
             for (Friend friend : byFromUserId) {
-                result.add(new GetFriendResDTO(friend.getToUser().getUserId(),friend.getToUser().getNickname(),friend.getFriendStatus().toString()));
+                result.add(new GetFriendResDTO(friend.getToUser().getUserId(),friend.getToUser().getNickname(),friend.getToUser().getProfileColor().toString(),friend.getFriendStatus().toString()));
             }
             return result;
         }catch(Exception e){
@@ -86,6 +85,13 @@ public class FriendService {
         } catch (Exception e){
             throw new BaseException(DATABASE_ERROR);
     }
+    }
+
+    public boolean checkFriend(Long userId, Long friendId){
+        if(friendRepository.existsByFromUserAndToUser(userId,friendId)+friendRepository.existsByFromUserAndToUser(friendId,userId)==0){
+            return false;
+        }
+        return true;
     }
 
     // 서로 친구 관계인지 확인 - 혜지 추가

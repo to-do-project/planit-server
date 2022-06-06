@@ -20,7 +20,7 @@ import static com.planz.planit.config.BaseResponseStatus.SUCCESS;
 
 @Slf4j
 @RestController
-@RequestMapping
+@RequestMapping("/api")
 public class DeviceTokenController {
     @Value("${jwt.user-id-header-name}")
     private String USER_ID_HEADER_NAME;

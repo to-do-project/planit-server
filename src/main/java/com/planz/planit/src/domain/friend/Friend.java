@@ -32,7 +32,7 @@ public class Friend {
     private Long friendId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="from_user_id",nullable = false)
+            @JoinColumn(name="from_user_id",nullable = false)
     private User fromUser;
 
     @ManyToOne(fetch = FetchType.LAZY)

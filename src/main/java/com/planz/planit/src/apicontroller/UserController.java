@@ -384,9 +384,12 @@ public class UserController {
 
     //유저 검색 - 은지 추가
     //닉네임 혹은 이메일을 완전하게 입력해야한다.
-    @PatchMapping("/api/users")
+    @GetMapping("/api/users")
     @ApiOperation("닉네임, 이메일로 유저 검색")
     public BaseResponse<SearchUserResDTO> searchUsers(@RequestParam("keyword") String keyword) {
+        if(keyword == null || keyword.isEmpty()){
+            return new BaseResponse<>(NOT_EXIST_KEYWORD);
+        }
         try {
             SearchUserResDTO searchUserResDTO = userService.searchUsers(keyword);
             return new BaseResponse<>(searchUserResDTO);
@@ -427,4 +430,5 @@ public class UserController {
             return new BaseResponse<>(e.getStatus());
         }
     }
+
 }
