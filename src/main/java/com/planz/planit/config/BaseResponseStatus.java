@@ -157,9 +157,13 @@ public enum BaseResponseStatus {
 
 
     // 설정 관련 BaseResponseStatus
-    INVALID_MISSION_STATUS(false, 6200, "유효하지 않은 status (path variable) 값 입니다. 0 (운영자 미션 안받기) 또는 1 (운영자 미션 받기)을 입력해주세요.")
-    ;
+    INVALID_MISSION_STATUS(false, 6200, "유효하지 않은 status (path variable) 값 입니다. 0 (운영자 미션 안받기) 또는 1 (운영자 미션 받기)을 입력해주세요."),
 
+
+    // 공지사항 관련 BaseResponseStatus
+    NOT_EXIST_NOTICE_TITLE(false, 6300, "공지사항 title 을 입력해주세요."),
+    NOT_EXIST_NOTICE_CONTENT(false, 6301, "공지사항 content 를 입력해주세요.")
+    ;
 
     private final boolean isSuccess;
     private final int code;

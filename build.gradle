@@ -58,6 +58,10 @@ dependencies {
 
 	//okhttp
 	implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.1'
+
+	// deserialize
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 tasks.named('test') {
