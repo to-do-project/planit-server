@@ -27,19 +27,30 @@ public class NoticeService {
     }
 
 
+    /**
+     * 공지사항 생성 API (ROLE_ADMIN 권한을 가진 사용자만 이용 가능)
+     * 1. Notice 엔티티 생성
+     * 2. Notice 엔티티 저장
+     */
     public void createNotice(String title, String content) throws BaseException {
 
         try {
+            // 1. Notice 엔티티 생성
             Notice notice = Notice.builder()
                     .title(title)
                     .content(content)
                     .build();
+
+            // 2. Notice 엔티티 저장
             saveNotice(notice);
         } catch (BaseException e) {
             throw e;
         }
     }
 
+    /**
+     * Notice 저장 혹은 업데이트
+     */
     public void saveNotice(Notice noticeEntity) throws BaseException {
         try {
             noticeRepository.save(noticeEntity);
@@ -50,10 +61,17 @@ public class NoticeService {
         }
     }
 
+    /**
+     * 공지사항 조회 API
+     * 1. 모든 공지사항 리스트를 생성일의 내림차순으로 정렬하여 조회하기
+     * 2. 결과 반환
+     */
     public GetNoticesResDTO getNotices() throws BaseException {
         try {
+            // 1. 모든 공지사항 리스트를 생성일의 내림차순으로 정렬하여 조회하기
             List<Notice> result = findAllNoticesOrderByCreateAt();
 
+            // 2. 결과 반환
             List<GetNoticesResDTO.NoticeDTO> noticeList = result.stream().map(notice ->
                     GetNoticesResDTO.NoticeDTO.builder()
                             .noticeId(notice.getNoticeId())
@@ -62,8 +80,6 @@ public class NoticeService {
                             .createAt(notice.getCreateAt())
                             .build()
             ).collect(Collectors.toList());
-
-            log.info("여기까지 문제없나? " + noticeList.get(0).getCreateAt());
 
             return GetNoticesResDTO.builder()
                     .totalNoticeCnt(noticeList.size())
@@ -74,6 +90,9 @@ public class NoticeService {
         }
     }
 
+    /**
+     * DB에서 생성일의 내림차순으로 정렬하여, 모든 공지사항 리스트 조회해오기
+     */
     public List<Notice> findAllNoticesOrderByCreateAt() throws BaseException {
         try {
             // 자바 클래스의 필드명 입력

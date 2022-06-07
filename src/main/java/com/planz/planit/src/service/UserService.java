@@ -91,7 +91,7 @@ public class UserService {
      * 4. DeviceToken 테이블 insert
      * 5. Planet 테이블 insert
      * 6-1. Inventory 테이블에 기본 행성 아이템(집, 포탈) insert
-     * 6-2. 포탈 : (-3.82, 4.8), 집 : (3.73, 5.2) 배치
+     * 6-2. 포탈 : (-3.82, 3.8), 집 : (3.73, 3.29) 배치
      * 7. Closet 테이블에 기본 캐릭터 아이템(기본 옷) insert
      * 8. access token, refresh token 생성해서 헤더에 담기
      */
@@ -141,7 +141,7 @@ public class UserService {
 
 
             /// 6-1. Inventory 테이블에 기본 행성 아이템(집, 포탈) insert
-            // 6-2. 포탈 : (-3.82, 4.8), 집 : (3.73, 5.2) 배치
+            // 6-2. 포탈 : (-3.82, 3.8), 집 : (3.73, 3.29) 배치
             Item basicHouse = itemService.findItemByItemId(BasicItem.HOUSE_01.getItemId());
             Inventory basicHouseInventory = Inventory.builder()
                     .user(userEntity)
@@ -152,7 +152,7 @@ public class UserService {
             basicHouseInventory.getItemPlacement().add(
                     Position.builder()
                             .posX(3.73f)
-                            .posY(5.2f)
+                            .posY(3.29f)
                             .build());
             inventoryService.saveInventory(basicHouseInventory);
 
@@ -167,7 +167,7 @@ public class UserService {
             basicPortalInventory.getItemPlacement().add(
                     Position.builder()
                             .posX(-3.82f)
-                            .posY(4.8f)
+                            .posY(3.8f)
                             .build());
             inventoryService.saveInventory(basicPortalInventory);
 

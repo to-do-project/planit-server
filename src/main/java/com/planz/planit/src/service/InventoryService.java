@@ -39,34 +39,58 @@ public class InventoryService {
 
     /**
      * 카테고리 별로 인벤토리에서 보유 중인 행성 아이템 목록을 반환한다.
-     * => List(itemId, totalCount, placedCount, remainingCount) 반환
-     * 1. userId와 category로 보유중인 Inventory 리스트 조회
-     * 2. 결과 반환
+     * => totalInventoryItemCount, List(itemId, totalCount, placedCount, remainingCount) 반환
+     * 1. 인벡토리에 존재하는 전체 아이템 개수 구하기 (기본 아이템 제외)
+     * 2. userId와 category로 보유중인 Inventory 리스트 조회
+     * 3. 결과 리펙토링
      */
-    public List<GetInventoryResDTO> getInventoryByCategory(Long userId, String category) throws BaseException {
+    public GetInventoryResDTO getInventoryByCategory(Long userId, String category) throws BaseException {
         try {
-            List<GetInventoryResDTO> result = new ArrayList<>();
 
-            // 1. userId와 category로 보유중인 Inventory 리스트 조회
-            List<Inventory> inventoryList = findInventoryItemsByCategory(userId, ItemCategory.valueOf(category));
+            // 1. 인벡토리에 존재하는 전체 아이템 개수 구하기 (기본 아이템 제외)
+            int totalInventoryItemCount = countTotalInventoriesExcludeCategory(userId, ItemCategory.basic_architecture);
 
-            // 2. 결과 반환
-            for (Inventory inventory : inventoryList) {
+            // 2. userId와 category로 보유중인 Inventory 리스트 조회
+            List<Inventory> result = findInventoryItemsByCategory(userId, ItemCategory.valueOf(category));
 
-                int totalCount = inventory.getCount();
+            // 3. 결과 리팩토링
+            List<GetInventoryResDTO.InventoryDTO> inventoryList = new ArrayList<>();
+            for (Inventory inventory : result) {
+
+                int totalCount = inventory.getPlanetItem().getMaxCnt();
                 int placedCount = inventory.getItemPlacement().size();
+                int remainingCount = inventory.getCount();
 
-                result.add(GetInventoryResDTO.builder()
+                inventoryList.add(
+                        GetInventoryResDTO.InventoryDTO.builder()
                         .itemCode(inventory.getPlanetItem().getCode())
                         .totalCount(totalCount)
                         .placedCount(placedCount)
-                        .remainingCount(totalCount - placedCount)
+                        .remainingCount(remainingCount)
                         .build());
             }
 
-            return result;
+            return GetInventoryResDTO.builder()
+                    .totalInventoryItemCount(totalInventoryItemCount)
+                    .inventoryList(inventoryList)
+                    .build();
+
         } catch (BaseException e) {
             throw e;
+        }
+    }
+
+    /**
+     * 특정 카테고리를 제외한 인벡토리 전체 아이템 개수 구하기
+     */
+    public Integer countTotalInventoriesExcludeCategory(Long userId, ItemCategory category) throws BaseException{
+        try{
+            return inventoryRepository.countTotalInventoriesExcludeCategory(userId, category);
+        }
+        catch (Exception e){
+            log.error("countTotalInventoriesExcludeCategory() : inventoryRepository.countTotalInventoriesExcludeCategory(userId, category) 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
+            throw new BaseException(DATABASE_ERROR);
         }
     }
 

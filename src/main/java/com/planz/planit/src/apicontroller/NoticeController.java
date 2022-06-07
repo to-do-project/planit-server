@@ -52,7 +52,7 @@ public class NoticeController {
     /**
      * 모든 공지사항을 조회한다.
      * @RequestHeader User-Id, Jwt-Access-Token
-     * @return
+     * @return totalNoticeCnt, List(noticeId, title, content, createAt)
      */
     @GetMapping("/api/notices")
     @ApiOperation(value = "공지사항 조회 API")
