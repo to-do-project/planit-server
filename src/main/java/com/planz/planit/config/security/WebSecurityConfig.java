@@ -59,7 +59,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtTokenService, userRepository, httpResponseService))
 
                 .authorizeRequests()    // 요청에 대한 사용권한 체크
-                .antMatchers("/api/**").access("hasRole('ROLE_USER')")
+                .antMatchers("/api/**").access("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+                .antMatchers("/admin/api/notices/new-notice").access("hasRole('ROLE_ADMIN')")
                 .anyRequest().permitAll();
     }
 }

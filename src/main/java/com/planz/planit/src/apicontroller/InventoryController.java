@@ -38,11 +38,11 @@ public class InventoryController {
      * 카테고리 별로 인벤토리에서 보유 중인 행성 아이템 목록을 반환한다.
      * @RequestHeader User-Id, Jwt-Access-Token
      * @PathVariable category
-     * @return List(itemId, totalCount, placedCount, remainingCount)
+     * @return totalInventoryItemCount, List(itemId, totalCount, placedCount, remainingCount)
      */
     @GetMapping("/planet-items/{category}")
     @ApiOperation(value = "보유한 행성 아이템 목록 조회 API")
-    public BaseResponse<List<GetInventoryResDTO>> getInventoryByCategory(HttpServletRequest request, @PathVariable String category) {
+    public BaseResponse<GetInventoryResDTO> getInventoryByCategory(HttpServletRequest request, @PathVariable String category) {
 
         // 형식적 validation
         if (!ValidationRegex.isRegexInventoryCategory(category)) {
@@ -52,8 +52,7 @@ public class InventoryController {
         String userId = request.getHeader(USER_ID_HEADER_NAME);
 
         try {
-            List<GetInventoryResDTO> result = inventoryService.getInventoryByCategory(Long.valueOf(userId), category);
-            return new BaseResponse<>(result);
+            return new BaseResponse<>(inventoryService.getInventoryByCategory(Long.valueOf(userId), category));
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
