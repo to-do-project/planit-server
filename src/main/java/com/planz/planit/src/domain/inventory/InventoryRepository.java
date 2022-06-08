@@ -15,7 +15,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     @Query("select i from Inventory i where i.user.userId = :userId and i.planetItem.category = :category")
     List<Inventory> findInventoryItemsByCategory(@Param("userId") Long userId, @Param("category") ItemCategory category);
 
-    @Query("select sum(i.count) from Inventory i where i.user.userId = :userId and i.planetItem.category <> :category ")
+    @Query("select coalesce(sum(i.count), 0) from Inventory i where i.user.userId = :userId and i.planetItem.category <> :category ")
     Integer countTotalInventoriesExcludeCategory(@Param("userId") Long userId, @Param("category") ItemCategory category);
 
     Optional<Inventory> findByUserAndPlanetItem(User user, Item planetItem);
