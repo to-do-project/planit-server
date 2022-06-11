@@ -60,16 +60,16 @@ public class FriendService {
     //유저의 친구목록 조회
     public GetFriendListResDTO getFriends(Long userId) throws BaseException {
         try {
-            //WAIT, FRIEND 상태인 친구만 불러오도록 함
-            List<Friend> byFromUserId = friendRepository.findByFromUser(userId);
+            //WAIT, FRIEND 상태인 친구만 불러오도록 함 => WAIT 조건을 아예 걸어버리기
+            List<Friend> byFromUserId = friendRepository.findFriendByFromUser(userId);
             List<Friend> byToUserId = friendRepository.findByToUser(userId);
             //데이터 정제하기 (상대방만 출력되게)
             List<GetFriendResDTO> result = new ArrayList<>();
             for (Friend friend : byToUserId) {
-                result.add(new GetFriendResDTO(friend.getFromUser().getUserId(),friend.getFromUser().getNickname(),friend.getFromUser().getProfileColor().toString(),friend.getFriendStatus()==WAIT?true:false));
+                result.add(new GetFriendResDTO(friend.getFriendId(), friend.getFromUser().getUserId(),friend.getFromUser().getNickname(),friend.getFromUser().getProfileColor().toString(),friend.getFriendStatus()==WAIT?true:false));
             }
             for (Friend friend : byFromUserId) {
-                result.add(new GetFriendResDTO(friend.getToUser().getUserId(),friend.getToUser().getNickname(),friend.getToUser().getProfileColor().toString(),friend.getFriendStatus()==WAIT?true:false));
+                result.add(new GetFriendResDTO(friend.getFriendId(),friend.getToUser().getUserId(),friend.getToUser().getNickname(),friend.getToUser().getProfileColor().toString(),friend.getFriendStatus()==WAIT?true:false));
             }
             List<GetFriendResDTO> wait = result.stream().filter(m -> m.isWaitFlag()==true).collect(Collectors.toList());
             List<GetFriendResDTO> friends = result.stream().filter(m -> m.isWaitFlag()==false).collect(Collectors.toList());

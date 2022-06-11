@@ -13,6 +13,8 @@ public interface FriendRepository extends JpaRepository<Friend,Long> {
 
     @Query(value = "select f from Friend f where f.fromUser.userId = :userId and f.friendStatus <> 'DELETE'")
     public List<Friend> findByFromUser(Long userId);
+    @Query(value="select f from Friend  f where f.fromUser.userId = :userId and f.friendStatus = 'FRIEND'")
+    public List<Friend> findFriendByFromUser(Long userId);
     @Query(value = "select f from Friend f where f.toUser.userId = :userId and f.friendStatus <> 'DELETE'")
     public List<Friend> findByToUser(Long userId);
 
