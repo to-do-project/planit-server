@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetFriendResDTO {
+    private Long friendId;
     private Long userId;
     private String nickName;
     private String profileColor;
