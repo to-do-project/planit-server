@@ -17,5 +17,6 @@ public class GetGoalMemberDetailDTO {
     private Long goalMemberId;
     private String nickname;
     private int percentage;
+    private boolean managerFlag;
     private List<GetTodoMemberDTO> getTodoMembers = new ArrayList<>();
 }

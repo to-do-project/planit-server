@@ -6,7 +6,9 @@ import com.planz.planit.config.BaseResponse;
 import com.planz.planit.config.BaseResponseStatus;
 import com.planz.planit.src.domain.goal.dto.CreateGoalReqDTO;
 import com.planz.planit.src.domain.goal.dto.GetGoalDetailResDTO;
+import com.planz.planit.src.domain.goal.dto.GetGoalMainInfoResDTO;
 import com.planz.planit.src.domain.goal.dto.ModifyGoalReqDTO;
+import com.planz.planit.src.domain.user.User;
 import com.planz.planit.src.domain.user.dto.GoalSearchUserResDTO;
 import com.planz.planit.src.service.GoalService;
 import io.swagger.annotations.ApiOperation;
@@ -16,6 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import java.util.List;
+
+import static com.planz.planit.config.BaseResponseStatus.NOT_FRIEND_RELATION;
 
 
 @RestController
@@ -113,6 +119,20 @@ public class GoalController {
             return new BaseResponse<>(resDTO);
 
         }catch(BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    @GetMapping("/goals/main/{targetUserId}")
+    @ApiOperation("메인화면 조회 API - 투두")
+    public BaseResponse<List<GetGoalMainInfoResDTO>> getGoalMainInfo(HttpServletRequest request, @PathVariable("targetUserId") Long targetUserId){
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
+        try{
+            if(userId!=targetUserId){
+                return new BaseResponse<>(goalService.getFriendGoalMainInfo(userId,targetUserId));
+            }
+            return new BaseResponse<>(goalService.getGoalMainInfo(targetUserId)); //나 자신일 때
+        }catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
     }

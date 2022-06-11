@@ -15,8 +15,7 @@ import java.util.List;
 public class GetTodoMemberDTO {
     private Long todoMemberId;
     private String todoTitle;
-    private String completeFlag;
+    private boolean completeFlag;
     private int likeCount;
-    private List<LikeUserResDTO> likeUsers= new ArrayList<>();
     private boolean likeFlag;//내가 좋아요를 눌렀는지 확인
 }

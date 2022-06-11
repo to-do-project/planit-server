@@ -11,5 +11,5 @@ public class GetFriendResDTO {
     private Long userId;
     private String nickName;
     private String profileColor;
-    private String friendStatus;
+    private boolean waitFlag;
 }

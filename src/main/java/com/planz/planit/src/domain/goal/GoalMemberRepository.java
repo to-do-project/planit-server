@@ -34,4 +34,7 @@ public interface GoalMemberRepository extends JpaRepository<GoalMember,Long> {
 
     @Query("select count(gm.goalMemberId) from GoalMember gm where gm.goal.goalId is :goalId and gm.member.userId is :userId")
     int checkGoalMember(@Param("goalId") Long goalId, @Param("userId") Long userId);
+
+    @Query("select gm from GoalMember gm where gm.member.userId is :userId")
+    List<GoalMember> findGoalMembersByMember(@Param("userId") Long userId);
 }

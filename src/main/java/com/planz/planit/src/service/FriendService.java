@@ -6,6 +6,7 @@ import com.planz.planit.src.domain.friend.Friend;
 import com.planz.planit.src.domain.friend.FriendRepository;
 import com.planz.planit.src.domain.friend.FriendStatus;
 import com.planz.planit.src.domain.friend.dto.AcceptReqDTO;
+import com.planz.planit.src.domain.friend.dto.GetFriendListResDTO;
 import com.planz.planit.src.domain.friend.dto.GetFriendResDTO;
 import com.planz.planit.src.domain.user.User;
 import com.planz.planit.src.domain.user.UserRepository;
@@ -15,8 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
+import static com.planz.planit.src.domain.friend.FriendStatus.WAIT;
 
 @Slf4j
 @Service
@@ -55,7 +58,7 @@ public class FriendService {
     }
 
     //유저의 친구목록 조회
-    public List<GetFriendResDTO> getFriends(Long userId) throws BaseException {
+    public GetFriendListResDTO getFriends(Long userId) throws BaseException {
         try {
             //WAIT, FRIEND 상태인 친구만 불러오도록 함
             List<Friend> byFromUserId = friendRepository.findByFromUser(userId);
@@ -63,12 +66,15 @@ public class FriendService {
             //데이터 정제하기 (상대방만 출력되게)
             List<GetFriendResDTO> result = new ArrayList<>();
             for (Friend friend : byToUserId) {
-                result.add(new GetFriendResDTO(friend.getFromUser().getUserId(),friend.getFromUser().getNickname(),friend.getFromUser().getProfileColor().toString(),friend.getFriendStatus().toString()));
+                result.add(new GetFriendResDTO(friend.getFromUser().getUserId(),friend.getFromUser().getNickname(),friend.getFromUser().getProfileColor().toString(),friend.getFriendStatus()==WAIT?true:false));
             }
             for (Friend friend : byFromUserId) {
-                result.add(new GetFriendResDTO(friend.getToUser().getUserId(),friend.getToUser().getNickname(),friend.getToUser().getProfileColor().toString(),friend.getFriendStatus().toString()));
+                result.add(new GetFriendResDTO(friend.getToUser().getUserId(),friend.getToUser().getNickname(),friend.getToUser().getProfileColor().toString(),friend.getFriendStatus()==WAIT?true:false));
             }
-            return result;
+            List<GetFriendResDTO> wait = result.stream().filter(m -> m.isWaitFlag()==true).collect(Collectors.toList());
+            List<GetFriendResDTO> friends = result.stream().filter(m -> m.isWaitFlag()==false).collect(Collectors.toList());
+            GetFriendListResDTO getFriendListResDTO = new GetFriendListResDTO(wait, friends);
+            return getFriendListResDTO;
         }catch(Exception e){
             throw new BaseException(DATABASE_ERROR);
         }

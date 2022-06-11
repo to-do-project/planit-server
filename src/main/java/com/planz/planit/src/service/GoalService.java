@@ -1,11 +1,10 @@
 package com.planz.planit.src.service;
 
 import com.planz.planit.config.BaseException;
+import com.planz.planit.config.BaseResponse;
 import com.planz.planit.src.domain.goal.*;
-import com.planz.planit.src.domain.goal.dto.GetGoalDetailResDTO;
-import com.planz.planit.src.domain.goal.dto.GetGoalMemberDetailDTO;
-import com.planz.planit.src.domain.goal.dto.ModifyGoalReqDTO;
-import com.planz.planit.src.domain.goal.dto.CreateGoalReqDTO;
+import com.planz.planit.src.domain.goal.dto.*;
+import com.planz.planit.src.domain.todo.CompleteFlag;
 import com.planz.planit.src.domain.todo.TodoMember;
 import com.planz.planit.src.domain.todo.TodoMemberLike;
 import com.planz.planit.src.domain.todo.dto.GetTodoMemberDTO;
@@ -22,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
+import static com.planz.planit.src.domain.goal.GoalMemberRole.MANAGER;
 import static com.planz.planit.src.domain.goal.GoalMemberRole.MEMBER;
 import static com.planz.planit.src.domain.goal.GroupStatus.ACCEPT;
 import static com.planz.planit.src.domain.goal.GroupStatus.WAIT;
@@ -227,9 +227,15 @@ public class GoalService {
         //DTO에 값 넣기 (goalId, title)
         getGoalDetailResDTO.setGoalId(goal.getGoalId());
         getGoalDetailResDTO.setGoalTitle(goal.getTitle());
-        getGoalDetailResDTO.setOpenFlag(goal.getOpenFlag().toString());
-        //goalMemberList
-        List<GoalMember> goalMembers = getGoalMembers(goalId);
+        if(goal.getOpenFlag()==OpenCategory.PUBLIC){
+            getGoalDetailResDTO.setOpenFlag(true);
+        }else{
+            getGoalDetailResDTO.setOpenFlag(false);
+        }
+        //goalMemberList (accept 멤버만)
+        List<GoalMember> goalMembers = getGoalMembers(goalId)
+                .stream().filter(m->m.getStatus()==ACCEPT)
+                .collect(Collectors.toList());
 
         //goalMember DTO 리스트
         List<GetGoalMemberDetailDTO> goalMemberDetails = new ArrayList<>();
@@ -237,6 +243,7 @@ public class GoalService {
             GetGoalMemberDetailDTO getGoalMemberDetailDTO = new GetGoalMemberDetailDTO();
             getGoalMemberDetailDTO.setGoalMemberId(goalMember.getGoalMemberId());
             getGoalMemberDetailDTO.setNickname(goalMember.getMember().getNickname());
+            getGoalMemberDetailDTO.setManagerFlag(goalMember.getMemberRole().toString().equals("MANAGER")?true:false);
 
             //투두 멤버 리스트 가져오기 (오늘치만)
             List<TodoMember> todoMembers = goalMember.getTodoMembers().stream().filter(m->m.getUpdateAt().toLocalDate().equals(LocalDate.now())).collect(Collectors.toList());
@@ -246,16 +253,10 @@ public class GoalService {
                 GetTodoMemberDTO getTodoMemberDTO = new GetTodoMemberDTO();
                 getTodoMemberDTO.setTodoMemberId(todoMember.getTodoMemberId());
                 getTodoMemberDTO.setTodoTitle(todoMember.getTodo().getTitle());
-                getTodoMemberDTO.setCompleteFlag(todoMember.getCompleteFlag().toString());
+                getTodoMemberDTO.setCompleteFlag(todoMember.getCompleteFlag().toString().equals("COMPLETE")?true:false);
 
                 List<User> todoMemberLikes = todoMember.getTodoMemberLikes().stream().map(TodoMemberLike::getUser).collect(Collectors.toList());
                 getTodoMemberDTO.setLikeCount(todoMemberLikes.size()); //좋아요 개수
-                List<LikeUserResDTO> likeUserResDTOS = new ArrayList<>();
-                for (User todoMemberLike : todoMemberLikes) {
-                    likeUserResDTOS.add(new LikeUserResDTO(todoMemberLike.getUserId(),todoMemberLike.getNickname(),todoMemberLike.getProfileColor().toString()));
-                }
-                getTodoMemberDTO.setLikeUsers(likeUserResDTOS); // 좋아요한 리스트
-
                 //내가 체크했는지 확인
                 if(todoMemberLikes.stream().filter(m->m.getUserId().equals(userId)).count()!=0){
                     getTodoMemberDTO.setLikeFlag(true);
@@ -269,5 +270,103 @@ public class GoalService {
         }
         getGoalDetailResDTO.setGoalMemberDetails(goalMemberDetails);
         return getGoalDetailResDTO;
+    }
+
+
+    //내 목표 조회
+    public List<GetGoalMainInfoResDTO> getGoalMainInfo(Long targetUserId) throws BaseException {
+
+        //목표 조회
+        List<GoalMember> targetGoalMembers = goalMemberRepository.findGoalMembersByMember(targetUserId)
+                .stream().filter(m->m.getStatus()==ACCEPT)
+                .collect(Collectors.toList());
+        //없으면 리턴
+        if(targetGoalMembers.isEmpty() || targetGoalMembers==null){
+            return new ArrayList<>();
+        }
+        List<GetGoalMainInfoResDTO> goalMainInfoResList = new ArrayList<>();
+        for (GoalMember targetGoalMember : targetGoalMembers) {
+            //todoMember 조회 (오늘자 것만)
+            List<TodoMember> todoMembers = targetGoalMember.getTodoMembers()
+                    .stream().filter(m->m.getUpdateAt().toLocalDate().equals(LocalDate.now()))
+                    .collect(Collectors.toList());
+            List<GetTodoMainResDTO> todoMainResList = new ArrayList<>();
+            boolean likeFlag = targetGoalMember.getGoal().getOpenFlag().toString().equals("PUBLIC")?true:false;
+            for (TodoMember todoMember : todoMembers) {
+                boolean completeFlag = todoMember.getCompleteFlag() == CompleteFlag.COMPLETE ? true : false;
+                todoMainResList.add(
+                        new GetTodoMainResDTO(
+                                todoMember.getTodoMemberId(),
+                                todoMember.getTodo().getTitle(),
+                                completeFlag,
+                                todoMember.getTodoMemberLikes().size(),
+                                likeFlag
+                        ));
+            }
+            boolean groupFlag = targetGoalMember.getGoal().getGroupFlag()==GroupCategory.GROUP?true:false;
+            boolean managerFlag = targetGoalMember.getMemberRole() == MANAGER ? true : false;
+            goalMainInfoResList.add(new GetGoalMainInfoResDTO(
+                    targetGoalMember.getGoal().getGoalId(),
+                    targetGoalMember.getGoal().getTitle(),
+                    groupFlag,
+                    0,
+                    managerFlag,
+                    todoMainResList
+            ));
+        }
+        return goalMainInfoResList;
+    }
+
+    //친구 목표 조회
+    public List<GetGoalMainInfoResDTO> getFriendGoalMainInfo(Long userId,Long targetUserId) throws BaseException {
+        //1. target!=user면 친구인지 확인
+        if (userId != targetUserId) {
+            User myUser = userService.findUser(userId);
+            User targetUser = userService.findUser(targetUserId);
+            if (friendService.isFriend(myUser, targetUser) == false) {
+                throw new BaseException(NOT_FRIEND_RELATION);
+            }
+        }
+
+        //비공개 제외
+        //목표 조회
+        List<GoalMember> targetGoalMembers = goalMemberRepository.findGoalMembersByMember(targetUserId)
+                .stream().filter(m->m.getGoal().getOpenFlag()==OpenCategory.PUBLIC)
+                .collect(Collectors.toList());
+        //없으면 리턴
+        if(targetGoalMembers.isEmpty() || targetGoalMembers==null){
+            return null;
+        }
+        List<GetGoalMainInfoResDTO> goalMainInfoResList = new ArrayList<>();
+        for (GoalMember targetGoalMember : targetGoalMembers) {
+            //todoMember 조회
+            List<TodoMember> todoMembers = targetGoalMember.getTodoMembers()
+                    .stream().filter(m->m.getUpdateAt().toLocalDate().equals(LocalDate.now()))
+                    .collect(Collectors.toList());
+            List<GetTodoMainResDTO> todoMainResList = new ArrayList<>();
+            boolean likeFlag = targetGoalMember.getGoal().getOpenFlag().toString().equals("PUBLIC")?true:false;
+            for (TodoMember todoMember : todoMembers) {
+                boolean completeFlag = todoMember.getCompleteFlag() == CompleteFlag.COMPLETE ? true : false;
+                todoMainResList.add(
+                new GetTodoMainResDTO(
+                                todoMember.getTodoMemberId(),
+                                todoMember.getTodo().getTitle(),
+                                completeFlag,
+                                todoMember.getTodoMemberLikes().size(),
+                                likeFlag
+                        ));
+            }
+            boolean groupFlag = targetGoalMember.getGoal().getGroupFlag()==GroupCategory.GROUP?true:false;
+            boolean managerFlag = targetGoalMember.getMemberRole() == MANAGER ? true : false;
+            goalMainInfoResList.add(new GetGoalMainInfoResDTO(
+                    targetGoalMember.getGoal().getGoalId(),
+                    targetGoalMember.getGoal().getTitle(),
+                    groupFlag,
+                    0,
+                    managerFlag,
+                    todoMainResList
+            ));
+        }
+        return goalMainInfoResList;
     }
 }
