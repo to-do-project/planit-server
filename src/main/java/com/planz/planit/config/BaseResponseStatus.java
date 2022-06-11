@@ -162,8 +162,14 @@ public enum BaseResponseStatus {
 
     // 공지사항 관련 BaseResponseStatus
     NOT_EXIST_NOTICE_TITLE(false, 6300, "공지사항 title 을 입력해주세요."),
-    NOT_EXIST_NOTICE_CONTENT(false, 6301, "공지사항 content 를 입력해주세요.")
+    NOT_EXIST_NOTICE_CONTENT(false, 6301, "공지사항 content 를 입력해주세요."),
+
+    // 알림 관련 BaseResponseStatus
+    INVALID_USER_ID_NOTIFICATION_ID(false, 6400, "유효하지 않은 notificationId, userId 조합입니다. 해당 사용자는 해당 알림을 받지 않았습니다."),
+    INVALID_USER_ID_GOAL_ID(false, 6401, "유효하지 않은 userId, goalId 조합입니다. 해당 사용자는 해당 목표를 가지고 있지 않습니다.")
     ;
+
+
 
     private final boolean isSuccess;
     private final int code;
