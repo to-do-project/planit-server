@@ -1,21 +1,20 @@
 package com.planz.planit.src.domain.goal.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@NoArgsConstructor
+@Getter @Setter
 @AllArgsConstructor
-@Getter
-@Setter
-public class GetGoalDetailResDTO {
+public class GetGoalMainInfoResDTO {
     private Long goalId;
     private String goalTitle;
-    private int goalPercentage;
-    private boolean openFlag;
-    private List<GetGoalMemberDetailDTO> goalMemberDetails = new ArrayList<>();
+    private boolean groupFlag;
+    private int percentage;
+    private boolean managerFlag;
+    private List<GetTodoMainResDTO> getTodoMainResList;
 }

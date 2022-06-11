@@ -9,6 +9,5 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class CheckTodoResDTO {
-    private boolean levelUpFlag;
-    //레벨 정보?
+    private int percentage;
 }

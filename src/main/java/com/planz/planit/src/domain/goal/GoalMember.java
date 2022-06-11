@@ -41,7 +41,6 @@ public class GoalMember {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private GroupStatus status; //매니저의 경우 무조건 accept, 다른 멤버는 wait 상태
-
     @Enumerated(EnumType.STRING)
     @Column(name="member_role", nullable=false)
     private GoalMemberRole memberRole;

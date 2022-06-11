@@ -5,6 +5,7 @@ import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponse;
 import com.planz.planit.src.domain.friend.Friend;
 import com.planz.planit.src.domain.friend.dto.AcceptReqDTO;
+import com.planz.planit.src.domain.friend.dto.GetFriendListResDTO;
 import com.planz.planit.src.domain.friend.dto.GetFriendResDTO;
 import com.planz.planit.src.service.FriendService;
 import io.swagger.annotations.ApiOperation;
@@ -61,10 +62,10 @@ public class FriendController {
      */
     @GetMapping("/friends")
     @ApiOperation("친구 목록 조회 api")
-    public BaseResponse<List<GetFriendResDTO>> getFriends(HttpServletRequest request) throws BaseException{
+    public BaseResponse<GetFriendListResDTO> getFriends(HttpServletRequest request) throws BaseException{
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try {
-            List<GetFriendResDTO> friends = friendService.getFriends(userId);
+            GetFriendListResDTO friends = friendService.getFriends(userId);
             return new BaseResponse<>(friends);
         }catch(BaseException e){
             return new BaseResponse<>(e.getStatus());
