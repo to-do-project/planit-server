@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -24,4 +25,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("delete from User u where u.userId is :userId")
     void deleteByUserIdInQuery(@Param("userId") Long userId);
 
+    @Override
+    List<User> findAll();
 }

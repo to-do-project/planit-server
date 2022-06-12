@@ -650,4 +650,18 @@ public class UserService {
             throw e;
         }
     }
+
+    /**
+     * 모든 유저 검색
+     */
+    public List<User> findAllUser() throws BaseException {
+        try{
+            return userRepository.findAll();
+        }
+        catch (Exception e){
+            log.error("findAllUser() : userRepository.findAll() 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }
