@@ -166,7 +166,8 @@ public enum BaseResponseStatus {
 
     // 알림 관련 BaseResponseStatus
     INVALID_USER_ID_NOTIFICATION_ID(false, 6400, "유효하지 않은 notificationId, userId 조합입니다. 해당 사용자는 해당 알림을 받지 않았습니다."),
-    INVALID_USER_ID_GOAL_ID(false, 6401, "유효하지 않은 userId, goalId 조합입니다. 해당 사용자는 해당 목표를 가지고 있지 않습니다.")
+    INVALID_USER_ID_GOAL_ID(false, 6401, "유효하지 않은 userId, goalId 조합입니다. 해당 사용자는 해당 목표를 가지고 있지 않습니다."),
+    INVALID_USER_ID_FRIEND_ID(false, 6402, "유효하지 않은 userId, friendId 조합입니다. 해당 사용자는 해당 친구 요청을 받지 않았습니다.")
     ;
 
 

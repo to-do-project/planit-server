@@ -5,6 +5,8 @@ import com.planz.planit.config.BaseResponseStatus;
 import com.planz.planit.src.domain.notice.Notice;
 import com.planz.planit.src.domain.notice.NoticeRepository;
 import com.planz.planit.src.domain.notice.dto.GetNoticesResDTO;
+import com.planz.planit.src.domain.notification.NotificationSmallCategory;
+import com.planz.planit.src.domain.user.User;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -20,10 +22,14 @@ import static com.planz.planit.config.BaseResponseStatus.DATABASE_ERROR;
 public class NoticeService {
 
     private final NoticeRepository noticeRepository;
+    private final NotificationService notificationService;
+    private final UserService userService;
 
     @Autowired
-    public NoticeService(NoticeRepository noticeRepository) {
+    public NoticeService(NoticeRepository noticeRepository, NotificationService notificationService, UserService userService) {
         this.noticeRepository = noticeRepository;
+        this.notificationService = notificationService;
+        this.userService = userService;
     }
 
 
@@ -31,6 +37,7 @@ public class NoticeService {
      * 공지사항 생성 API (ROLE_ADMIN 권한을 가진 사용자만 이용 가능)
      * 1. Notice 엔티티 생성
      * 2. Notice 엔티티 저장
+     * 3. 공지사항 알림 생성
      */
     public void createNotice(String title, String content) throws BaseException {
 
@@ -43,6 +50,12 @@ public class NoticeService {
 
             // 2. Notice 엔티티 저장
             saveNotice(notice);
+
+            // 3. 공지사항 알림 생성
+            List<User> allUser = userService.findAllUser();
+            for (User user : allUser) {
+                notificationService.createNotification(user, NotificationSmallCategory.NOTICE_TWO, "[공지] " + notice.getTitle(), null);
+            }
         } catch (BaseException e) {
             throw e;
         }
