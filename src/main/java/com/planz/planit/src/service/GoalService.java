@@ -163,7 +163,6 @@ public class GoalService {
         }catch(Exception e){
             throw new BaseException(FAILED_TO_ACCEPT_GOAL);
         }
-
     }
 
     /**
