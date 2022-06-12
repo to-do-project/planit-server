@@ -1,14 +1,12 @@
 package com.planz.planit.src.service;
 
 import com.planz.planit.config.BaseException;
-import com.planz.planit.config.BaseResponse;
 import com.planz.planit.src.domain.goal.*;
 import com.planz.planit.src.domain.goal.dto.*;
 import com.planz.planit.src.domain.todo.CompleteFlag;
 import com.planz.planit.src.domain.todo.TodoMember;
 import com.planz.planit.src.domain.todo.TodoMemberLike;
 import com.planz.planit.src.domain.todo.dto.GetTodoMemberDTO;
-import com.planz.planit.src.domain.todo.dto.LikeUserResDTO;
 import com.planz.planit.src.domain.user.User;
 import com.planz.planit.src.domain.user.dto.GoalSearchUserResDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -31,12 +29,14 @@ import static com.planz.planit.src.domain.goal.GroupStatus.WAIT;
 public class GoalService {
     private final UserService userService;
     private final FriendService friendService;
+    private final NotificationService notificationService;
     private final GoalRepository goalRepository;
     private final GoalMemberRepository goalMemberRepository;
 
-    public GoalService(UserService userService, FriendService friendService, GoalRepository goalRepository, GoalMemberRepository goalMemberRepository) {
+    public GoalService(UserService userService, FriendService friendService, NotificationService notificationService, GoalRepository goalRepository, GoalMemberRepository goalMemberRepository) {
         this.userService = userService;
         this.friendService = friendService;
+        this.notificationService = notificationService;
         this.goalRepository = goalRepository;
         this.goalMemberRepository = goalMemberRepository;
     }
@@ -157,6 +157,9 @@ public class GoalService {
             }else{
                 goalMemberRepository.delete(findGoalMember);
             }
+
+            //알림 처리
+            notificationService.confirmGroupReqNotification(userId, goalId);
         }catch(Exception e){
             throw new BaseException(FAILED_TO_ACCEPT_GOAL);
         }
