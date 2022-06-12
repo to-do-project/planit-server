@@ -1,6 +1,7 @@
 package com.planz.planit.src.service;
 
 import com.planz.planit.config.BaseException;
+import com.planz.planit.src.domain.friend.Friend;
 import com.planz.planit.src.domain.goal.Goal;
 import com.planz.planit.src.domain.notification.*;
 import com.planz.planit.src.domain.notification.dto.GetNotificationsResDTO;
@@ -31,15 +32,29 @@ public class NotificationService {
     /**
      * 알림 생성 함수
      */
-    public void createNotification(User user, NotificationSmallCategory category, String content, Goal goal) throws BaseException {
+    public void createNotification(User user, NotificationSmallCategory category, String content, Friend friend, Goal goal) throws BaseException {
         try {
 
             if (user == null || category == null || content == null) {
                 throw new NullPointerException("user, category, content를 모두 입력해주세요.");
             }
 
+            // 친구 요청 알림인 경우
+            if (category == FRIEND_REQUEST){
+                if (friend == null) {
+                    throw new NullPointerException("friend를 입력해주세요.");
+                }
+
+                FriendReqNotification notification = FriendReqNotification.builder()
+                        .user(user)
+                        .category(category)
+                        .content(content)
+                        .friend(friend)
+                        .build();
+                saveNotification(notification);
+            }
             // 그룹 초대 요청 알림인 경우
-            if (category == NotificationSmallCategory.GROUP_REQUEST) {
+            else if (category == GROUP_REQUEST) {
                 if (goal == null) {
                     throw new NullPointerException("goal을 입력해주세요.");
                 }
