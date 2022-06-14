@@ -91,7 +91,12 @@ public enum BaseResponseStatus {
     NOT_EXIST_FRIEND(false,5030,"친구 목록에 존재하지 않는 친구입니다."),
     INVALID_COMPLETE_FLAG(false,5031,"완료한 투두에만 좋아요를 누를 수 있습니다."),
     NOT_EQUAL_TODO_USER(false,5032,"투두 멤버와 다른 유저입니다."),
-
+    FAILED_TO_ARCHIVE_GOAL(false,5033,"목표보관함 이동에 실패했습니다."),
+    FAILED_TO_GET_ARCHIVES(false,5034,"목표보관함 조회에 실패했습니다."),
+    NOT_ARCHIVE_GOAL(false,5035,"목표보관함에 있는 목표가 아닙니다."),
+    FAILED_TO_ACTIVATE_GOAL(false,5036,"목표 시작하기에 실패했습니다."),
+    FAILED_TO_GET_LIKES(false,5037,"좋아요 리스트 조회에 실패했습니다."),
+    FAILED_TO_GET_PERCENTAGE(false,5038,"퍼센테이지 계산에 실패했습니다."),
 
     // 6000 : 필요시 만들어서 쓰세요
     // 회원가입 & 로그인 관련 BaseResponseStatus

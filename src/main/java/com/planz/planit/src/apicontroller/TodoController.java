@@ -5,6 +5,7 @@ import com.planz.planit.config.BaseResponse;
 import com.planz.planit.config.BaseResponseStatus;
 import com.planz.planit.src.domain.todo.dto.CheckTodoResDTO;
 import com.planz.planit.src.domain.todo.dto.CreateTodoReqDTO;
+import com.planz.planit.src.domain.todo.dto.GetLikeTodoResDTO;
 import com.planz.planit.src.service.GoalService;
 import com.planz.planit.src.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,15 +54,15 @@ public class TodoController {
     public BaseResponse<CheckTodoResDTO> checkTodo(HttpServletRequest request, @PathVariable(name="todoMemberId") Long todoMemberId){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try{
-            todoService.checkTodo(userId,todoMemberId);
+            CheckTodoResDTO response = todoService.checkTodo(userId,todoMemberId);
+            return new BaseResponse<>(response);
         }catch(BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
-        return new BaseResponse(SUCCESS);
     }
 
-    @PostMapping("/todo/like/{goalId}")
-    public BaseResponse likeTodo(HttpServletRequest request,@RequestParam(name="todoMemberId") Long todoMemberId){
+    @PostMapping("/todo/like/{todoMemberId}")
+    public BaseResponse likeTodo(HttpServletRequest request,@PathVariable(name="todoMemberId") Long todoMemberId){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try{
             todoService.likeTodo(userId,todoMemberId);
@@ -70,5 +71,16 @@ public class TodoController {
         }
         //FCM 날리기
         return new BaseResponse(SUCCESS);
+    }
+
+    @GetMapping("/todo/like/{todoMemberId}")
+    public BaseResponse<GetLikeTodoResDTO> getLikeTodoMember(HttpServletRequest request,@PathVariable(name="todoMemberId") Long todoMemberId){
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
+        try{
+            GetLikeTodoResDTO response = todoService.getLikeTodoMember(todoMemberId);
+            return new BaseResponse<>(response);
+        }catch(BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
     }
 }

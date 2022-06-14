@@ -1,7 +1,6 @@
 package com.planz.planit.src.service;
 
 import com.planz.planit.config.BaseException;
-import com.planz.planit.config.BaseResponseStatus;
 import com.planz.planit.src.domain.friend.Friend;
 import com.planz.planit.src.domain.friend.FriendRepository;
 import com.planz.planit.src.domain.friend.FriendStatus;
@@ -9,7 +8,6 @@ import com.planz.planit.src.domain.friend.dto.AcceptReqDTO;
 import com.planz.planit.src.domain.friend.dto.GetFriendListResDTO;
 import com.planz.planit.src.domain.friend.dto.GetFriendResDTO;
 import com.planz.planit.src.domain.user.User;
-import com.planz.planit.src.domain.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +23,12 @@ import static com.planz.planit.src.domain.friend.FriendStatus.WAIT;
 @Service
 public class FriendService {
     private final FriendRepository friendRepository;
+    private final NotificationService notificationService;
     private final UserService userService;
 
-    public FriendService(FriendRepository friendRepository, UserService userService) {
+    public FriendService(FriendRepository friendRepository, NotificationService notificationService, UserService userService) {
         this.friendRepository = friendRepository;
+        this.notificationService = notificationService;
         this.userService = userService;
     }
 
@@ -87,6 +87,8 @@ public class FriendService {
             Friend friend = friendRepository.findById(acceptReqDTO.getFriendId()).orElseThrow();
             friend.acceptFriend(acceptReqDTO.isAccepted()); //수락 혹은 거절로 변경
             friendRepository.save(friend);
+            //알림 추가
+            notificationService.confirmFriendReqNotification(friend.getToUser().getUserId(), friend.getFriendId());
             return true;
         } catch (Exception e){
             throw new BaseException(DATABASE_ERROR);
