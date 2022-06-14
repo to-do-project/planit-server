@@ -107,4 +107,6 @@ public class User {
     public void setMissionStatus(Integer missionStatus) {
         this.missionStatus = missionStatus;
     }
+
+    public void setLastCheckAt(LocalDateTime lastCheckAt){this.lastCheckAt = lastCheckAt;}
 }

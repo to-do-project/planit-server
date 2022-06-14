@@ -40,3 +40,4 @@ out/
 /src/test/java/com/planz/planit/src/
 /src/main/resources/application-local.yml
 /logs/
+/logs/spring.log

@@ -16,11 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
 import static com.planz.planit.src.domain.goal.GoalMemberRole.MANAGER;
 import static com.planz.planit.src.domain.goal.GoalMemberRole.MEMBER;
+import static com.planz.planit.src.domain.goal.GoalStatus.ACTIVE;
+import static com.planz.planit.src.domain.goal.GoalStatus.ARCHIVE;
 import static com.planz.planit.src.domain.goal.GroupStatus.ACCEPT;
 import static com.planz.planit.src.domain.goal.GroupStatus.WAIT;
 
@@ -109,7 +112,7 @@ public class GoalService {
                 goalRepository.deleteById(goalId); //목표 삭제
                 //멤버 모두 삭제?
                 goalMemberRepository.deleteAllGoalMemberInQuery(goalId);
-                //좋아요 개수 업데이트
+
             }else{ //일반 멤버라면 그룹에서만 탈퇴
                 goalMemberRepository.deleteGoalMemberInQuery(userId,goalId);//해당 멤버만 삭제
             }
@@ -239,6 +242,7 @@ public class GoalService {
                 .stream().filter(m->m.getStatus()==ACCEPT)
                 .collect(Collectors.toList());
 
+        int goalPercentage=0;
         //goalMember DTO 리스트
         List<GetGoalMemberDetailDTO> goalMemberDetails = new ArrayList<>();
         for (GoalMember goalMember : goalMembers) {
@@ -249,6 +253,8 @@ public class GoalService {
 
             //투두 멤버 리스트 가져오기 (오늘치만)
             List<TodoMember> todoMembers = goalMember.getTodoMembers().stream().filter(m->m.getUpdateAt().toLocalDate().equals(LocalDate.now())).collect(Collectors.toList());
+            int completeCount = todoMembers.stream().filter(m->m.getCompleteFlag()==CompleteFlag.COMPLETE)
+                    .collect(Collectors.toList()).size();
             //todoMember DTO 리스트 만들기
             List<GetTodoMemberDTO> getTodoMembers = new ArrayList<>();
             for (TodoMember todoMember : todoMembers) {
@@ -266,10 +272,16 @@ public class GoalService {
 
                 getTodoMembers.add(getTodoMemberDTO);
             }
+            int percentage = todoMembers.size()==0?0:completeCount*100/ todoMembers.size();
+            goalPercentage+=percentage;
+            //퍼센트 추가
+            getGoalMemberDetailDTO.setPercentage(percentage);
             getGoalMemberDetailDTO.setGetTodoMembers(getTodoMembers);
             //DTO 리스트에 객체 추가
             goalMemberDetails.add(getGoalMemberDetailDTO);
         }
+        goalPercentage = goalMembers.size()==0?0:goalPercentage/goalMembers.size();
+        getGoalDetailResDTO.setGoalPercentage(goalPercentage);
         getGoalDetailResDTO.setGoalMemberDetails(goalMemberDetails);
         return getGoalDetailResDTO;
     }
@@ -278,9 +290,9 @@ public class GoalService {
     //내 목표 조회
     public List<GetGoalMainInfoResDTO> getGoalMainInfo(Long targetUserId) throws BaseException {
 
-        //목표 조회
+        //목표 조회 (수락 및 보관함 X)
         List<GoalMember> targetGoalMembers = goalMemberRepository.findGoalMembersByMember(targetUserId)
-                .stream().filter(m->m.getStatus()==ACCEPT)
+                .stream().filter(m->m.getStatus()==ACCEPT&&m.getGoal().getGoalStatus()==ACTIVE)
                 .collect(Collectors.toList());
         //없으면 리턴
         if(targetGoalMembers.isEmpty() || targetGoalMembers==null){
@@ -292,6 +304,8 @@ public class GoalService {
             List<TodoMember> todoMembers = targetGoalMember.getTodoMembers()
                     .stream().filter(m->m.getUpdateAt().toLocalDate().equals(LocalDate.now()))
                     .collect(Collectors.toList());
+            int completeCount = todoMembers.stream().filter(m->m.getCompleteFlag()==CompleteFlag.COMPLETE)
+                    .collect(Collectors.toList()).size();
             List<GetTodoMainResDTO> todoMainResList = new ArrayList<>();
             boolean likeFlag = targetGoalMember.getGoal().getOpenFlag().toString().equals("PUBLIC")?true:false;
             for (TodoMember todoMember : todoMembers) {
@@ -307,11 +321,12 @@ public class GoalService {
             }
             boolean groupFlag = targetGoalMember.getGoal().getGroupFlag()==GroupCategory.GROUP?true:false;
             boolean managerFlag = targetGoalMember.getMemberRole() == MANAGER ? true : false;
+            int percentage = todoMembers.size()==0?0:100*completeCount/todoMembers.size();
             goalMainInfoResList.add(new GetGoalMainInfoResDTO(
                     targetGoalMember.getGoal().getGoalId(),
                     targetGoalMember.getGoal().getTitle(),
                     groupFlag,
-                    0,
+                    percentage,
                     managerFlag,
                     todoMainResList
             ));
@@ -329,11 +344,10 @@ public class GoalService {
                 throw new BaseException(NOT_FRIEND_RELATION);
             }
         }
-
         //비공개 제외
-        //목표 조회
+        //목표 조회 (수락, 공개, 보관함 X)
         List<GoalMember> targetGoalMembers = goalMemberRepository.findGoalMembersByMember(targetUserId)
-                .stream().filter(m->m.getGoal().getOpenFlag()==OpenCategory.PUBLIC)
+                .stream().filter(m->m.getGoal().getOpenFlag()==OpenCategory.PUBLIC && m.getGoal().getGoalStatus()==ACTIVE&&m.getStatus()==ACCEPT)
                 .collect(Collectors.toList());
         //없으면 리턴
         if(targetGoalMembers.isEmpty() || targetGoalMembers==null){
@@ -341,13 +355,16 @@ public class GoalService {
         }
         List<GetGoalMainInfoResDTO> goalMainInfoResList = new ArrayList<>();
         for (GoalMember targetGoalMember : targetGoalMembers) {
-            //todoMember 조회
+            //todoMember 조회 (오늘자 투두 조회)
             List<TodoMember> todoMembers = targetGoalMember.getTodoMembers()
                     .stream().filter(m->m.getUpdateAt().toLocalDate().equals(LocalDate.now()))
                     .collect(Collectors.toList());
+            int completeCount = todoMembers.stream().filter(m->m.getCompleteFlag()==CompleteFlag.COMPLETE)
+                    .collect(Collectors.toList()).size();
             List<GetTodoMainResDTO> todoMainResList = new ArrayList<>();
-            boolean likeFlag = targetGoalMember.getGoal().getOpenFlag().toString().equals("PUBLIC")?true:false;
             for (TodoMember todoMember : todoMembers) {
+                boolean likeFlag = todoMember.getTodoMemberLikes().
+                        stream().filter(m->m.getUser().getUserId().equals(userId)).count()!=0?true:false; //내가 좋아요를 눌렀는지 확인
                 boolean completeFlag = todoMember.getCompleteFlag() == CompleteFlag.COMPLETE ? true : false;
                 todoMainResList.add(
                 new GetTodoMainResDTO(
@@ -360,15 +377,59 @@ public class GoalService {
             }
             boolean groupFlag = targetGoalMember.getGoal().getGroupFlag()==GroupCategory.GROUP?true:false;
             boolean managerFlag = targetGoalMember.getMemberRole() == MANAGER ? true : false;
+            int percentage = todoMembers.size()==0?0:100*completeCount/todoMembers.size();
             goalMainInfoResList.add(new GetGoalMainInfoResDTO(
                     targetGoalMember.getGoal().getGoalId(),
                     targetGoalMember.getGoal().getTitle(),
                     groupFlag,
-                    0,
+                    percentage,
                     managerFlag,
                     todoMainResList
             ));
         }
         return goalMainInfoResList;
+    }
+
+    //목표 보관함으로 옮기기
+    public void changeToArchive(Long userId, Long goalId) throws BaseException {
+        //목표 객체 가져오기
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new BaseException(NOT_EXIST_GOAL));
+        //매니저인지 확인 -> 아니면 exception
+        checkManager(userId,goalId);
+        try{
+            goal.archiveGoal();
+            goalRepository.save(goal);
+        }catch (Exception e){
+            throw new BaseException(FAILED_TO_ARCHIVE_GOAL);
+        }
+    }
+
+    //목표 보관함 리스트 조회
+    public List<GetArchiveGoalResDTO> getArchiveGoals(Long userId) throws BaseException {
+        try {
+            List<Goal> archiveGoals = goalMemberRepository.getGoalArchivesByMember(userId);
+            List<GetArchiveGoalResDTO> response = new ArrayList<>();
+            for (Goal archiveGoal : archiveGoals) {
+                response.add(new GetArchiveGoalResDTO(archiveGoal.getGoalId(),archiveGoal.getTitle()));
+            }
+            return response;
+        }catch(Exception e){
+            throw new BaseException(FAILED_TO_GET_ARCHIVES);
+        }
+    }
+
+    //목표 보관함에 있던 거 활성화
+    public void archiveToActive(Long goalId) throws BaseException {
+        //goal상태 확인
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new BaseException(NOT_EXIST_GOAL));
+        if(goal.getGoalStatus()!=ARCHIVE){
+            throw new BaseException(NOT_ARCHIVE_GOAL);
+        }
+        try{
+            goal.activateGoal();
+            goalRepository.save(goal);
+        }catch(Exception e){
+            throw new BaseException(FAILED_TO_ACTIVATE_GOAL);
+        }
     }
 }

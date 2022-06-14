@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+import static com.planz.planit.src.domain.goal.GoalStatus.ACTIVE;
+import static com.planz.planit.src.domain.goal.GoalStatus.ARCHIVE;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -27,6 +30,10 @@ public class Goal {
     @Column(name="open_flag", nullable = false)
     private OpenCategory openFlag;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name="goal_status",nullable = false)
+    private GoalStatus goalStatus = ACTIVE;
+
     @Column(name="create_at",nullable = false)
     private LocalDateTime createAt = LocalDateTime.now();
 
@@ -40,6 +47,13 @@ public class Goal {
     public void modifyGoal(String title,OpenCategory openFlag){
         this.title=title;
         this.openFlag = openFlag;
+    }
+
+    public void archiveGoal(){
+        this.goalStatus=ARCHIVE;
+    }
+    public void activateGoal(){
+        this.goalStatus = ACTIVE;
     }
 
 }
