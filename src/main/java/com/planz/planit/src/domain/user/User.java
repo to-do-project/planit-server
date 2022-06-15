@@ -62,6 +62,12 @@ public class User {
     @Column(name = "last_check_at")
     private LocalDateTime lastCheckAt;
 
+    @Column(name="tmp_point",nullable=false)
+    private int tmpPoint=0; //임시 포인트
+
+    @Column(name="prev_percent",nullable = false)
+    private int prevPercent=0; //전 날 목표량
+
 /*    @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private List<String> roles = new ArrayList<>();*/
@@ -109,4 +115,9 @@ public class User {
     }
 
     public void setLastCheckAt(LocalDateTime lastCheckAt){this.lastCheckAt = lastCheckAt;}
+
+    //임시 포인트 추가하는 메소드
+    public void addTmpPoint(){
+        this.tmpPoint+=1000;
+    }
 }
