@@ -120,6 +120,8 @@ public class UserService {
                     .point(0)
                     .missionStatus(1)
                     .userStatus(UserStatus.VALID)
+                    .tmpPoint(0)
+                    .prevPercent(0)
                     .role(UserRole.ROLE_USER)
                     .deviceToken(reqDTO.getDeviceToken())
                     .build();
@@ -136,6 +138,7 @@ public class UserService {
                     .level(1)
                     .exp(0)
                     .color(PlanetColor.valueOf(reqDTO.getPlanetColor()))
+                    .tmpExp(0)
                     .build();
             planetService.savePlanet(planetEntity);
 
