@@ -34,7 +34,7 @@ public class Planet {
     private PlanetColor color;
 
     @Column(name="tmp_exp",nullable = false)
-    private Integer tmpExp =0;
+    private Integer tmpExp = 0;
 
     //임시 경험치 올리는 메소드
     public void addTmpExp(){
