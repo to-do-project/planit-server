@@ -97,6 +97,9 @@ public enum BaseResponseStatus {
     FAILED_TO_ACTIVATE_GOAL(false,5036,"목표 시작하기에 실패했습니다."),
     FAILED_TO_GET_LIKES(false,5037,"좋아요 리스트 조회에 실패했습니다."),
     FAILED_TO_GET_PERCENTAGE(false,5038,"퍼센테이지 계산에 실패했습니다."),
+    INCOMPLETE_FLAG(false,5039,"완료한 투두가 아닙니다."),
+    EQUAL_TO_USER_ID(false,5040,"자기 자신에게 친구요청은 할 수 없습니다."),
+    ALREADY_WAIT_FRIEND(false,5041,"친구 수락 대기 중인 사용자입니다."),
 
     // 6000 : 필요시 만들어서 쓰세요
     // 회원가입 & 로그인 관련 BaseResponseStatus

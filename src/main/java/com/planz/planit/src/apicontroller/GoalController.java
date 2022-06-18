@@ -37,7 +37,7 @@ public class GoalController {
 
     @PostMapping("/goals")
     @ApiOperation("목표 추가 api")
-    public BaseResponse createGoal(HttpServletRequest request, @Valid @RequestBody CreateGoalReqDTO createGoalReqDTO, BindingResult br) {
+    public BaseResponse<String> createGoal(HttpServletRequest request, @Valid @RequestBody CreateGoalReqDTO createGoalReqDTO, BindingResult br) {
         if (br.hasErrors()) {
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
@@ -45,7 +45,7 @@ public class GoalController {
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try {
             goalService.createGoal(userId, createGoalReqDTO);
-            return new BaseResponse(BaseResponseStatus.SUCCESS);
+            return new BaseResponse<>("목표 추가를 완료했습니다.");
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
@@ -58,11 +58,11 @@ public class GoalController {
 
     @DeleteMapping("/goals")
     @ApiOperation("목표삭제/탈퇴 api")
-    public BaseResponse deleteGoal(HttpServletRequest request, @RequestParam("goal") Long goalId) {
+    public BaseResponse<String> deleteGoal(HttpServletRequest request, @RequestParam("goal") Long goalId) {
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try {
             goalService.deleteGoal(userId, goalId);
-            return new BaseResponse(BaseResponseStatus.SUCCESS);
+            return new BaseResponse<>("목표 삭제/탈퇴를 완료했습니다.");
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
@@ -70,7 +70,7 @@ public class GoalController {
 
     @PatchMapping("/goals")
     @ApiOperation("목표 수정 api -매니저만 가능")
-    public BaseResponse modifyGoal(HttpServletRequest request, @Valid @RequestBody ModifyGoalReqDTO modifyGoalreqDTO, BindingResult br) {
+    public BaseResponse<String> modifyGoal(HttpServletRequest request, @Valid @RequestBody ModifyGoalReqDTO modifyGoalreqDTO, BindingResult br) {
         if (br.hasErrors()) {
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
@@ -81,16 +81,16 @@ public class GoalController {
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
-        return new BaseResponse<>(BaseResponseStatus.SUCCESS);
+        return new BaseResponse<>("목표 수정을 완료했습니다.");
     }
 
     @PatchMapping("/goals/{goalId}")
     @ApiOperation("그룹 초대 수락 api")
-    public BaseResponse acceptGroupGoal(HttpServletRequest request, @PathVariable("goalId") Long goalId, @RequestParam("accept") int accept) {
+    public BaseResponse<String> acceptGroupGoal(HttpServletRequest request, @PathVariable("goalId") Long goalId, @RequestParam("accept") int accept) {
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try {
             goalService.acceptGroupGoal(goalId, userId, accept);
-            return new BaseResponse(BaseResponseStatus.SUCCESS);
+            return new BaseResponse<>("그룹 초대 수락/거절을 완료했습니다.");
         } catch (BaseException e) {
             return new BaseResponse(e.getStatus());
         }
@@ -137,11 +137,11 @@ public class GoalController {
 
     @PostMapping("/goals/archive/{goalId}")
     @ApiOperation("목표 보관함 API")
-    public BaseResponse changeToArchive(HttpServletRequest request, @PathVariable("goalId") Long goalId) {
+    public BaseResponse<String> changeToArchive(HttpServletRequest request, @PathVariable("goalId") Long goalId) {
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try {
             goalService.changeToArchive(userId, goalId);
-            return new BaseResponse(SUCCESS);
+            return new BaseResponse<>("목표 보관하기를 완료했습니다.");
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
@@ -161,11 +161,11 @@ public class GoalController {
 
     @PatchMapping("/goals/archive/{goalId}")
     @ApiOperation("목표 보관함 활성화API")
-    public BaseResponse archiveToActive(HttpServletRequest request, @PathVariable Long goalId){
+    public BaseResponse<String> archiveToActive(HttpServletRequest request, @PathVariable Long goalId){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try{
             goalService.archiveToActive(goalId);
-            return new BaseResponse(SUCCESS);
+            return new BaseResponse<>("목표 시작하기를 완료했습니다.");
         }catch(BaseException e){
             return new BaseResponse<>(e.getStatus());
         }

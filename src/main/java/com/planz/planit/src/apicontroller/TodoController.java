@@ -34,7 +34,7 @@ public class TodoController {
     }
 
     @PostMapping("/todo")
-    public BaseResponse createTodo(HttpServletRequest request, @Valid @RequestBody CreateTodoReqDTO createTodoReqDTO, BindingResult br){
+    public BaseResponse<String> createTodo(HttpServletRequest request, @Valid @RequestBody CreateTodoReqDTO createTodoReqDTO, BindingResult br){
         if(br.hasErrors()){
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
@@ -44,7 +44,7 @@ public class TodoController {
 
         try {
             todoService.createTodo(userId,createTodoReqDTO);
-            return new BaseResponse(SUCCESS);
+            return new BaseResponse<>("투두 생성을 완료했습니다.");
         }catch(BaseException e){
             return new BaseResponse(e.getStatus());
         }
@@ -62,7 +62,7 @@ public class TodoController {
     }
 
     @PostMapping("/todo/like/{todoMemberId}")
-    public BaseResponse likeTodo(HttpServletRequest request,@PathVariable(name="todoMemberId") Long todoMemberId){
+    public BaseResponse<String> likeTodo(HttpServletRequest request,@PathVariable(name="todoMemberId") Long todoMemberId){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try{
             todoService.likeTodo(userId,todoMemberId);
@@ -70,7 +70,7 @@ public class TodoController {
             return new BaseResponse(e.getStatus());
         }
         //FCM 날리기
-        return new BaseResponse(SUCCESS);
+        return new BaseResponse<>("투두 좋아요를 완료했습니다.");
     }
 
     @GetMapping("/todo/like/{todoMemberId}")

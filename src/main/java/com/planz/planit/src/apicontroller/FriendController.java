@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-import static com.planz.planit.config.BaseResponseStatus.SERVER_ERROR;
-import static com.planz.planit.config.BaseResponseStatus.SUCCESS;
+import static com.planz.planit.config.BaseResponseStatus.*;
 
 @RestController
 @RequestMapping("/api")
@@ -38,14 +37,17 @@ public class FriendController {
      */
     @PostMapping("/friends/{toUserId}")
     @ApiOperation(value = "친구 요청 api")
-    public BaseResponse<Friend> followUser(HttpServletRequest request, @PathVariable Long toUserId) throws BaseException {
+    public BaseResponse<String> followUser(HttpServletRequest request, @PathVariable Long toUserId) throws BaseException {
         /*
         Authnetificattion 과정
          */
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
+        if(userId==toUserId){
+            return new BaseResponse<>(EQUAL_TO_USER_ID);
+        }
         try{
             friendService.save(userId,toUserId);
-            return new BaseResponse<>(SUCCESS);
+            return new BaseResponse<>("친구 요청을 완료했습니다.");
         }catch(BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
@@ -78,11 +80,11 @@ public class FriendController {
      */
     @PatchMapping("/friends")
     @ApiOperation("친구 요청 수락/거절/삭제 api")
-    public BaseResponse acceptFriends(HttpServletRequest request, @RequestBody AcceptReqDTO acceptReqDTO){
+    public BaseResponse<String> acceptFriends(HttpServletRequest request, @RequestBody AcceptReqDTO acceptReqDTO){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try {
            if (friendService.acceptFriend(acceptReqDTO)) {
-               return new BaseResponse<>(SUCCESS);
+               return new BaseResponse<>("친구 요청 수락/거절을 완료했습니다.");
            }
            return new BaseResponse(SERVER_ERROR); //에러
        }catch(BaseException e){

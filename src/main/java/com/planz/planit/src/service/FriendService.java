@@ -43,6 +43,10 @@ public class FriendService {
         if(isFriend(user,toUser)){
             throw new BaseException(ALREADY_EXIST_FRIEND);
         }
+        //이미 요청한 친구인지 확인
+        if(isWaitFriend(user,toUser)){
+            throw new BaseException(ALREADY_WAIT_FRIEND);
+        }
         try {
             //friend 객체 만들어주기
             Friend friend = Friend.builder()
@@ -82,6 +86,7 @@ public class FriendService {
 
     //친구 수락
     //친구 거절 및 삭제
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public boolean acceptFriend(AcceptReqDTO acceptReqDTO) throws BaseException {
         try {
             Friend friend = friendRepository.findById(acceptReqDTO.getFriendId()).orElseThrow();
@@ -109,4 +114,17 @@ public class FriendService {
         }
     }
 
+    // 친구 요청 상태인지 확인
+    public boolean isWaitFriend(User myUser, User friendUser) throws BaseException{
+        try {
+            boolean result1 = friendRepository.existsByFromUserAndToUserAndFriendStatus(myUser, friendUser, WAIT);
+            boolean result2 = friendRepository.existsByFromUserAndToUserAndFriendStatus(friendUser, myUser, WAIT);
+            return (result1 | result2);
+        }
+        catch (Exception e){
+            log.error("isFriend() : friendRepository.existsByFromUserAndToUserAndFriendStatus() 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }
