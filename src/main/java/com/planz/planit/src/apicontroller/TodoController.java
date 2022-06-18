@@ -3,11 +3,13 @@ package com.planz.planit.src.apicontroller;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponse;
 import com.planz.planit.config.BaseResponseStatus;
+import com.planz.planit.src.domain.todo.dto.ChangeTodoReqDTO;
 import com.planz.planit.src.domain.todo.dto.CheckTodoResDTO;
 import com.planz.planit.src.domain.todo.dto.CreateTodoReqDTO;
 import com.planz.planit.src.domain.todo.dto.GetLikeTodoResDTO;
 import com.planz.planit.src.service.GoalService;
 import com.planz.planit.src.service.TodoService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.BindingResult;
@@ -34,6 +36,7 @@ public class TodoController {
     }
 
     @PostMapping("/todo")
+    @ApiOperation("투두 추가 API")
     public BaseResponse<String> createTodo(HttpServletRequest request, @Valid @RequestBody CreateTodoReqDTO createTodoReqDTO, BindingResult br){
         if(br.hasErrors()){
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
@@ -51,6 +54,7 @@ public class TodoController {
     }
 
     @PostMapping("/todo/{todoMemberId}")
+    @ApiOperation("투두 체크 API")
     public BaseResponse<CheckTodoResDTO> checkTodo(HttpServletRequest request, @PathVariable(name="todoMemberId") Long todoMemberId){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try{
@@ -60,8 +64,20 @@ public class TodoController {
             return new BaseResponse<>(e.getStatus());
         }
     }
+    @PatchMapping("/todo/{todoMemberId}")
+    @ApiOperation("투두 체크 API")
+    public BaseResponse<CheckTodoResDTO> uncheckTodo(HttpServletRequest request, @PathVariable(name="todoMemberId") Long todoMemberId){
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
+        try{
+            CheckTodoResDTO response = todoService.uncheckTodo(userId,todoMemberId);
+            return new BaseResponse<>(response);
+        }catch(BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 
     @PostMapping("/todo/like/{todoMemberId}")
+    @ApiOperation("투두 좋아요 API")
     public BaseResponse<String> likeTodo(HttpServletRequest request,@PathVariable(name="todoMemberId") Long todoMemberId){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try{
@@ -74,6 +90,7 @@ public class TodoController {
     }
 
     @GetMapping("/todo/like/{todoMemberId}")
+    @ApiOperation("투두 좋아요 리스트 조회 API")
     public BaseResponse<GetLikeTodoResDTO> getLikeTodoMember(HttpServletRequest request,@PathVariable(name="todoMemberId") Long todoMemberId){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try{
@@ -82,5 +99,18 @@ public class TodoController {
         }catch(BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
+    }
+
+    @PostMapping("/todo/change/{todoMemberId}")
+    @ApiOperation("투두 수정 API")
+    public BaseResponse<String> changeTodoTitle(HttpServletRequest request,@PathVariable Long todoMemberId,@RequestBody ChangeTodoReqDTO reqDTO){
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
+        try{
+            todoService.changeTodoTitle(userId,todoMemberId,reqDTO);
+            return new BaseResponse<>("투두 수정을 완료했습니다.");
+        }catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+
     }
 }

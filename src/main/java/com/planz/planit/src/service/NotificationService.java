@@ -157,7 +157,6 @@ public class NotificationService {
         try {
             // 1. userId, goalId로 Notification 엔티티 조회
             GroupReqNotification notification = findByUserIdAndGoalId(userId, goalId);
-
             // 2. 조회한 Notification의 confirmStatus를 확정 상태(CONFIRM)로 변경
             notification.setConfirmStatus(NotificationStatus.CONFIRM);
             saveNotification(notification);
@@ -175,7 +174,6 @@ public class NotificationService {
         try {
             // 1. userId, friendId로 Notification 엔티티 조회
             FriendReqNotification notification = findByUserIdAndFriendId(userId, friendId);
-
             // 2. 조회한 Notification의 confirmStatus를 확정 상태(CONFIRM)로 변경
             notification.setConfirmStatus(NotificationStatus.CONFIRM);
             saveNotification(notification);
@@ -221,6 +219,7 @@ public class NotificationService {
         try {
             return (FriendReqNotification) notificationRepository.findByUserIdAndFriendId(userId, friendId).orElseThrow(() -> new BaseException(INVALID_USER_ID_FRIEND_ID));
         } catch (BaseException e) {
+            e.printStackTrace();
             throw e;
         } catch (Throwable e) {
             log.error("findByUserIdAndFriendId(): notificationRepository.findByUserIdAndFriendId() 실행 중 데이터베이스 에러 발생");

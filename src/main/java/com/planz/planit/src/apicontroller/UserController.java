@@ -431,4 +431,16 @@ public class UserController {
         }
     }
 
+    @GetMapping("/api/users/result")
+    @ApiOperation("목표 달성 보상 조회 API")
+    public BaseResponse<GetUserResultResDTO> getUserResult(HttpServletRequest request){
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME));
+        try{
+            return new BaseResponse<>(userService.getUserResult(userId));
+        }catch(BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+
+    }
+
 }

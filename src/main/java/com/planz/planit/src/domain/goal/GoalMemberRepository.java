@@ -23,13 +23,13 @@ public interface GoalMemberRepository extends JpaRepository<GoalMember,Long> {
     //그룹 내 멤버들 모두 삭제
     @Transactional
     @Modifying
-    @Query("delete from GoalMember gm where gm.goal.goalId is:goalId")
+    @Query("update GoalMember gm set gm.status='REJECT' where gm.goal.goalId is :goalId")
     void deleteAllGoalMemberInQuery(@Param("goalId") Long goalId);
 
     //특정 멤버만 삭제
     @Transactional
     @Modifying
-    @Query("delete from GoalMember gm where gm.member.userId is :userId and gm.goal.goalId is:goalId")
+    @Query("update GoalMember gm set gm.status='REJECT' where gm.member.userId is :userId and gm.goal.goalId is :goalId")
     void deleteGoalMemberInQuery(@Param("userId") Long userId, @Param("goalId") Long goalId);
 
     @Query("select count(gm.goalMemberId) from GoalMember gm where gm.goal.goalId is :goalId and gm.member.userId is :userId")

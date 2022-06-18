@@ -100,6 +100,12 @@ public enum BaseResponseStatus {
     INCOMPLETE_FLAG(false,5039,"완료한 투두가 아닙니다."),
     EQUAL_TO_USER_ID(false,5040,"자기 자신에게 친구요청은 할 수 없습니다."),
     ALREADY_WAIT_FRIEND(false,5041,"친구 수락 대기 중인 사용자입니다."),
+    INVALID_TODO_TITLE(false,5042,"투두명은 50자까지입니다."),
+    NOT_EXIST_TODO_MEMBER(false,5043,"존재하지 않는 목표입니다."),
+    NOT_GROUP_TODO(false,5044,"그룹 목표는 수정이 불가합니다."),
+    FAILED_TO_CHANGE_TODO(false,5045,"투두 수정에 실패했습니다."),
+    NOT_ACTIVE_GOAL(false,5046,"활성화된 목표에만 투두 추가가 가능합니다."),
+    FAILED_TO_UNCHECK_TODO(false,5047,"투두 체크 취소에 실패했습니다."),
 
     // 6000 : 필요시 만들어서 쓰세요
     // 회원가입 & 로그인 관련 BaseResponseStatus

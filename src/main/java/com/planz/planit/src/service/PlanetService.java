@@ -18,12 +18,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
-import static com.planz.planit.config.BaseResponseStatus.OVER_ITEM_COUNT;
 
 @Log4j2
 @Service
@@ -32,13 +29,15 @@ public class PlanetService {
     private final UserService userService;
     private final FriendService friendService;
     private final InventoryService inventoryService;
+    private final TodoService todoService;
 
     @Autowired
-    public PlanetService(PlanetRepository planetRepository, UserService userService, FriendService friendService, InventoryService inventoryService) {
+    public PlanetService(PlanetRepository planetRepository, UserService userService, FriendService friendService, InventoryService inventoryService, TodoService todoService) {
         this.planetRepository = planetRepository;
         this.userService = userService;
         this.friendService = friendService;
         this.inventoryService = inventoryService;
+        this.todoService = todoService;
     }
 
 
@@ -169,19 +168,20 @@ public class PlanetService {
             LocalDateTime createAt = user.getCreateAt();
             long age = ChronoUnit.DAYS.between(createAt, today) + 1;
 
-            // 4. 평균 목표 완성률 계산
+            // 4. 목표량 계산 -> PASS!
 
             // 5. 좋아요 받은 수 계산
-
+            int totalTodoLike = todoService.getTotalTodoLike(userId);
             // 6. 좋아요 누른 수 계산
+            int pushTotalTodoLike = todoService.getPushTotalTodoLike(userId);
 
             return GetPlanetMyInfoResDTO.builder()
                     .age(age)
                     .level(planet.getLevel())
                     .point(user.getPoint())
-                    .avgGoalCompleteRate(0)
-                    .getFavoriteCount(0)
-                    .putFavoriteCount(0)
+                    .avgGoalCompleteRate(user.getPrevPercent())
+                    .getFavoriteCount(totalTodoLike)
+                    .putFavoriteCount(pushTotalTodoLike)
                     .build();
         }
         catch (BaseException e){

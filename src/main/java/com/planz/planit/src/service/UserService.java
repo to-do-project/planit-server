@@ -1,5 +1,6 @@
 package com.planz.planit.src.service;
 
+import com.google.cloud.BaseServiceException;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.src.domain.closet.Closet;
 import com.planz.planit.src.domain.deviceToken.DeviceToken;
@@ -12,10 +13,7 @@ import com.planz.planit.src.domain.mail.MailDTO;
 import com.planz.planit.src.domain.planet.Planet;
 import com.planz.planit.src.domain.planet.PlanetColor;
 import com.planz.planit.src.domain.user.*;
-import com.planz.planit.src.domain.user.dto.GoalSearchUserResDTO;
-import com.planz.planit.src.domain.user.dto.JoinReqDTO;
-import com.planz.planit.src.domain.user.dto.LoginResDTO;
-import com.planz.planit.src.domain.user.dto.SearchUserResDTO;
+import com.planz.planit.src.domain.user.dto.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -666,5 +664,11 @@ public class UserService {
             e.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
+    }
+
+    public GetUserResultResDTO getUserResult(Long userId) throws BaseException {
+        User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
+        Planet planet = planetService.findPlanetByUserId(userId);
+        return new GetUserResultResDTO(planet.getExp(), user.getPoint());
     }
 }
