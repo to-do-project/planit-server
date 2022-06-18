@@ -14,4 +14,4 @@ dev 서버 3차 자동 배포
 - application.yml을 dev, local 환경으로 분리
 - 액세스 토큰 시간 변경
 - 액세스 토큰 시간 하루로 변경
-- FCM 관련 설정 추가
+- FCM 관련 설정 수정
