@@ -80,12 +80,12 @@ public class TodoService {
     @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public CheckTodoResDTO checkTodo(Long userId, Long todoMemberId) throws BaseException {
         TodoMember todoMember = todoMemberRepository.findById(todoMemberId).orElseThrow(() -> new BaseException(INVALID_TODO_MEMBER_ID));
+        //유저가 투두 그룹 멤버인지 확인하기
+        if(todoMember.getGoalMember().getMember().getUserId() !=userId){
+            log.error("투두 멤버와 다른 유저입니다.");
+            throw new BaseException(NOT_EQUAL_TODO_USER);
+        }
         try{
-            //유저가 투두 그룹 멤버인지 확인하기
-            if(todoMember.getGoalMember().getMember().getUserId() !=userId){
-                log.error("투두 멤버와 다른 유저입니다.");
-                throw new BaseException(NOT_EQUAL_TODO_USER);
-            }
             //할 일 체크하기
             todoMember.checkTodo();
             todoMemberRepository.save(todoMember);
@@ -95,20 +95,27 @@ public class TodoService {
         }
         //lastCheckAt 정리
         User user = userService.findUser(userId);
-        user.setLastCheckAt(now());
-        userService.saveUser(user);
+        addTmpExp(user,10);
         //퍼센테이지 리턴
         try {
             Long goalMemberId = todoMember.getGoalMember().getGoalMemberId();
             List<TodoMember> todoMembersByGoalMemberId = todoMemberRepository.findTodoMembersByGoalMemberId(goalMemberId);
-            log.info("여기?");
             int completeCount = todoMembersByGoalMemberId.stream().filter(m -> m.getCompleteFlag() == CompleteFlag.COMPLETE).collect(Collectors.toList()).size();
-            log.info("여기??");
             int percentage = todoMembersByGoalMemberId.size()==0?0:100*completeCount/todoMembersByGoalMemberId.size();
-            log.info("여기????");
             return new CheckTodoResDTO(percentage);
         }catch(Exception e){
             throw new BaseException(FAILED_TO_GET_PERCENTAGE);
+        }
+    }
+
+    private void addTmpExp(User user, int exp) throws BaseException {
+        try {
+            user.setLastCheckAt(now());
+            user.addTmpPoint(exp);
+            user.getPlanet().addTmpExp(exp);
+            userService.saveUser(user);
+        }catch (Exception e){
+            throw new BaseException(DATABASE_ERROR);
         }
     }
 
@@ -136,14 +143,22 @@ public class TodoService {
                     .user(user)
                     .build();
             todoMemberLikeRepository.save(todoMemberLike);
+            addTmpExp(user,5); //좋아요 누른 사람
         }catch(Exception e){
             throw new BaseException(FAILED_TO_LIKE_TODO);
         }
+        //상대방
+        User member = todoMember.getGoalMember().getMember();
+        addTmpExp(member,1);
+
     }
 
     //좋아요 리스트 조회
     public GetLikeTodoResDTO getLikeTodoMember(Long todoMemberId) throws BaseException {
         TodoMember todoMember = todoMemberRepository.findById(todoMemberId).orElseThrow(() -> new BaseException(NOT_EXIST_GOAL));
+        if(todoMember.getCompleteFlag()==CompleteFlag.INCOMPLETE){
+            throw new BaseException(INCOMPLETE_FLAG);
+        }
         List<TodoMemberLike> todoMemberLikes = todoMember.getTodoMemberLikes();
         try {
             List<LikeUserResDTO> likeUserResList = new ArrayList<>();

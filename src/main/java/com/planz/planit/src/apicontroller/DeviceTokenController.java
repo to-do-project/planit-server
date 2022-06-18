@@ -34,12 +34,12 @@ public class DeviceTokenController {
 
     @PostMapping("/device-token")
     @ApiOperation(value="유저 디바이스 토큰 생성")
-    public BaseResponse createDeviceToken(HttpServletRequest request, @RequestBody DeviceTokenReqDTO reqDTO){
+    public BaseResponse<String> createDeviceToken(HttpServletRequest request, @RequestBody DeviceTokenReqDTO reqDTO){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try{
             log.info("DeviceTokenController.createDeviceToken()");
             deviceTokenService.createDeviceToken(userId,reqDTO);
-            return new BaseResponse(SUCCESS);
+            return new BaseResponse<>("디바이스 토큰 생성을 완료했습니다.");
         }catch(BaseException e){
             return new BaseResponse(e.getStatus());
         }
@@ -51,7 +51,7 @@ public class DeviceTokenController {
 
     @PatchMapping("/device-token")
     @ApiOperation(value="알림 설정 on off")
-    public BaseResponse changeFlag(HttpServletRequest request, @Valid @RequestBody ChangeFlagReqDTO reqDTO, BindingResult br){
+    public BaseResponse<String> changeFlag(HttpServletRequest request, @Valid @RequestBody ChangeFlagReqDTO reqDTO, BindingResult br){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         if(br.hasErrors()){
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
@@ -59,7 +59,7 @@ public class DeviceTokenController {
         }
         try{
             deviceTokenService.changeFlag(userId,reqDTO);
-            return new BaseResponse(SUCCESS);
+            return new BaseResponse<>(reqDTO.getFlag()+"알림 설정 변경을 완료했습니다.");
         }catch(BaseException e){
             return new BaseResponse(e.getStatus());
         }

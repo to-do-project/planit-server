@@ -117,7 +117,7 @@ public class User {
     public void setLastCheckAt(LocalDateTime lastCheckAt){this.lastCheckAt = lastCheckAt;}
 
     //임시 포인트 추가하는 메소드
-    public void addTmpPoint(){
-        this.tmpPoint+=1000;
+    public void addTmpPoint(int point){
+        this.tmpPoint+=point;
     }
 }

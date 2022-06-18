@@ -321,6 +321,7 @@ public class GoalService {
             }
             boolean groupFlag = targetGoalMember.getGoal().getGroupFlag()==GroupCategory.GROUP?true:false;
             boolean managerFlag = targetGoalMember.getMemberRole() == MANAGER ? true : false;
+            boolean openFlag = targetGoalMember.getGoal().getOpenFlag()==OpenCategory.PUBLIC?true:false;
             int percentage = todoMembers.size()==0?0:100*completeCount/todoMembers.size();
             goalMainInfoResList.add(new GetGoalMainInfoResDTO(
                     targetGoalMember.getGoal().getGoalId(),
@@ -328,6 +329,7 @@ public class GoalService {
                     groupFlag,
                     percentage,
                     managerFlag,
+                    openFlag,
                     todoMainResList
             ));
         }
@@ -377,6 +379,7 @@ public class GoalService {
             }
             boolean groupFlag = targetGoalMember.getGoal().getGroupFlag()==GroupCategory.GROUP?true:false;
             boolean managerFlag = targetGoalMember.getMemberRole() == MANAGER ? true : false;
+            boolean openFlag = targetGoalMember.getGoal().getOpenFlag()==OpenCategory.PUBLIC?true:false;
             int percentage = todoMembers.size()==0?0:100*completeCount/todoMembers.size();
             goalMainInfoResList.add(new GetGoalMainInfoResDTO(
                     targetGoalMember.getGoal().getGoalId(),
@@ -384,6 +387,7 @@ public class GoalService {
                     groupFlag,
                     percentage,
                     managerFlag,
+                    openFlag,
                     todoMainResList
             ));
         }

@@ -37,7 +37,7 @@ public class Planet {
     private Integer tmpExp = 0;
 
     //임시 경험치 올리는 메소드
-    public void addTmpExp(){
-        this.tmpExp +=1000;
+    public void addTmpExp(int exp){
+        this.tmpExp +=exp;
     }
 }
