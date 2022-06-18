@@ -1,5 +1,7 @@
 package com.planz.planit.src.service;
 
+import com.fasterxml.jackson.databind.ser.Serializers;
+import com.google.api.services.storage.Storage;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.src.domain.friend.Friend;
 import com.planz.planit.src.domain.friend.FriendRepository;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
+import static com.planz.planit.src.domain.friend.FriendStatus.FRIEND;
 import static com.planz.planit.src.domain.friend.FriendStatus.WAIT;
 
 @Slf4j
@@ -68,16 +71,21 @@ public class FriendService {
             List<Friend> byFromUserId = friendRepository.findFriendByFromUser(userId);
             List<Friend> byToUserId = friendRepository.findByToUser(userId);
             //데이터 정제하기 (상대방만 출력되게)
+            List<GetFriendResDTO> waitResult = new ArrayList<>();
             List<GetFriendResDTO> result = new ArrayList<>();
             for (Friend friend : byToUserId) {
-                result.add(new GetFriendResDTO(friend.getFriendId(), friend.getFromUser().getUserId(),friend.getFromUser().getNickname(),friend.getFromUser().getProfileColor().toString(),friend.getFriendStatus()==WAIT?true:false));
+                if(friend.getFriendStatus()==WAIT) {
+                    waitResult.add(new GetFriendResDTO(friend.getFriendId(), friend.getFromUser().getUserId(), friend.getFromUser().getNickname(), friend.getFromUser().getProfileColor().toString(), true));
+                }else {
+                    result.add(new GetFriendResDTO(friend.getFriendId(), friend.getFromUser().getUserId(), friend.getFromUser().getNickname(), friend.getFromUser().getProfileColor().toString(), false));
+                }
             }
             for (Friend friend : byFromUserId) {
-                result.add(new GetFriendResDTO(friend.getFriendId(),friend.getToUser().getUserId(),friend.getToUser().getNickname(),friend.getToUser().getProfileColor().toString(),friend.getFriendStatus()==WAIT?true:false));
+                if(friend.getFriendStatus()==FRIEND) {
+                    result.add(new GetFriendResDTO(friend.getFriendId(), friend.getToUser().getUserId(), friend.getToUser().getNickname(), friend.getToUser().getProfileColor().toString(), friend.getFriendStatus() == WAIT ? true : false));
+                }
             }
-            List<GetFriendResDTO> wait = result.stream().filter(m -> m.isWaitFlag()==true).collect(Collectors.toList());
-            List<GetFriendResDTO> friends = result.stream().filter(m -> m.isWaitFlag()==false).collect(Collectors.toList());
-            GetFriendListResDTO getFriendListResDTO = new GetFriendListResDTO(wait, friends);
+            GetFriendListResDTO getFriendListResDTO = new GetFriendListResDTO(waitResult, result);
             return getFriendListResDTO;
         }catch(Exception e){
             throw new BaseException(DATABASE_ERROR);
@@ -88,16 +96,16 @@ public class FriendService {
     //친구 거절 및 삭제
     @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public boolean acceptFriend(AcceptReqDTO acceptReqDTO) throws BaseException {
+        Friend friend = friendRepository.findById(acceptReqDTO.getFriendId()).orElseThrow(()-> new BaseException(NOT_EXIST_FRIEND));
         try {
-            Friend friend = friendRepository.findById(acceptReqDTO.getFriendId()).orElseThrow();
             friend.acceptFriend(acceptReqDTO.isAccepted()); //수락 혹은 거절로 변경
             friendRepository.save(friend);
             //알림 추가
-            notificationService.confirmFriendReqNotification(friend.getToUser().getUserId(), friend.getFriendId());
-            return true;
+            //notificationService.confirmFriendReqNotification(friend.getToUser().getUserId(), friend.getFriendId());
         } catch (Exception e){
             throw new BaseException(DATABASE_ERROR);
     }
+        return true;
     }
 
     // 서로 친구 관계인지 확인 - 혜지 추가

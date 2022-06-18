@@ -8,4 +8,10 @@ public interface TodoMemberLikeRepository extends JpaRepository<TodoMemberLike,L
 
     @Query("select count(*) from TodoMemberLike tml where tml.todoMember.todoMemberId is :todoMemberId and tml.user.userId is :userId")
     int checkExistTodoLike(@Param("todoMemberId") Long todoMemberId,@Param("userId") Long userId);
+
+    @Query("select count(*) from TodoMemberLike tml where tml.todoMember.goalMember.member.userId is :userId")
+    int countTotalTodoLike(@Param("userId") Long userId);
+
+    @Query("select count(*) from TodoMemberLike tml where tml.user.userId is :userId")
+    int countPushTotalTodoLike(@Param("userId") Long userId);
 }

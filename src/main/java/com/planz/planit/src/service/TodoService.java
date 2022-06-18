@@ -2,13 +2,9 @@ package com.planz.planit.src.service;
 
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.planz.planit.config.BaseException;
-import com.planz.planit.src.domain.goal.Goal;
-import com.planz.planit.src.domain.goal.GoalMember;
+import com.planz.planit.src.domain.goal.*;
 import com.planz.planit.src.domain.todo.*;
-import com.planz.planit.src.domain.todo.dto.CheckTodoResDTO;
-import com.planz.planit.src.domain.todo.dto.CreateTodoReqDTO;
-import com.planz.planit.src.domain.todo.dto.GetLikeTodoResDTO;
-import com.planz.planit.src.domain.todo.dto.LikeUserResDTO;
+import com.planz.planit.src.domain.todo.dto.*;
 import com.planz.planit.src.domain.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +46,9 @@ public class TodoService {
         Goal goal = goalService.getGoal(createTodoReqDTO.getGoalId());
 
         //goal 상태가 active가 아니면 에러 처리
-
+        if(goal.getGoalStatus()!= GoalStatus.ACTIVE){
+            throw new BaseException(NOT_ACTIVE_GOAL);
+        }
         //투두 생성
         try{
             Todo todo = Todo.builder()
@@ -85,9 +83,12 @@ public class TodoService {
             log.error("투두 멤버와 다른 유저입니다.");
             throw new BaseException(NOT_EQUAL_TODO_USER);
         }
+        //할 일 체크하기
+        if(!todoMember.checkTodo()){
+            log.error("checkTodo(): error");
+            throw new BaseException(FAILED_TO_CHECK_TODO);
+        }
         try{
-            //할 일 체크하기
-            todoMember.checkTodo();
             todoMemberRepository.save(todoMember);
 
         }catch(Exception e){
@@ -108,7 +109,48 @@ public class TodoService {
         }
     }
 
-    private void addTmpExp(User user, int exp) throws BaseException {
+    /**
+     * 투두 체크 취소
+     * @param userId
+     * @param todoMemberId
+     * @return
+     * @throws BaseException
+     */
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
+    public CheckTodoResDTO uncheckTodo(Long userId, Long todoMemberId) throws BaseException {
+        TodoMember todoMember = todoMemberRepository.findById(todoMemberId).orElseThrow(() -> new BaseException(INVALID_TODO_MEMBER_ID));
+        //유저가 투두 그룹 멤버인지 확인하기
+        if (todoMember.getGoalMember().getMember().getUserId() != userId) {
+            log.error("투두 멤버와 다른 유저입니다.");
+            throw new BaseException(NOT_EQUAL_TODO_USER);
+        }
+        //할 일 체크해제
+        if(!todoMember.uncheckTodo()){
+            log.error("uncheckTodo(): error");
+            throw new BaseException(FAILED_TO_UNCHECK_TODO);
+        }
+        try {
+            todoMemberRepository.save(todoMember);
+
+        } catch (Exception e) {
+            throw new BaseException(FAILED_TO_UNCHECK_TODO);
+        }
+        //lastCheckAt 정리
+        User user = userService.findUser(userId);
+        addTmpExp(user, -10);
+        //퍼센테이지 리턴
+        try {
+            Long goalMemberId = todoMember.getGoalMember().getGoalMemberId();
+            List<TodoMember> todoMembersByGoalMemberId = todoMemberRepository.findTodoMembersByGoalMemberId(goalMemberId);
+            int completeCount = todoMembersByGoalMemberId.stream().filter(m -> m.getCompleteFlag() == CompleteFlag.COMPLETE).collect(Collectors.toList()).size();
+            int percentage = todoMembersByGoalMemberId.size() == 0 ? 0 : 100 * completeCount / todoMembersByGoalMemberId.size();
+            return new CheckTodoResDTO(percentage);
+        } catch (Exception e) {
+            throw new BaseException(FAILED_TO_GET_PERCENTAGE);
+        }
+
+    }
+        private void addTmpExp(User user, int exp) throws BaseException {
         try {
             user.setLastCheckAt(now());
             user.addTmpPoint(exp);
@@ -119,7 +161,7 @@ public class TodoService {
         }
     }
 
-
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void likeTodo(Long userId, Long todoMemberId) throws BaseException {
         TodoMember todoMember = todoMemberRepository.findById(todoMemberId).orElseThrow(() -> new BaseException(NOT_EXIST_GOAL));
         //자기 자신한테 좋아요를 누르는지 확인
@@ -171,4 +213,40 @@ public class TodoService {
             throw new BaseException(FAILED_TO_GET_LIKES);
         }
     }
+
+    public int getTotalTodoLike(Long userId) throws BaseException{
+        try {
+            return todoMemberLikeRepository.countTotalTodoLike(userId);
+        }catch(Exception e){
+            log.error("TodoService.getTotalTodoLike error");
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+    public int getPushTotalTodoLike(Long userId) throws BaseException {
+        try{
+            return todoMemberLikeRepository.countPushTotalTodoLike(userId);
+        }catch(Exception e){
+            log.error("TodoService.getPushTotalTodoLike");
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
+    public void changeTodoTitle(Long userId, Long todoMemberId, ChangeTodoReqDTO reqDTO) throws BaseException {
+        TodoMember todoMember = todoMemberRepository.findById(todoMemberId)
+                .orElseThrow(() -> new BaseException(NOT_EXIST_TODO_MEMBER));
+        //개인 목표가 아님
+        if(todoMember.getGoalMember().getGoal().getGroupFlag()== GroupCategory.GROUP){
+            throw new BaseException(NOT_GROUP_TODO);
+        }
+        try {
+            Todo todo = todoMember.getTodo();
+            todo.changeTitle(reqDTO.getTitle());
+            todoRepository.save(todo);
+        }catch (Exception e){
+            throw new BaseException(FAILED_TO_CHANGE_TODO);
+        }
+    }
+
+
 }

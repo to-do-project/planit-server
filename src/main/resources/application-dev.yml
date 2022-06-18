@@ -51,4 +51,9 @@ jwt:
   refresh-token-reissue-time: ${secrets.REFRESH_TOKEN_REISSUE_TIME}
   access-token-header-name: ${secrets.ACCESS_TOKEN_HEADER_NAME}
   refresh-token-header-name: ${secrets.REFRESH_TOKEN_HEADER_NAME}
-  user-id-header-name: ${secrets.USER_ID_HEADER_NAME} 
+  user-id-header-name: ${secrets.USER_ID_HEADER_NAME}
+
+fcm:
+  key:
+    path: firebase_service_key.json
+    scope: ${secrets.FIREBASE_CREATE_SCOPED}

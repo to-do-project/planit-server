@@ -50,14 +50,22 @@ public class TodoMember {
     }
 
     //checkTodo
-    public void checkTodo(){
-        this.completeFlag = CompleteFlag.COMPLETE;
-        this.updateAt = now();
+    public boolean checkTodo(){
+        if(completeFlag==CompleteFlag.INCOMPLETE) {
+            this.completeFlag = CompleteFlag.COMPLETE;
+            this.updateAt = now();
+            return true;
+        }
+        return false;
     }
     //uncheckTodo()
-    public void uncheckTodo(){
-        this.completeFlag = CompleteFlag.INCOMPLETE;
-        this.updateAt = now();
+    public boolean uncheckTodo(){
+        if(completeFlag==CompleteFlag.COMPLETE) {
+            this.completeFlag = CompleteFlag.INCOMPLETE;
+            this.updateAt = now();
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -65,4 +73,5 @@ public class TodoMember {
         return "todoMemberId"+this.todoMemberId+
                 "\n completeFlag"+this.completeFlag;
     }
+
 }

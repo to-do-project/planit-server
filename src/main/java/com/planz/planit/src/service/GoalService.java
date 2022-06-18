@@ -109,7 +109,7 @@ public class GoalService {
         try{
             //매니저인지 확인
             if(goalMemberRepository.checkMemberRole(userId,goalId)==GoalMemberRole.MANAGER){
-                goalRepository.deleteById(goalId); //목표 삭제
+                goalRepository.deleteGoalById(goalId); //목표 삭제
                 //멤버 모두 삭제?
                 goalMemberRepository.deleteAllGoalMemberInQuery(goalId);
 
@@ -162,7 +162,7 @@ public class GoalService {
             }
 
             //알림 처리
-            notificationService.confirmGroupReqNotification(userId, goalId);
+            //notificationService.confirmGroupReqNotification(userId, goalId);
         }catch(Exception e){
             throw new BaseException(FAILED_TO_ACCEPT_GOAL);
         }
@@ -289,10 +289,9 @@ public class GoalService {
 
     //내 목표 조회
     public List<GetGoalMainInfoResDTO> getGoalMainInfo(Long targetUserId) throws BaseException {
-
         //목표 조회 (수락 및 보관함 X)
         List<GoalMember> targetGoalMembers = goalMemberRepository.findGoalMembersByMember(targetUserId)
-                .stream().filter(m->m.getStatus()==ACCEPT&&m.getGoal().getGoalStatus()==ACTIVE)
+                .stream().filter(m->m.getStatus()==ACCEPT && m.getGoal().getGoalStatus()==ACTIVE)
                 .collect(Collectors.toList());
         //없으면 리턴
         if(targetGoalMembers.isEmpty() || targetGoalMembers==null){
@@ -302,7 +301,7 @@ public class GoalService {
         for (GoalMember targetGoalMember : targetGoalMembers) {
             //todoMember 조회 (오늘자 것만)
             List<TodoMember> todoMembers = targetGoalMember.getTodoMembers()
-                    .stream().filter(m->m.getUpdateAt().toLocalDate().equals(LocalDate.now()))
+                    .stream().filter(m->m.getUpdateAt().toLocalDate().isEqual(LocalDate.now()))
                     .collect(Collectors.toList());
             int completeCount = todoMembers.stream().filter(m->m.getCompleteFlag()==CompleteFlag.COMPLETE)
                     .collect(Collectors.toList()).size();
@@ -359,7 +358,7 @@ public class GoalService {
         for (GoalMember targetGoalMember : targetGoalMembers) {
             //todoMember 조회 (오늘자 투두 조회)
             List<TodoMember> todoMembers = targetGoalMember.getTodoMembers()
-                    .stream().filter(m->m.getUpdateAt().toLocalDate().equals(LocalDate.now()))
+                    .stream().filter(m->m.getUpdateAt().toLocalDate().isEqual(LocalDate.now()))
                     .collect(Collectors.toList());
             int completeCount = todoMembers.stream().filter(m->m.getCompleteFlag()==CompleteFlag.COMPLETE)
                     .collect(Collectors.toList()).size();

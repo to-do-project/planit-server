@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.http.HttpHeaders;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
@@ -23,16 +24,16 @@ import static com.planz.planit.config.BaseResponseStatus.FCM_SEND_ERROR;
 @Component
 @RequiredArgsConstructor
 public class FirebaseCloudMessageService {
-
-    private final String API_URL = "https://fcm.googleapis.com/v1/projects/mentos-4adeb/messages:send";
+    @Value("${fcm.key.scope}")
+    private String API_URL;
     private final ObjectMapper objectMapper;
 
-    public void sendMessageTo(List<String> targetToken, String title, String body, int flag) throws BaseException {
+    public void sendMessageTo(List<String> targetToken, String title, String body) throws BaseException {
         AtomicBoolean fcmPushSuccess = new AtomicBoolean(true);
         //log.info("sendMessageTo method");
         targetToken.forEach(i-> {
             try {
-                String message = makeMessage(i, title, body, flag);
+                String message = makeMessage(i, title, body);
 
                 OkHttpClient client = new OkHttpClient();
                 RequestBody requestBody = RequestBody.create(message,
@@ -56,14 +57,13 @@ public class FirebaseCloudMessageService {
             throw new BaseException(FCM_SEND_ERROR);
         }
     }
-    private String makeMessage(String targetToken, String title, String body,int flag) throws JsonParseException, JsonProcessingException {
+    private String makeMessage(String targetToken, String title, String body) throws JsonParseException, JsonProcessingException {
         FcmMessage fcmMessage = FcmMessage.builder()
                 .message(FcmMessage.Message.builder()
                         .token(targetToken)
                         .data(FcmMessage.Data.builder()
                                 .title(title)
                                 .body(body)
-                                .receiverFlag(Integer.toString(flag))
                                 .build()
                         ).build()).validateOnly(false).build();
 

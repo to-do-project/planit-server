@@ -34,4 +34,7 @@ public class Todo {
         this.goal = goal;
         this.title = title;
     }
+    public void changeTitle(String title){
+        this.title = title;
+    }
 }
