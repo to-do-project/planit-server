@@ -86,6 +86,7 @@ public class FriendService {
 
     //친구 수락
     //친구 거절 및 삭제
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public boolean acceptFriend(AcceptReqDTO acceptReqDTO) throws BaseException {
         try {
             Friend friend = friendRepository.findById(acceptReqDTO.getFriendId()).orElseThrow();
