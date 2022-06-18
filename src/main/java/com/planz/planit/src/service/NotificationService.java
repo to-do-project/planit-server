@@ -3,6 +3,7 @@ package com.planz.planit.src.service;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.src.domain.friend.Friend;
 import com.planz.planit.src.domain.goal.Goal;
+import com.planz.planit.src.domain.notice.Notice;
 import com.planz.planit.src.domain.notification.*;
 import com.planz.planit.src.domain.notification.dto.GetNotificationsResDTO;
 import com.planz.planit.src.domain.user.User;
@@ -31,16 +32,35 @@ public class NotificationService {
 
     /**
      * 알림 생성 함수
+     * 1. 공지사항 알림인 경우, NoticeNotification 엔티티 생성후 DB에 저장
+     * 2. 친구 요청 알림인 경우, FriendReqNotification 엔티티 생성후 DB에 저장
+     * 3. 그룹 초대 요청 알림인 경우, GroupReqNotification 엔티티 생성후 DB에 저장
+     * 4. 그 외 알림인 경우, Notification 엔티티 생성후 DB에 저장
+     * 5. 푸쉬 알림 보내기 => 추가 로직 필요!!!!
      */
-    public void createNotification(User user, NotificationSmallCategory category, String content, Friend friend, Goal goal) throws BaseException {
+    public void createNotification(User user, NotificationSmallCategory category, String content, Friend friend, Goal goal, Notice notice) throws BaseException {
         try {
 
             if (user == null || category == null || content == null) {
                 throw new NullPointerException("user, category, content를 모두 입력해주세요.");
             }
 
-            // 친구 요청 알림인 경우
-            if (category == FRIEND_REQUEST){
+            // 1. 공지사항 알림인 경우, NoticeNotification 엔티티 생성후 DB에 저장
+            if (category == NOTICE_TWO){
+                if (notice == null){
+                    throw new NullPointerException("notice를 입력해주세요.");
+                }
+
+                NoticeNotification notification = NoticeNotification.builder()
+                        .user(user)
+                        .category(category)
+                        .content(content)
+                        .notice(notice)
+                        .build();
+                saveNotification(notification);
+            }
+            // 2. 친구 요청 알림인 경우, FriendReqNotification 엔티티 생성후 DB에 저장
+            else if (category == FRIEND_REQUEST){
                 if (friend == null) {
                     throw new NullPointerException("friend를 입력해주세요.");
                 }
@@ -53,7 +73,7 @@ public class NotificationService {
                         .build();
                 saveNotification(notification);
             }
-            // 그룹 초대 요청 알림인 경우
+            // 3. 그룹 초대 요청 알림인 경우, GroupReqNotification 엔티티 생성후 DB에 저장
             else if (category == GROUP_REQUEST) {
                 if (goal == null) {
                     throw new NullPointerException("goal을 입력해주세요.");
@@ -67,7 +87,7 @@ public class NotificationService {
                         .build();
                 saveNotification(notification);
             }
-            // 그 외 알림인 경우
+            // 4. 그 외 알림인 경우, Notification 엔티티 생성후 DB에 저장
             else {
                 Notification notification = Notification.builder()
                         .user(user)
@@ -79,7 +99,7 @@ public class NotificationService {
             }
 
 
-            // 푸쉬 알림 보내기
+            // 5. 푸쉬 알림 보내기
             if (category.getLargeCategory() == NOTICE) {
 
             } else if (category.getLargeCategory() == FRIEND) {
@@ -214,12 +234,16 @@ public class NotificationService {
      * - 공지사항 2개 최상단
      * - 확정하지 않은 친구 요청, 그룹 초대 요청은 최상단
      * - 나머지 알림은 시간순으로 최대 200개까지 조회 가능
-     * 1.
+     * 1. 확정하지 않은 그룹 초대 요청 알림 리스트 조회
+     * 2. 확정하지 않은 친구 요청 알림 리스트 조회
+     * 3. 공지사항 알림 리스트 조회 (최대 2개)
+     * 4. 일반 알림 리스트 조회
      */
     public GetNotificationsResDTO getNotifications(Long userId) throws BaseException {
 
         try {
 
+            // 1. 확정하지 않은 그룹 초대 요청 알림 리스트 조회
             List<GroupReqNotification> groupReqNotifications = getAllNotConfirmedGroupReqNotis(userId);
             List<GetNotificationsResDTO.GroupReqNotificationDTO> groupReqNotificationsResult = groupReqNotifications.stream().
                     map(n -> GetNotificationsResDTO.GroupReqNotificationDTO.builder()
@@ -235,7 +259,7 @@ public class NotificationService {
                     .sorted(Comparator.comparing(GetNotificationsResDTO.GroupReqNotificationDTO::getCreateAt).reversed())
                     .collect(Collectors.toList());
 
-
+            // 2. 확정하지 않은 친구 요청 알림 리스트 조회
             List<FriendReqNotification> friendReqNotifications = getAllNotConfirmedFriendReqNotis(userId);
             List<GetNotificationsResDTO.FriendReqNotificationDTO> friendReqNotificationsResult = friendReqNotifications.stream()
                     .map(n -> GetNotificationsResDTO.FriendReqNotificationDTO.builder()
@@ -252,24 +276,28 @@ public class NotificationService {
                     .collect(Collectors.toList());
 
 
-            List<Notification> noticeNotifications = getAllNotifications(userId);
-            List<GetNotificationsResDTO.BasicNotificationDTO> noticeNotificationsResult =
+            // 3. 공지사항 알림 리스트 조회 (최대 2개)
+            List<NoticeNotification> noticeNotifications = getAllNoticeNotifications(userId);
+            List<GetNotificationsResDTO.NoticeNotificationDTO> noticeNotificationsResult =
                     noticeNotifications.stream()
                             .filter(n -> n.getCategory() == NOTICE_TWO)
-                            .map(n -> GetNotificationsResDTO.BasicNotificationDTO.builder()
+                            .map(n -> GetNotificationsResDTO.NoticeNotificationDTO.builder()
                                     .notificationId(n.getNotificationId())
                                     .userId(n.getUser().getUserId())
                                     .category(n.getCategory().name())
                                     .content(n.getContent())
                                     .createAt(n.getCreateAt())
                                     .readStatus(n.getReadStatus().name())
+                                    .noticeId(n.getNotice().getNoticeId())
                                     .build())
-                            .sorted(Comparator.comparing(GetNotificationsResDTO.BasicNotificationDTO::getCreateAt).reversed())
+                            .sorted(Comparator.comparing(GetNotificationsResDTO.NoticeNotificationDTO::getCreateAt).reversed())
                             .limit(2)
                             .collect(Collectors.toList());
 
+            // 4. 일반 알림 리스트 조회
+            List<Notification> etcNotifications = getAllNotifications(userId);
             List<GetNotificationsResDTO.BasicNotificationDTO> etcNotificationsResult =
-                    noticeNotifications.stream()
+                    etcNotifications.stream()
                             .filter(n -> n.getCategory() != NOTICE_TWO && n.getCategory() != FRIEND_REQUEST && n.getCategory() != GROUP_REQUEST)
                             .map(n -> GetNotificationsResDTO.BasicNotificationDTO.builder()
                                     .notificationId(n.getNotificationId())
@@ -316,6 +344,19 @@ public class NotificationService {
             return notificationRepository.getAllNotConfirmedFriendReqNotis(userId, NotificationStatus.NOT_CONFIRM);
         } catch (Exception e) {
             log.error("getAllNotConfirmedFriendReqNotis() : notificationRepository.getAllNotConfirmedFriendReqNotis() 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    /**
+     * userId로 DB에서 모든 NoticeNotification 엔티티 조회
+     */
+    public List<NoticeNotification> getAllNoticeNotifications(Long userId) throws BaseException {
+        try {
+            return notificationRepository.getAllNoticeNotifications(userId);
+        } catch (Exception e) {
+            log.error("getAllNoticeNotifications() : notificationRepository.getAllNoticeNotifications(userId) 실행 중 데이터베이스 에러 발생");
             e.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }

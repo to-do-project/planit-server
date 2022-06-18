@@ -15,7 +15,7 @@ import java.util.List;
 public class GetNotificationsResDTO {
 
     // "공지사항" 알림 리스트
-    List<BasicNotificationDTO> noticeNotifications;
+    List<NoticeNotificationDTO> noticeNotifications;
 
     // "친구 요청" 알림 리스트
     List<FriendReqNotificationDTO> friendReqNotifications;
@@ -29,7 +29,7 @@ public class GetNotificationsResDTO {
 
     @Getter
     @Builder
-    public static class BasicNotificationDTO{
+    public static class NoticeNotificationDTO{
         private Long notificationId;
         private Long userId;
         private String category;
@@ -40,6 +40,7 @@ public class GetNotificationsResDTO {
         private LocalDateTime createAt;
 
         private String readStatus;
+        private Long noticeId;
     }
 
     @Getter
@@ -76,5 +77,20 @@ public class GetNotificationsResDTO {
         private String readStatus;
         private Long goalId;
         private String confirmStatus;
+    }
+
+    @Getter
+    @Builder
+    public static class BasicNotificationDTO{
+        private Long notificationId;
+        private Long userId;
+        private String category;
+        private String content;
+
+        @JsonSerialize(using = LocalDateTimeSerializer.class)
+        @JsonFormat(pattern = "yyyy-MM-dd kk:mm:ss")
+        private LocalDateTime createAt;
+
+        private String readStatus;
     }
 }

@@ -54,7 +54,7 @@ public class NoticeService {
             // 3. 공지사항 알림 생성
             List<User> allUser = userService.findAllUser();
             for (User user : allUser) {
-                notificationService.createNotification(user, NotificationSmallCategory.NOTICE_TWO, "[공지] " + notice.getTitle(), null, null);
+                notificationService.createNotification(user, NotificationSmallCategory.NOTICE_TWO, "[공지] " + notice.getTitle(), null, null, notice);
             }
         } catch (BaseException e) {
             throw e;

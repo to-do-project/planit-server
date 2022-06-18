@@ -24,6 +24,9 @@ public interface NotificationRepository<T extends Notification> extends JpaRepos
     @Query(value = "select frn from FriendReqNotification frn where frn.user.userId = :userId and frn.confirmStatus = :confirmStatus")
     List<FriendReqNotification> getAllNotConfirmedFriendReqNotis(@Param("userId") Long userId, @Param("confirmStatus") NotificationStatus confirmStatus);
 
+    @Query(value = "select nn from NoticeNotification nn where nn.user.userId = :userId")
+    List<NoticeNotification> getAllNoticeNotifications(@Param("userId") Long userId);
+
     @Query(value = "select n from Notification n where n.user.userId = :userId")
     List<Notification> getAllNotifications(@Param("userId") Long userId);
 }
