@@ -10,6 +10,7 @@ import com.planz.planit.src.domain.planet.PlanetRepository;
 import com.planz.planit.src.domain.planet.dto.GetPlanetMainInfoResDTO;
 import com.planz.planit.src.domain.planet.dto.GetPlanetMyInfoResDTO;
 import com.planz.planit.src.domain.user.User;
+import com.planz.planit.src.domain.user.UserStatus;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -98,6 +99,11 @@ public class PlanetService {
             // 1. 타켓 유저 조회
             User user = userService.findUser(targetUserId);
 
+            boolean isRunAway = false;
+            if (user.getUserStatus() == UserStatus.RUN_AWAY){
+                isRunAway = true;
+            }
+
             // 2. 타겟 유저의 행성 조회
             Planet planet = findPlanetByUserId(targetUserId);
 
@@ -130,6 +136,7 @@ public class PlanetService {
                     .userId(targetUserId)
                     .planetColor(planet.getColor().name())
                     .level(planet.getLevel())
+                    .isRunAway(isRunAway)
                     .characterItem(user.getCharacterItem())
                     .planetItemList(planetItemList)
                     .build();

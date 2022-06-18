@@ -19,6 +19,9 @@ public class GetPlanetMainInfoResDTO {
     // 행성 레벨
     private Integer level;
 
+    // 캐릭터 가출 여부
+    private Boolean isRunAway;
+
     // 현재 사용중인 캐릭터 아이템 아이디
     private Long characterItem;
 
