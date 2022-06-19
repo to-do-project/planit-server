@@ -32,4 +32,7 @@ public interface DeviceTokenRepository extends JpaRepository<DeviceToken,Long> {
 
     @Query(value = "CALL run_away();", nativeQuery = true)
     List<DeviceToken> callRunAwayProcedure();
+
+    @Query(value = "select d.deviceToken from DeviceToken d where d.noticeFlag = 1")
+    List<String> findAllDeviceTokens_noticeFlag1();
 }
