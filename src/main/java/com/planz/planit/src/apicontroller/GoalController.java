@@ -1,5 +1,6 @@
 package com.planz.planit.src.apicontroller;
 
+import com.fasterxml.jackson.databind.ser.Serializers;
 import com.google.api.Http;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponse;
@@ -171,4 +172,15 @@ public class GoalController {
         }
     }
 
+    @GetMapping("/goals/accept/{goalId}")
+    @ApiOperation("그룹 초대 수락 화면 조회 API")
+    public BaseResponse<GetAcceptGoalResDTO> getAcceptGoal(HttpServletRequest request, @PathVariable Long goalId){
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
+
+        try{
+            return new BaseResponse<>(goalService.getAcceptGoal(userId,goalId));
+        }catch(BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 }

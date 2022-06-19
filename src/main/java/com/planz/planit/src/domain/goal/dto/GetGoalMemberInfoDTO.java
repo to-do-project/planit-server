@@ -1,16 +1,14 @@
-package com.planz.planit.src.domain.user.dto;
+package com.planz.planit.src.domain.goal.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class GoalSearchUserResDTO {
-    private Long userId;
+public class GetGoalMemberInfoDTO {
     private String nickname;
     private String profileColor;
+    private boolean managerFlag;
 }

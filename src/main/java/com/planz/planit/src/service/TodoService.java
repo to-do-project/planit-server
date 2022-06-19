@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
@@ -38,7 +40,7 @@ public class TodoService {
     }
 
     @Transactional(rollbackFor = {Exception.class, BaseException.class})
-    public void createTodo(Long userId, CreateTodoReqDTO createTodoReqDTO) throws BaseException {
+    public CreateTodoResDTO createTodo(Long userId, CreateTodoReqDTO createTodoReqDTO) throws BaseException {
         //투두 생성자가 매니저인지 아닌지 확인
         goalService.checkManager(userId, createTodoReqDTO.getGoalId());
 
@@ -60,7 +62,8 @@ public class TodoService {
 
             //목표 멤버 조회
             List<GoalMember> goalMembers = goalService.getGoalMembers(createTodoReqDTO.getGoalId());
-
+            GoalMember first = goalMembers.stream().filter(m -> m.getMember().getUserId() == userId)
+                    .findAny().orElseThrow(()-> new BaseException(INVALID_GOAL_USER));
             //멤버 당 todo 상태 저장
             for(GoalMember goalMember:goalMembers){
                 TodoMember todoMember = TodoMember.builder()
@@ -69,6 +72,9 @@ public class TodoService {
                         .build();
                 todoMemberRepository.save(todoMember);
             }
+
+            TodoMember result = todoMemberRepository.findTodoMemberByTodoAndGoalMember(todo.getTodoId(), first.getGoalMemberId());
+            return new CreateTodoResDTO(result.getTodoMemberId());
 
         }catch(Exception e){
             throw new BaseException(FAILED_TO_CREATE_TODO);

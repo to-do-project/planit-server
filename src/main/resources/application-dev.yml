@@ -57,6 +57,7 @@ jwt:
   access-token-header-name: ${secrets.ACCESS_TOKEN_HEADER_NAME}
   refresh-token-header-name: ${secrets.REFRESH_TOKEN_HEADER_NAME}
   user-id-header-name: ${secrets.USER_ID_HEADER_NAME}
+  device-token-header-name: ${secrets.DEVICE_TOKEN_HEADER_NAME}
 
 fcm:
   key:

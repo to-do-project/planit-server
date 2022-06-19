@@ -63,7 +63,8 @@ jobs:
           jwt.refresh-token-reissue-time: ${{ secrets.REFRESH_TOKEN_REISSUE_TIME }} 
           jwt.access-token-header-name: ${{ secrets.ACCESS_TOKEN_HEADER_NAME }} 
           jwt.refresh-token-header-name: ${{ secrets.REFRESH_TOKEN_HEADER_NAME }} 
-          jwt.user-id-header-name: ${{ secrets.USER_ID_HEADER_NAME }} 
+          jwt.user-id-header-name: ${{ secrets.USER_ID_HEADER_NAME }}
+          jwt.device-token-header-name : ${{secrets.DEVICE_TOKEN_HEADER_NAME}}
           fcm.key.path: firebase_service_key.json
           fcm.key.scope: ${{ secrets.FIREBASE_CREATE_SCOPED }}
           

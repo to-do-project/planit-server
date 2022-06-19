@@ -3,10 +3,7 @@ package com.planz.planit.src.apicontroller;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponse;
 import com.planz.planit.config.BaseResponseStatus;
-import com.planz.planit.src.domain.todo.dto.ChangeTodoReqDTO;
-import com.planz.planit.src.domain.todo.dto.CheckTodoResDTO;
-import com.planz.planit.src.domain.todo.dto.CreateTodoReqDTO;
-import com.planz.planit.src.domain.todo.dto.GetLikeTodoResDTO;
+import com.planz.planit.src.domain.todo.dto.*;
 import com.planz.planit.src.service.GoalService;
 import com.planz.planit.src.service.TodoService;
 import io.swagger.annotations.ApiOperation;
@@ -37,7 +34,7 @@ public class TodoController {
 
     @PostMapping("/todo")
     @ApiOperation("투두 추가 API")
-    public BaseResponse<String> createTodo(HttpServletRequest request, @Valid @RequestBody CreateTodoReqDTO createTodoReqDTO, BindingResult br){
+    public BaseResponse<CreateTodoResDTO> createTodo(HttpServletRequest request, @Valid @RequestBody CreateTodoReqDTO createTodoReqDTO, BindingResult br){
         if(br.hasErrors()){
             String errorName = br.getAllErrors().get(0).getDefaultMessage();
             return new BaseResponse<>(BaseResponseStatus.of(errorName));
@@ -46,8 +43,8 @@ public class TodoController {
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
 
         try {
-            todoService.createTodo(userId,createTodoReqDTO);
-            return new BaseResponse<>("투두 생성을 완료했습니다.");
+
+            return new BaseResponse<>(todoService.createTodo(userId,createTodoReqDTO));
         }catch(BaseException e){
             return new BaseResponse(e.getStatus());
         }
@@ -65,7 +62,7 @@ public class TodoController {
         }
     }
     @PatchMapping("/todo/{todoMemberId}")
-    @ApiOperation("투두 체크 API")
+    @ApiOperation("투두 체크 해제 API")
     public BaseResponse<CheckTodoResDTO> uncheckTodo(HttpServletRequest request, @PathVariable(name="todoMemberId") Long todoMemberId){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try{

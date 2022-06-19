@@ -75,7 +75,12 @@ public class DeviceToken {
     public void changeFlag(DeviceTokenFlag flag){
         switch (flag){
             case ALL:
+                System.out.println();
                 this.allFlag = this.allFlag==1?0:1;
+                this.friendFlag = this.allFlag;
+                this.settingFlag = this.allFlag;
+                this.groupFlag = this.allFlag;
+                this.noticeFlag = this.allFlag;
                 break;
             case FRIEND:
                 this.friendFlag = this.friendFlag==1?0:1;
@@ -94,5 +99,6 @@ public class DeviceToken {
                 this.allFlag = 0;
                 break;
         }
+
     }
 }
