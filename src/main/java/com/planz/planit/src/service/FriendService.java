@@ -56,11 +56,11 @@ public class FriendService {
                     .fromUser(user)
                     .toUser(toUser)
                     .build();
-            friendRepository.save(friend);
+            Friend save = friendRepository.save(friend);
+
         }catch(Exception e){
             throw new BaseException(DATABASE_ERROR);
         }
-
 
     }
 

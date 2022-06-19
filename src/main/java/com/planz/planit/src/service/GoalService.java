@@ -90,11 +90,11 @@ public class GoalService {
 
                 }
             }
-            return true; //그룹 생성 성공 시 true
+
         }catch(Exception e){
             throw new BaseException(FAILED_TO_CREATE_GOAL);
         }
-
+        return true; //그룹 생성 성공 시 true
     }
 
     /**
@@ -158,11 +158,11 @@ public class GoalService {
                 findGoalMember.accept();
                 goalMemberRepository.save(findGoalMember);
             }else{
-                goalMemberRepository.delete(findGoalMember);
+                goalMemberRepository.delete(findGoalMember); //수정 필요 체크하기
             }
 
             //알림 처리
-            //notificationService.confirmGroupReqNotification(userId, goalId);
+            notificationService.confirmGroupReqNotification(userId, goalId);
         }catch(Exception e){
             throw new BaseException(FAILED_TO_ACCEPT_GOAL);
         }

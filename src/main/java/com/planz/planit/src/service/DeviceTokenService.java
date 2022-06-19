@@ -6,6 +6,7 @@ import com.planz.planit.src.domain.deviceToken.DeviceTokenFlag;
 import com.planz.planit.src.domain.deviceToken.DeviceTokenRepository;
 import com.planz.planit.src.domain.deviceToken.dto.ChangeFlagReqDTO;
 import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
+import com.planz.planit.src.domain.deviceToken.dto.GetAlarmInfoResDTO;
 import com.planz.planit.src.domain.user.User;
 import io.lettuce.core.dynamic.annotation.Param;
 import lombok.extern.slf4j.Slf4j;
@@ -14,8 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.planz.planit.config.BaseResponseStatus.DATABASE_ERROR;
-import static com.planz.planit.config.BaseResponseStatus.FAILED_TO_DELETE_DEVICE_TOKEN;
+import static com.planz.planit.config.BaseResponseStatus.*;
 
 @Slf4j
 @Service
@@ -86,8 +86,9 @@ public class DeviceTokenService {
             User user = userService.findUser(userId);
             DeviceToken findToken = deviceTokenRepository.findDeviceTokenByUserIdAndDeviceToken(userId, reqDTO.getDeviceToken());
             findToken.changeFlag(DeviceTokenFlag.valueOf(reqDTO.getFlag()));
+            deviceTokenRepository.save(findToken);
         }catch(Exception e){
-            throw new BaseException(DATABASE_ERROR);
+            throw new BaseException(FAILED_TO_CHANGE_FLAG);
         }
     }
 
@@ -98,6 +99,17 @@ public class DeviceTokenService {
         }
         catch (Exception e){
             throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    public GetAlarmInfoResDTO getAlarmInfo(Long userId,String deviceToken) throws BaseException {
+        try{
+            DeviceToken findDeviceToken = deviceTokenRepository.findDeviceTokenByUserIdAndDeviceToken(userId, deviceToken);
+            log.info("deviceRepository.findDeviceTokenByUserIdAndDeviceToken() 호출");
+            return new GetAlarmInfoResDTO(findDeviceToken.getAllFlag(),findDeviceToken.getFriendFlag(),
+                    findDeviceToken.getGroupFlag(),findDeviceToken.getSettingFlag(),findDeviceToken.getNoticeFlag());
+        }catch(Exception e){
+            throw new BaseException(FAILED_TO_GET_ALARM_INFO);
         }
     }
 }

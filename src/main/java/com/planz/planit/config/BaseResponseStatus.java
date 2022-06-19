@@ -106,6 +106,8 @@ public enum BaseResponseStatus {
     FAILED_TO_CHANGE_TODO(false,5045,"투두 수정에 실패했습니다."),
     NOT_ACTIVE_GOAL(false,5046,"활성화된 목표에만 투두 추가가 가능합니다."),
     FAILED_TO_UNCHECK_TODO(false,5047,"투두 체크 취소에 실패했습니다."),
+    FAILED_TO_CHANGE_FLAG(false,5048,"알림 설정 변경에 실패했습니다."),
+    FAILED_TO_GET_ALARM_INFO(false,5049,"알림 설정 조회에 실패했습니다."),
 
     // 6000 : 필요시 만들어서 쓰세요
     // 회원가입 & 로그인 관련 BaseResponseStatus

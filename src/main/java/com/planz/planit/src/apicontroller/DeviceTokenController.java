@@ -5,6 +5,7 @@ import com.planz.planit.config.BaseResponse;
 import com.planz.planit.config.BaseResponseStatus;
 import com.planz.planit.src.domain.deviceToken.dto.ChangeFlagReqDTO;
 import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
+import com.planz.planit.src.domain.deviceToken.dto.GetAlarmInfoResDTO;
 import com.planz.planit.src.service.DeviceTokenService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,9 @@ import static com.planz.planit.config.BaseResponseStatus.SUCCESS;
 public class DeviceTokenController {
     @Value("${jwt.user-id-header-name}")
     private String USER_ID_HEADER_NAME;
+
+    @Value("${jwt.device-token-header-name}")
+    private String DEVICE_TOKEN_HEADER_NAME;
 
     private final DeviceTokenService deviceTokenService;
 
@@ -45,11 +49,7 @@ public class DeviceTokenController {
         }
     }
 
-    /**
-     *유저 디바이스 토큰 갱신 구현 필요!!!!!
-     */
-
-    @PatchMapping("/device-token")
+    @PatchMapping("/alarms")
     @ApiOperation(value="알림 설정 on off")
     public BaseResponse<String> changeFlag(HttpServletRequest request, @Valid @RequestBody ChangeFlagReqDTO reqDTO, BindingResult br){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
@@ -62,6 +62,18 @@ public class DeviceTokenController {
             return new BaseResponse<>(reqDTO.getFlag()+"알림 설정 변경을 완료했습니다.");
         }catch(BaseException e){
             return new BaseResponse(e.getStatus());
+        }
+    }
+
+    @GetMapping("/alarms")
+    @ApiOperation(value = "알림 설정 조회 API")
+    public BaseResponse<GetAlarmInfoResDTO> getAlarmInfo(HttpServletRequest request){
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
+        String deviceToken = request.getHeader(DEVICE_TOKEN_HEADER_NAME);
+        try{
+            return new BaseResponse<>(deviceTokenService.getAlarmInfo(userId,deviceToken));
+        }catch(BaseException e){
+            return new BaseResponse<>(e.getStatus());
         }
     }
 
