@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
@@ -124,6 +125,20 @@ public class DeviceTokenService {
             log.error("callRunAwayProcedure() : deviceTokenRepository.callRunAwayProcedure() 실행 중 데이터베이스 에러 발생");
             e.printStackTrace();
         }
-        return null;
+        return Collections.emptyList();
+    }
+
+    /**
+     * notice_flag가 1인 모든 사용자의 deviceToken 리스트 조회
+     */
+    public List<String> findAllDeviceTokens_noticeFlag1(){
+        try{
+            return deviceTokenRepository.findAllDeviceTokens_noticeFlag1();
+        }
+        catch (Exception e){
+            log.error("findAllDeviceTokens_noticeFlag1() : deviceTokenRepository.findAllDeviceTokens_noticeFlag1() 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
     }
 }

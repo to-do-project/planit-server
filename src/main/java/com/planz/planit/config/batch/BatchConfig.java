@@ -1,5 +1,6 @@
 package com.planz.planit.config.batch;
 
+import com.planz.planit.config.BaseException;
 import com.planz.planit.config.fcm.FirebaseCloudMessageService;
 import com.planz.planit.src.domain.deviceToken.DeviceToken;
 import com.planz.planit.src.service.DeviceTokenService;
@@ -58,16 +59,19 @@ public class BatchConfig {
 
                     // MySQL의 가출 프로시저 (run_away) 실행
                     List<DeviceToken> deviceTokenList = deviceTokenService.callRunAwayProcedure();
+                    // setting_flag가 1이고, 가출 상태인 사용자의 deviceToken 값 리스트
                     List<String> deviceTokens = deviceTokenList.stream()
                             .map(DeviceToken::getDeviceToken)
                             .collect(Collectors.toList());
 
-                    for (String deviceToken : deviceTokens) {
-                        log.info("디바이스 토큰 : " + deviceToken);
+                    try{
+                        // push 알림 전송
+                        firebaseCloudMessageService.sendMessageTo(deviceTokens, "[가출]", "별 주민이 우주선을 타고 행성을 떠났습니다. 빨리 행성을 확인해주세요!");
+                        log.info("[FCM 전송 성공] setting_flag가 1이고 가출 상태인 사용자에게, 가출 FCM 전송 성공");
                     }
-
-                    // push 알림 전송 => flag값 확인 !!
-                    //firebaseCloudMessageService.sendMessageTo(deviceTokens, "[가출]", "별 주민이 우주선을 타고 행성을 떠났습니다. 빨리 행성을 확인해주세요!", 1);
+                    catch (BaseException e){
+                        log.error("[FCM 전송 실패] " + e.getStatus());
+                    }
 
                     return RepeatStatus.FINISHED;
                 })
