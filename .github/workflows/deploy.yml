@@ -55,6 +55,8 @@ jobs:
           spring.mail.password: ${{ secrets.MAIL_PASSWORD }} 
           spring.mail.properties.mail.smtp.auth: true 
           spring.mail.properties.mail.smtp.starttls.enable: true 
+          spring.batch.job.enabled: false
+          spring.batch.jdbc.initialize-schema: always
           jwt.secret-key: ${{ secrets.JWT_SECRET_KEY }} 
           jwt.access-token-expire-time: ${{ secrets.ACCESS_TOKEN_EXPIRE_TIME }} 
           jwt.refresh-token-expire-time: ${{ secrets.REFRESH_TOKEN_EXPIRE_TIME }} 
@@ -62,6 +64,9 @@ jobs:
           jwt.access-token-header-name: ${{ secrets.ACCESS_TOKEN_HEADER_NAME }} 
           jwt.refresh-token-header-name: ${{ secrets.REFRESH_TOKEN_HEADER_NAME }} 
           jwt.user-id-header-name: ${{ secrets.USER_ID_HEADER_NAME }} 
+          fcm.key.path: firebase_service_key.json
+          fcm.key.scope: ${{ secrets.FIREBASE_CREATE_SCOPED }}
+          
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
