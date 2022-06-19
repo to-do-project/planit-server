@@ -29,4 +29,7 @@ public interface DeviceTokenRepository extends JpaRepository<DeviceToken,Long> {
     @Modifying
     @Query("select d.deviceTokenId from DeviceToken d where d.user.userId = :userId")
     List<Long> findAllByUserIdInQuery(@Param("userId") Long userId);
+
+    @Query(value = "CALL run_away();", nativeQuery = true)
+    List<DeviceToken> callRunAwayProcedure();
 }

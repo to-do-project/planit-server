@@ -102,14 +102,28 @@ public class DeviceTokenService {
         }
     }
 
+
     public GetAlarmInfoResDTO getAlarmInfo(Long userId,String deviceToken) throws BaseException {
-        try{
+        try {
             DeviceToken findDeviceToken = deviceTokenRepository.findDeviceTokenByUserIdAndDeviceToken(userId, deviceToken);
             log.info("deviceRepository.findDeviceTokenByUserIdAndDeviceToken() 호출");
-            return new GetAlarmInfoResDTO(findDeviceToken.getAllFlag(),findDeviceToken.getFriendFlag(),
-                    findDeviceToken.getGroupFlag(),findDeviceToken.getSettingFlag(),findDeviceToken.getNoticeFlag());
-        }catch(Exception e){
+            return new GetAlarmInfoResDTO(findDeviceToken.getAllFlag(), findDeviceToken.getFriendFlag(),
+                    findDeviceToken.getGroupFlag(), findDeviceToken.getSettingFlag(), findDeviceToken.getNoticeFlag());
+        } catch (Exception e) {
             throw new BaseException(FAILED_TO_GET_ALARM_INFO);
         }
+    }
+    /**
+     * 가출 프로시저 호출
+     */
+    public List<DeviceToken> callRunAwayProcedure(){
+        try{
+            return deviceTokenRepository.callRunAwayProcedure();
+        }
+        catch (Exception e){
+            log.error("callRunAwayProcedure() : deviceTokenRepository.callRunAwayProcedure() 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
+        }
+        return null;
     }
 }

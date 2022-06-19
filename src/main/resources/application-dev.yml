@@ -43,6 +43,11 @@ spring:
     pathmatch:
       matching-strategy: ${secrets.MVC_MATCH_STRATEGY}
 
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
 
 jwt:
   secret-key: ${secrets.JWT_SECRET_KEY}
@@ -52,7 +57,7 @@ jwt:
   access-token-header-name: ${secrets.ACCESS_TOKEN_HEADER_NAME}
   refresh-token-header-name: ${secrets.REFRESH_TOKEN_HEADER_NAME}
   user-id-header-name: ${secrets.USER_ID_HEADER_NAME}
-  device-token-header-name: ${secrets.DEVICE-TOKEN-HEADER-NAME}
+  device-token-header-name: ${secrets.DEVICE_TOKEN_HEADER_NAME}
 
 fcm:
   key:
