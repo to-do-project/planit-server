@@ -34,6 +34,7 @@ public class MailService {
         }
         catch (Exception e){
             log.error("mailSend() : javaMailSender.send(message) 실행 중 에러 발생");
+            e.printStackTrace();
             throw new BaseException(MAIL_SEND_ERROR);
         }
     }
