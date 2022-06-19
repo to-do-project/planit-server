@@ -3,6 +3,7 @@ package com.planz.planit.src.apicontroller;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponse;
 import com.planz.planit.config.BaseResponseStatus;
+import com.planz.planit.config.fcm.FirebaseCloudMessageService;
 import com.planz.planit.src.domain.notice.dto.CreateNoticeReqDTO;
 import com.planz.planit.src.domain.notice.dto.GetNoticesResDTO;
 import com.planz.planit.src.service.NoticeService;
@@ -17,10 +18,12 @@ import javax.validation.Valid;
 public class NoticeController {
 
     private final NoticeService noticeService;
+    private final FirebaseCloudMessageService firebaseCloudMessageService;
 
     @Autowired
-    public NoticeController(NoticeService noticeService) {
+    public NoticeController(NoticeService noticeService, FirebaseCloudMessageService firebaseCloudMessageService) {
         this.noticeService = noticeService;
+        this.firebaseCloudMessageService = firebaseCloudMessageService;
     }
 
     /**
@@ -42,6 +45,10 @@ public class NoticeController {
 
         try {
             noticeService.createNotice(reqDTO.getTitle(), reqDTO.getContent());
+
+            // FCM 보내기
+            // firebaseCloudMessageService.sendMessageTo(,"[공지사항 업데이트]", "공지사항이 업데이트 되었습니다.", 1);
+
             return new BaseResponse<>("성공적으로 새로운 공지사항을 생성했습니다.");
         }
         catch (BaseException e){

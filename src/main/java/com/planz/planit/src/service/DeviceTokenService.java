@@ -100,4 +100,18 @@ public class DeviceTokenService {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    /**
+     * 가출 프로시저 호출
+     */
+    public List<DeviceToken> callRunAwayProcedure(){
+        try{
+            return deviceTokenRepository.callRunAwayProcedure();
+        }
+        catch (Exception e){
+            log.error("callRunAwayProcedure() : deviceTokenRepository.callRunAwayProcedure() 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
