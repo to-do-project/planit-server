@@ -12,4 +12,5 @@ import lombok.Setter;
 public class GoalSearchUserResDTO {
     private Long userId;
     private String nickname;
+    private String profileColor;
 }

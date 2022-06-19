@@ -609,7 +609,7 @@ public class UserService {
     public GoalSearchUserResDTO goalSearchUsers(String nickname) throws BaseException {
         //유저 검색
         User findUser = userRepository.findByNickname(nickname).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
-        return new GoalSearchUserResDTO(findUser.getUserId(), findUser.getNickname());
+        return new GoalSearchUserResDTO(findUser.getUserId(), findUser.getNickname(),findUser.getProfileColor().toString());
     }
 
 
