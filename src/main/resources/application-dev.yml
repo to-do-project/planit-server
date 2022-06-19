@@ -61,4 +61,4 @@ jwt:
 fcm:
   key:
     path: firebase_service_key.json
-    scope: ${secrets.FIREBASE_CREATE_SCOPED}
+    scope: ${secrets.USER_ID_HEADER_NAME}
