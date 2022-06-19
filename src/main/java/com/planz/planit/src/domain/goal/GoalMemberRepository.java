@@ -11,10 +11,10 @@ import java.util.Optional;
 
 public interface GoalMemberRepository extends JpaRepository<GoalMember,Long> {
 
-    @Query("select gm from GoalMember gm where gm.goal.goalId is :goalId")
+    @Query("select gm from GoalMember gm where gm.status <> 'REJECT' and  gm.goal.goalStatus <> 'DELETE' and gm.goal.goalId is :goalId ")
     List<GoalMember> findGoalMembersByGoal(@Param("goalId") Long goalId);
 
-    @Query("select gm from GoalMember gm where gm.goal.goalId is :goalId and gm.member.userId is :userId")
+    @Query("select gm from GoalMember gm where gm.status <> 'REJECT' and gm.goal.goalId is :goalId and gm.member.userId is :userId")
     Optional<GoalMember> findGoalMemberByGoalAndUser(@Param("goalId") Long goalId, @Param("userId") Long userId);
 
     @Query("select gm.memberRole from GoalMember gm where gm.member.userId is :userId and gm.goal.goalId is :goalId")

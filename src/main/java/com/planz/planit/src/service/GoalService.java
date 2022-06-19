@@ -1,5 +1,6 @@
 package com.planz.planit.src.service;
 
+import com.fasterxml.jackson.databind.ser.Serializers;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.src.domain.goal.*;
 import com.planz.planit.src.domain.goal.dto.*;
@@ -434,5 +435,33 @@ public class GoalService {
         }catch(Exception e){
             throw new BaseException(FAILED_TO_ACTIVATE_GOAL);
         }
+    }
+
+    public GetAcceptGoalResDTO getAcceptGoal(Long userId, Long goalId) throws BaseException {
+        //조회
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new BaseException(NOT_EXIST_GOAL));
+
+        //멤버인지 확인
+        GoalMember checkMember = goalMemberRepository.findGoalMemberByGoalAndUser(goalId, userId).orElseThrow(() -> new BaseException(INVALID_GOAL_USER));
+
+        //이미 요청 했는지 확인
+        if(checkMember.getStatus()!=WAIT){
+            throw new BaseException(ALREADY_ACCEPT_GOAL);
+        }
+
+        try {
+            List<GoalMember> goalMembersByGoal = goalMemberRepository.findGoalMembersByGoal(goalId);
+
+            List<GetGoalMemberInfoDTO> goalMemberResList = new ArrayList<>();
+            for (GoalMember goalMember : goalMembersByGoal) {
+                goalMemberResList.add(new GetGoalMemberInfoDTO(goalMember.getMember().getNickname()
+                        ,goalMember.getMember().getProfileColor().toString(),goalMember.getMemberRole()==MANAGER?true:false));
+            }
+
+            return new GetAcceptGoalResDTO(goal.getTitle(),goalMemberResList);
+        }catch (Exception e){
+            throw new BaseException(FAILED_TO_GET_GOAL_INFO);
+        }
+
     }
 }
