@@ -43,6 +43,11 @@ spring:
     pathmatch:
       matching-strategy: ${secrets.MVC_MATCH_STRATEGY}
 
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
 
 jwt:
   secret-key: ${secrets.JWT_SECRET_KEY}
