@@ -135,4 +135,21 @@ public class FriendService {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    //닉네임으로 유저 검색
+    public List<User> getSearchFriends(Long userId, String nickname) throws BaseException {
+
+        List<Friend> toFriends = friendRepository.seachFriendsByToUser(userId,nickname);
+        List<Friend> fromFriends = friendRepository.seachFriendsByFromUser(userId,nickname);
+
+        if(toFriends.isEmpty() && fromFriends.isEmpty()){
+            throw new BaseException(NOT_EXIST_FRIEND);
+        }
+        List<User> fromUserList = toFriends.stream().map(s -> s.getFromUser()).collect(Collectors.toList());
+        List<User> toUserList = fromFriends.stream().map(s -> s.getToUser()).collect(Collectors.toList());
+
+        fromUserList.addAll(toUserList);
+
+        return fromUserList;
+    }
 }
