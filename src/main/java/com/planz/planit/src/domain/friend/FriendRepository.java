@@ -19,4 +19,9 @@ public interface FriendRepository extends JpaRepository<Friend,Long> {
     public List<Friend> findByToUser(Long userId);
 
     boolean existsByFromUserAndToUserAndFriendStatus(User fromUser, User toUser, FriendStatus friendStatus);
+
+    @Query(value="select f from Friend f where f.toUser.userId = :userId and f.friendStatus='FRIEND' and f.fromUser.nickname like %:nickname%")
+    List<Friend> seachFriendsByToUser(Long userId, String nickname);
+    @Query(value="select f from Friend f where f.fromUser.userId = :userId and f.friendStatus='FRIEND' and f.toUser.nickname like %:nickname%")
+    List<Friend> seachFriendsByFromUser(Long userId, String nickname);
 }

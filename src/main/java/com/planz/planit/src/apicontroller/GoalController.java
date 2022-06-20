@@ -99,10 +99,10 @@ public class GoalController {
 
     @GetMapping("/goals/users")
     @ApiOperation("그룹 목표 닉네임 검색 api")
-    public BaseResponse<GoalSearchUserResDTO> goalSearchUser(HttpServletRequest request, @RequestParam("nickname") String nickname) {
+    public BaseResponse<List<GoalSearchUserResDTO>> goalSearchUser(HttpServletRequest request, @RequestParam("nickname") String nickname) {
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try {
-            GoalSearchUserResDTO resDTO = goalService.goalSearchUser(userId, nickname);
+            List<GoalSearchUserResDTO> resDTO = goalService.goalSearchUser(userId, nickname);
             return new BaseResponse<>(resDTO);
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());

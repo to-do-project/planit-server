@@ -213,16 +213,15 @@ public class GoalService {
      * @param nickname
      * @return
      */
-    public GoalSearchUserResDTO goalSearchUser(Long userId, String nickname) throws BaseException {
+    public List<GoalSearchUserResDTO> goalSearchUser(Long userId, String nickname) throws BaseException {
         //검색하려는 친구 DTO 가져오기
-        GoalSearchUserResDTO findUserDTO = userService.goalSearchUsers(nickname);
-        //친구인지 확인하기
-        User user = userService.findUser(userId);
-        User findUser = userService.findUser(findUserDTO.getUserId());
-        if(!friendService.isFriend(user,findUser)){
-            throw new BaseException(NOT_EXIST_FRIEND);
+        List<User> friends = friendService.getSearchFriends(userId,nickname);
+
+        List<GoalSearchUserResDTO> responses = new ArrayList<>();
+        for (User user : friends) {
+            responses.add(new GoalSearchUserResDTO(user.getUserId(),user.getNickname(),user.getProfileColor().toString()));
         }
-        return findUserDTO;
+        return responses;
     }
 
     //setter에서 생성자로 수정 필요
