@@ -237,10 +237,11 @@ public class GoalService {
         }else{
             getGoalDetailResDTO.setOpenFlag(false);
         }
-        //goalMemberList (accept 멤버만)
-        List<GoalMember> goalMembers = getGoalMembers(goalId)
-                .stream().filter(m->m.getStatus()==ACCEPT)
-                .collect(Collectors.toList());
+        //goalMemberList (accept 멤버만) -> 대기 중인 멤버도 같이 보여줘야 함
+//        List<GoalMember> goalMembers = getGoalMembers(goalId)
+//                .stream().filter(m->m.getStatus()==ACCEPT)
+//                .collect(Collectors.toList());
+        List<GoalMember> goalMembers = getGoalMembers(goalId);
 
         int goalPercentage=0;
         //goalMember DTO 리스트
@@ -250,7 +251,7 @@ public class GoalService {
             getGoalMemberDetailDTO.setGoalMemberId(goalMember.getGoalMemberId());
             getGoalMemberDetailDTO.setNickname(goalMember.getMember().getNickname());
             getGoalMemberDetailDTO.setManagerFlag(goalMember.getMemberRole().toString().equals("MANAGER")?true:false);
-
+            getGoalMemberDetailDTO.setWaitFlag(goalMember.getStatus().toString().equals("WAIT")?true:false);
             //투두 멤버 리스트 가져오기 (오늘치만)
             List<TodoMember> todoMembers = goalMember.getTodoMembers().stream().filter(m->m.getUpdateAt().toLocalDate().equals(LocalDate.now())).collect(Collectors.toList());
             int completeCount = todoMembers.stream().filter(m->m.getCompleteFlag()==CompleteFlag.COMPLETE)
