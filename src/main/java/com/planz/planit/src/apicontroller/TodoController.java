@@ -50,28 +50,33 @@ public class TodoController {
         }
     }
 
-    @PostMapping("/todo/{todoMemberId}")
-    @ApiOperation("투두 체크 API")
-    public BaseResponse<CheckTodoResDTO> checkTodo(HttpServletRequest request, @PathVariable(name="todoMemberId") Long todoMemberId){
-        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
-        try{
-            CheckTodoResDTO response = todoService.checkTodo(userId,todoMemberId);
-            return new BaseResponse<>(response);
-        }catch(BaseException e){
-            return new BaseResponse<>(e.getStatus());
-        }
-    }
     @PatchMapping("/todo/{todoMemberId}")
-    @ApiOperation("투두 체크 해제 API")
-    public BaseResponse<CheckTodoResDTO> uncheckTodo(HttpServletRequest request, @PathVariable(name="todoMemberId") Long todoMemberId){
+    @ApiOperation("투두 체크 API")
+    public BaseResponse<CheckTodoResDTO> checkTodo(HttpServletRequest request, @PathVariable(name="todoMemberId") Long todoMemberId, @RequestParam("flag") boolean flag){
         Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
         try{
-            CheckTodoResDTO response = todoService.uncheckTodo(userId,todoMemberId);
-            return new BaseResponse<>(response);
+            if(flag) {
+                CheckTodoResDTO response = todoService.checkTodo(userId, todoMemberId);
+                return new BaseResponse<>(response);
+            }else{
+                CheckTodoResDTO response = todoService.uncheckTodo(userId,todoMemberId);
+                return new BaseResponse<>(response);
+            }
         }catch(BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
     }
+//    @PatchMapping("/todo/{todoMemberId}")
+//    @ApiOperation("투두 체크 해제 API")
+//    public BaseResponse<CheckTodoResDTO> uncheckTodo(HttpServletRequest request, @PathVariable(name="todoMemberId") Long todoMemberId){
+//        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
+//        try{
+//            CheckTodoResDTO response = todoService.uncheckTodo(userId,todoMemberId);
+//            return new BaseResponse<>(response);
+//        }catch(BaseException e){
+//            return new BaseResponse<>(e.getStatus());
+//        }
+//    }
 
     @PostMapping("/todo/like/{todoMemberId}")
     @ApiOperation("투두 좋아요 API")
