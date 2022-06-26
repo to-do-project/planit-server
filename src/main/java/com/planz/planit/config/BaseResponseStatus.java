@@ -110,6 +110,7 @@ public enum BaseResponseStatus {
     FAILED_TO_GET_ALARM_INFO(false,5049,"알림 설정 조회에 실패했습니다."),
     FAILED_TO_GET_GOAL_INFO(false,5050,"그룹 목표 초대 화면 조회에 실패했습니다."),
     ALREADY_ACCEPT_GOAL(false,5051,"이미 수락한 그룹 목표입니다."),
+    ALREADY_COMPLETE_TODO(false,5052,"이미 완료한 투두입니다."),
 
     // 6000 : 필요시 만들어서 쓰세요
     // 회원가입 & 로그인 관련 BaseResponseStatus

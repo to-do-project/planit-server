@@ -2,6 +2,7 @@ package com.planz.planit.src.service;
 
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.planz.planit.config.BaseException;
+import com.planz.planit.config.fcm.FirebaseCloudMessageService;
 import com.planz.planit.src.domain.goal.*;
 import com.planz.planit.src.domain.todo.*;
 import com.planz.planit.src.domain.todo.dto.*;
@@ -11,14 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
+import static com.planz.planit.src.domain.notification.NotificationSmallCategory.*;
 import static java.time.LocalDateTime.now;
 
 @Slf4j
@@ -29,14 +28,20 @@ public class TodoService {
     private final UserService userService;
     private final TodoMemberRepository todoMemberRepository;
     private final TodoMemberLikeRepository todoMemberLikeRepository;
+    private final NotificationService notificationService;
+    private final DeviceTokenService deviceTokenService;
+    private final FirebaseCloudMessageService firebaseCloudMessageService;
 
     @Autowired
-    public TodoService(TodoRepository todoRepository, GoalService goalService, UserService userService, TodoMemberRepository todoMemberRepository, TodoMemberLikeRepository todoMemberLikeRepository) {
+    public TodoService(TodoRepository todoRepository, GoalService goalService, UserService userService, TodoMemberRepository todoMemberRepository, TodoMemberLikeRepository todoMemberLikeRepository, NotificationService notificationService, DeviceTokenService deviceTokenService, FirebaseCloudMessageService firebaseCloudMessageService) {
         this.todoRepository = todoRepository;
         this.goalService = goalService;
         this.userService = userService;
         this.todoMemberRepository = todoMemberRepository;
         this.todoMemberLikeRepository = todoMemberLikeRepository;
+        this.notificationService = notificationService;
+        this.deviceTokenService = deviceTokenService;
+        this.firebaseCloudMessageService = firebaseCloudMessageService;
     }
 
     @Transactional(rollbackFor = {Exception.class, BaseException.class})
@@ -81,6 +86,7 @@ public class TodoService {
         }
     }
 
+
     @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public CheckTodoResDTO checkTodo(Long userId, Long todoMemberId) throws BaseException {
         TodoMember todoMember = todoMemberRepository.findById(todoMemberId).orElseThrow(() -> new BaseException(INVALID_TODO_MEMBER_ID));
@@ -115,6 +121,32 @@ public class TodoService {
         }
     }
 
+    public void sendCheckTodoMessage(Long userId, Long todoMemberId) throws BaseException {
+        //그룹 정보 얻어오기
+        TodoMember todoMember = todoMemberRepository.findById(todoMemberId).orElseThrow(() -> new BaseException(NOT_EXIST_TODO_MEMBER));
+        Goal goal = todoMember.getTodo().getGoal();
+        //개인목표면 return
+        if(goal.getGroupFlag()!=GroupCategory.GROUP){
+            return;
+        }
+        //유저 정보 가져오기
+        User user = userService.findUser(userId);
+        //목표 가져오기
+        List<GoalMember> goalMembers = goalService.getGoalMembers(goal.getGoalId());
+        for (GoalMember goalMember : goalMembers) {
+            if(goalMember.getMember().getUserId()==userId) continue;
+            //알림 테이블 추가
+            notificationService.createNotification(goalMember.getMember(),GROUP_DONE,goal.getTitle()+" 그룹 목표의 "+user.getNickname()+" 님이 "+
+                todoMember.getTodo().getTitle()+" 을 완료했습니다.",null,null,null);
+            try {
+                //디바이스 토큰
+                List<String> deviceTokenList = deviceTokenService.findAllDeviceTokens_groupFlag1(goalMember.getMember());
+                firebaseCloudMessageService.sendMessageTo(deviceTokenList, "[그룹 Todo]", "그룹목표의 다른 별 주민이 to-do를 완료했습니다. 오늘의 to-do를 빨리 완료해주세요!\n");
+            }catch (BaseException e){
+                log.error("[FCM 전송 실패] " + e.getStatus());
+            }
+        }
+    }
 
     /**
      * 투두 체크 취소
@@ -200,6 +232,26 @@ public class TodoService {
         User member = todoMember.getGoalMember().getMember();
         addTmpExp(member,1);
 
+        //fcm 날리기
+        sendLikeTodoMessage(userId,todoMemberId);
+    }
+    //좋아요 알림 보내기
+    public void sendLikeTodoMessage(Long userId, Long todoMemberId) throws BaseException {
+        //상대방 id 가져오기
+        TodoMember todoMember = todoMemberRepository.findById(todoMemberId).orElseThrow(() -> new BaseException(NOT_EXIST_TODO_MEMBER));
+        User toUser = todoMember.getGoalMember().getMember();
+
+        //내 id 가져오기
+        User user = userService.findUser(userId);
+
+        notificationService.createNotification(toUser,TODO_FAVORITE,user.getNickname()+" 님이 "+todoMember.getTodo().getTitle()+" 에 좋아요를 눌렀습니다.\n"
+        ,null,null,null);
+        try{
+            List<String> deviceTokenList = deviceTokenService.findAllDeviceTokens_friendFlag1(toUser.getUserId());
+            firebaseCloudMessageService.sendMessageTo(deviceTokenList,"[좋아요]","다른 별 주민이 좋아요를 눌렀습니다. 행성을 확인해주세요!\n");
+        }catch (BaseException e){
+            log.error("[FCM 전송 실패] " + e.getStatus());
+        }
     }
 
     //좋아요 리스트 조회
@@ -255,5 +307,28 @@ public class TodoService {
         }
     }
 
+    /**
+     * 투두 응원하기 API
+     * @param userId
+     * @param todoMemberId
+     */
+    public void cheerUpTodo(Long userId, Long todoMemberId) throws BaseException {
+        //안한건지 확인
+        TodoMember todoMember = todoMemberRepository.findById(todoMemberId).orElseThrow(() -> new BaseException(NOT_EXIST_TODO_MEMBER));
+        if(todoMember.getCompleteFlag()==CompleteFlag.COMPLETE){
+            throw new BaseException(ALREADY_COMPLETE_TODO);
+        }
 
+        //안했으면 알림 보내기
+        User member = todoMember.getGoalMember().getMember();
+        User user = userService.findUser(userId);
+        notificationService.createNotification(member,TODO_CHEER,user.getNickname()+" 님이 "+todoMember.getTodo().getTitle()+"을 응원했습니다."
+        ,null,null,null);
+        try {
+            List<String> deviceTokenList = deviceTokenService.findAllDeviceTokens_friendFlag1(member.getUserId());
+            firebaseCloudMessageService.sendMessageTo(deviceTokenList,"[응원]","다른 별 주민이 응원을 눌렀습니다. 빨리 행성을 확인해주세요!\n");
+        }catch (BaseException e){
+            log.error("[FCM 전송 실패] " + e.getStatus());
+        }
+    }
 }

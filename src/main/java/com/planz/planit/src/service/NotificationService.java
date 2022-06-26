@@ -98,18 +98,6 @@ public class NotificationService {
                 saveNotification(notification);
             }
 
-
-            // 5. 푸쉬 알림 보내기
-            if (category.getLargeCategory() == NOTICE) {
-
-            } else if (category.getLargeCategory() == FRIEND) {
-
-            } else if (category.getLargeCategory() == PRIVATE) {
-
-            } else {
-
-            }
-
         } catch (BaseException e) {
             throw e;
         }
