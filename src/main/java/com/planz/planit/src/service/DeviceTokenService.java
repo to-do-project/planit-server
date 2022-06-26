@@ -155,4 +155,18 @@ public class DeviceTokenService {
         }
         return Collections.emptyList();
     }
+
+    /**
+     * userId로 deviceToken 리스트 조회 (friend_flag가 1인 경우만)
+     */
+    public List<String> findAllDeviceTokens_groupFlag1(User user){
+        try{
+            return deviceTokenRepository.findAllDeviceTokens_groupFlag1(user);
+        }
+        catch (Exception e){
+            log.error("findAllDeviceTokens_friendFlag1() : deviceTokenRepository.findAllDeviceTokens_friendFlag1(userId) 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
 }
