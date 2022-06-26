@@ -1,7 +1,7 @@
 package com.planz.planit.src.service;
 
-import com.fasterxml.jackson.databind.ser.Serializers;
 import com.planz.planit.config.BaseException;
+import com.planz.planit.config.fcm.FirebaseCloudMessageService;
 import com.planz.planit.src.domain.goal.*;
 import com.planz.planit.src.domain.goal.dto.*;
 import com.planz.planit.src.domain.todo.CompleteFlag;
@@ -11,6 +11,7 @@ import com.planz.planit.src.domain.todo.dto.GetTodoMemberDTO;
 import com.planz.planit.src.domain.user.User;
 import com.planz.planit.src.domain.user.dto.GoalSearchUserResDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ import static com.planz.planit.src.domain.goal.GoalStatus.ACTIVE;
 import static com.planz.planit.src.domain.goal.GoalStatus.ARCHIVE;
 import static com.planz.planit.src.domain.goal.GroupStatus.ACCEPT;
 import static com.planz.planit.src.domain.goal.GroupStatus.WAIT;
+import static com.planz.planit.src.domain.notification.NotificationSmallCategory.GROUP_REQUEST;
 
 @Slf4j
 @Service
@@ -36,13 +38,18 @@ public class GoalService {
     private final NotificationService notificationService;
     private final GoalRepository goalRepository;
     private final GoalMemberRepository goalMemberRepository;
+    private final DeviceTokenService deviceTokenService;
+    private final FirebaseCloudMessageService firebaseCloudMessageService;
 
-    public GoalService(UserService userService, FriendService friendService, NotificationService notificationService, GoalRepository goalRepository, GoalMemberRepository goalMemberRepository) {
+    @Autowired
+    public GoalService(UserService userService, FriendService friendService, NotificationService notificationService, GoalRepository goalRepository, GoalMemberRepository goalMemberRepository, DeviceTokenService deviceTokenService, FirebaseCloudMessageService firebaseCloudMessageService) {
         this.userService = userService;
         this.friendService = friendService;
         this.notificationService = notificationService;
         this.goalRepository = goalRepository;
         this.goalMemberRepository = goalMemberRepository;
+        this.deviceTokenService = deviceTokenService;
+        this.firebaseCloudMessageService = firebaseCloudMessageService;
     }
 
     /**
@@ -89,6 +96,18 @@ public class GoalService {
                             .build();
                     goalMemberRepository.save(goalMember);
 
+                    //notification 테이블 추가
+                    notificationService.createNotification(user,GROUP_REQUEST,
+                            createGoalReqDTO.getTitle()+"그룹목표에 초대받았습니다.\n",null,goal,null);
+                    //fcm알림 추가
+                    try{
+                        List<String> deviceTokenList = deviceTokenService.findAllDeviceTokens_groupFlag1(goalMember.getMember());
+                        firebaseCloudMessageService.sendMessageTo(deviceTokenList,"그룹 초대 요청"
+                                ,"새로운 그룹목표에 초대받았습니다. 빨리 행성을 확인해주세요!\n"
+                        );
+                    }catch(BaseException e){
+                        log.error("[FCM 전송 실패] " + e.getStatus());
+                    }
                 }
             }
 
@@ -97,6 +116,7 @@ public class GoalService {
         }
         return true; //그룹 생성 성공 시 true
     }
+
 
     /**
      * 목표 삭제 / 탈퇴
@@ -158,14 +178,37 @@ public class GoalService {
             if(accept==1){ //1이면 수락, 0이면 거절
                 findGoalMember.accept();
                 goalMemberRepository.save(findGoalMember);
+
+                //메세지 보내기
+                sendGoalAcceptMessage(userId,findGoalMember.getGoal());
             }else{
-                goalMemberRepository.delete(findGoalMember); //수정 필요 체크하기
+                goalMemberRepository.delete(findGoalMember); //초기에 삭제해도 됨
+                notificationService.confirmGroupReqNotification(userId, findGoalMember.getGoal().getGoalId()); //체크표시는 하기
             }
 
-            //알림 처리
-            notificationService.confirmGroupReqNotification(userId, goalId);
         }catch(Exception e){
             throw new BaseException(FAILED_TO_ACCEPT_GOAL);
+        }
+    }
+
+    public void sendGoalAcceptMessage(Long userId, Goal goal) throws BaseException {
+        List<GoalMember> goalMembers = goalMemberRepository.findGoalMembersByGoal(goal.getGoalId());
+        notificationService.confirmGroupReqNotification(userId, goal.getGoalId());
+        User user = userService.findUser(userId);
+        for (GoalMember goalMember : goalMembers) {
+            if(goalMember.getMember().getUserId()==userId) continue; //나는 패스!
+            //notification 테이블 추가
+            notificationService.createNotification(goalMember.getMember(),GROUP_REQUEST,
+                    user.getNickname()+"님이"+ goal.getTitle()+"그룹목표에 참가하였습니다.\n",null,goal,null);
+            //fcm알림 추가
+            try{
+                List<String> deviceTokenList = deviceTokenService.findAllDeviceTokens_groupFlag1(goalMember.getMember());
+                firebaseCloudMessageService.sendMessageTo(deviceTokenList,"그룹 초대 수락",
+                        "그룹목표에 다른 별 주민이 가입했습니다. 반갑게 인사해주세요!"
+                );
+            }catch(BaseException e){
+                log.error("[FCM 전송 실패] " + e.getStatus());
+            }
         }
     }
 
@@ -248,7 +291,7 @@ public class GoalService {
         List<GetGoalMemberDetailDTO> goalMemberDetails = new ArrayList<>();
         for (GoalMember goalMember : goalMembers) {
             GetGoalMemberDetailDTO getGoalMemberDetailDTO = new GetGoalMemberDetailDTO();
-            getGoalMemberDetailDTO.setGoalMemberId(goalMember.getGoalMemberId());
+            getGoalMemberDetailDTO.setUserId(goalMember.getMember().getUserId());
             getGoalMemberDetailDTO.setNickname(goalMember.getMember().getNickname());
             getGoalMemberDetailDTO.setManagerFlag(goalMember.getMemberRole().toString().equals("MANAGER")?true:false);
             getGoalMemberDetailDTO.setWaitFlag(goalMember.getStatus().toString().equals("WAIT")?true:false);

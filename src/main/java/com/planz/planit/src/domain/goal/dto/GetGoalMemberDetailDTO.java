@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetGoalMemberDetailDTO {
-    private Long goalMemberId;
+    private Long userId;
     private String nickname;
     private int percentage;
     private boolean managerFlag;
