@@ -2,6 +2,7 @@ package com.planz.planit.src.service;
 
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponseStatus;
+import com.planz.planit.config.fcm.FirebaseCloudMessageService;
 import com.planz.planit.src.domain.notice.Notice;
 import com.planz.planit.src.domain.notice.NoticeRepository;
 import com.planz.planit.src.domain.notice.dto.GetNoticesResDTO;
@@ -24,20 +25,24 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final NotificationService notificationService;
     private final UserService userService;
+    private final FirebaseCloudMessageService firebaseCloudMessageService;
+    private final DeviceTokenService deviceTokenService;
 
     @Autowired
-    public NoticeService(NoticeRepository noticeRepository, NotificationService notificationService, UserService userService) {
+    public NoticeService(NoticeRepository noticeRepository, NotificationService notificationService, UserService userService, FirebaseCloudMessageService firebaseCloudMessageService, DeviceTokenService deviceTokenService) {
         this.noticeRepository = noticeRepository;
         this.notificationService = notificationService;
         this.userService = userService;
+        this.firebaseCloudMessageService = firebaseCloudMessageService;
+        this.deviceTokenService = deviceTokenService;
     }
-
 
     /**
      * 공지사항 생성 API (ROLE_ADMIN 권한을 가진 사용자만 이용 가능)
      * 1. Notice 엔티티 생성
      * 2. Notice 엔티티 저장
      * 3. 공지사항 알림 생성
+     * 4. FCM 보내기
      */
     public void createNotice(String title, String content) throws BaseException {
 
@@ -56,6 +61,17 @@ public class NoticeService {
             for (User user : allUser) {
                 notificationService.createNotification(user, NotificationSmallCategory.NOTICE_TWO, "[공지] " + notice.getTitle(), null, null, notice);
             }
+
+            // 4. FCM 보내기
+            try {
+                List<String> deviceTokens = deviceTokenService.findAllDeviceTokens_noticeFlag1();
+                firebaseCloudMessageService.sendMessageTo(deviceTokens, "[공지사항 업데이트]", "공지사항이 업데이트 되었습니다.");
+                log.info("[FCM 전송 성공] notice_flag가 1인 모든 사용자에게, 공지사항 FCM 전송 성공");
+            }
+            catch (BaseException e){
+                log.error("[FCM 전송 실패] " + e.getStatus());
+            }
+
         } catch (BaseException e) {
             throw e;
         }

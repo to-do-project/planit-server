@@ -22,14 +22,10 @@ import java.util.List;
 public class NoticeController {
 
     private final NoticeService noticeService;
-    private final FirebaseCloudMessageService firebaseCloudMessageService;
-    private final DeviceTokenService deviceTokenService;
 
     @Autowired
-    public NoticeController(NoticeService noticeService, FirebaseCloudMessageService firebaseCloudMessageService, DeviceTokenService deviceTokenService) {
+    public NoticeController(NoticeService noticeService) {
         this.noticeService = noticeService;
-        this.firebaseCloudMessageService = firebaseCloudMessageService;
-        this.deviceTokenService = deviceTokenService;
     }
 
     /**
@@ -51,17 +47,6 @@ public class NoticeController {
 
         try {
             noticeService.createNotice(reqDTO.getTitle(), reqDTO.getContent());
-
-            // FCM 보내기
-            try {
-                List<String> deviceTokens = deviceTokenService.findAllDeviceTokens_noticeFlag1();
-                firebaseCloudMessageService.sendMessageTo(deviceTokens, "[공지사항 업데이트]", "공지사항이 업데이트 되었습니다.");
-                log.info("[FCM 전송 성공] notice_flag가 1인 모든 사용자에게, 공지사항 FCM 전송 성공");
-            }
-            catch (BaseException e){
-                log.error("[FCM 전송 실패] " + e.getStatus());
-            }
-
             return new BaseResponse<>("성공적으로 새로운 공지사항을 생성했습니다.");
         }
         catch (BaseException e){
