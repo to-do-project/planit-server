@@ -98,7 +98,7 @@ public class GoalService {
 
                     //notification 테이블 추가
                     notificationService.createNotification(user,GROUP_REQUEST,
-                            createGoalReqDTO.getTitle()+"그룹목표에 초대받았습니다.\n",null,goal,null);
+                            createGoalReqDTO.getTitle()+" 그룹목표에 초대받았습니다.\n",null,goal,null);
                     //fcm알림 추가
                     try{
                         List<String> deviceTokenList = deviceTokenService.findAllDeviceTokens_groupFlag1(goalMember.getMember());
@@ -199,7 +199,7 @@ public class GoalService {
             if(goalMember.getMember().getUserId()==userId) continue; //나는 패스!
             //notification 테이블 추가
             notificationService.createNotification(goalMember.getMember(),GROUP_REQUEST,
-                    user.getNickname()+"님이"+ goal.getTitle()+"그룹목표에 참가하였습니다.\n",null,goal,null);
+                    user.getNickname()+" 님이"+ goal.getTitle()+" 그룹목표에 참가하였습니다.\n",null,goal,null);
             //fcm알림 추가
             try{
                 List<String> deviceTokenList = deviceTokenService.findAllDeviceTokens_groupFlag1(goalMember.getMember());

@@ -1,5 +1,6 @@
 package com.planz.planit.src.apicontroller;
 
+import com.google.api.Http;
 import com.planz.planit.config.BaseException;
 import com.planz.planit.config.BaseResponse;
 import com.planz.planit.config.BaseResponseStatus;
@@ -57,6 +58,7 @@ public class TodoController {
         try{
             if(flag) {
                 CheckTodoResDTO response = todoService.checkTodo(userId, todoMemberId);
+                todoService.sendCheckTodoMessage(userId,todoMemberId); //fcm 알림 보내기
                 return new BaseResponse<>(response);
             }else{
                 CheckTodoResDTO response = todoService.uncheckTodo(userId,todoMemberId);
@@ -113,6 +115,17 @@ public class TodoController {
         }catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
+    }
 
+    @GetMapping("/todo/{todoMemberId}")
+    @ApiOperation("투두 응원하기 API")
+    public BaseResponse<String> cheerUpTodo(HttpServletRequest request,@PathVariable Long todoMemberId){
+        Long userId = Long.valueOf(request.getHeader(USER_ID_HEADER_NAME)).longValue();
+        try{
+            todoService.cheerUpTodo(userId,todoMemberId);
+            return new BaseResponse("투두 응원하기를 완료했습니다.");
+        }catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
     }
 }

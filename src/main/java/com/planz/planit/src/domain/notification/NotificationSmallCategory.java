@@ -12,14 +12,12 @@ public enum NotificationSmallCategory {
     FRIEND_REQUEST(FRIEND,"친구 요청"),
     FRIEND_ACCEPT(FRIEND,"친구 수락"),
 
-    PRIVATE_FAVORITE(PRIVATE, "개인 투두 좋아요"),
-    PRIVATE_CHEER(PRIVATE, "개인 투두 응원"),
-
     GROUP_REQUEST(GROUP, "그룹 초대 요청"),
     GROUP_ACCEPT(GROUP, "그룹 초대 수락"),
     GROUP_DONE(GROUP, "그룹 투두 완료"),
-    GROUP_FAVORITE(GROUP, "그룹 투두 좋아요"),
-    GROUP_CHEER(GROUP, "그룹 투두 응원");
+
+    TODO_FAVORITE(TODO,"투두 좋아요"),
+    TODO_CHEER(TODO,"투두 응원");
 
 
     private final NotificationLargeCategory largeCategory;
