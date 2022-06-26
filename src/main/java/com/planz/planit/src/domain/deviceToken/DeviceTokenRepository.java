@@ -35,4 +35,8 @@ public interface DeviceTokenRepository extends JpaRepository<DeviceToken,Long> {
 
     @Query(value = "select d.deviceToken from DeviceToken d where d.noticeFlag = 1")
     List<String> findAllDeviceTokens_noticeFlag1();
+
+    @Query(value = "select d.deviceToken from DeviceToken d where d.user.userId = :userId and d.friendFlag = 1")
+    List<String> findAllDeviceTokens_friendFlag1(@Param("userId") Long userId);
+
 }
