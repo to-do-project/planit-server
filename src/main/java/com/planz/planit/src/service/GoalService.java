@@ -293,6 +293,7 @@ public class GoalService {
             GetGoalMemberDetailDTO getGoalMemberDetailDTO = new GetGoalMemberDetailDTO();
             getGoalMemberDetailDTO.setUserId(goalMember.getMember().getUserId());
             getGoalMemberDetailDTO.setNickname(goalMember.getMember().getNickname());
+            getGoalMemberDetailDTO.setProfileColor(goalMember.getMember().getProfileColor().toString());
             getGoalMemberDetailDTO.setManagerFlag(goalMember.getMemberRole().toString().equals("MANAGER")?true:false);
             getGoalMemberDetailDTO.setWaitFlag(goalMember.getStatus().toString().equals("WAIT")?true:false);
             //투두 멤버 리스트 가져오기 (오늘치만)

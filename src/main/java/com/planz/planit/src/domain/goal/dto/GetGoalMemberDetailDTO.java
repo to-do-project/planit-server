@@ -16,6 +16,7 @@ import java.util.List;
 public class GetGoalMemberDetailDTO {
     private Long userId;
     private String nickname;
+    private String profileColor;
     private int percentage;
     private boolean managerFlag;
     private boolean waitFlag;
