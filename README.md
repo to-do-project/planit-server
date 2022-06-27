@@ -20,3 +20,4 @@ dev 서버 3차 자동 배포
 dev 서버 4차 자동 배포
 - 가출 관련 스프링 배치 및 스케줄러 작성
 - application-dev.yml, deploy.yml 
+- 재시작
