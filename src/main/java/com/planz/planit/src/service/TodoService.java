@@ -141,7 +141,7 @@ public class TodoService {
             try {
                 //디바이스 토큰
                 List<String> deviceTokenList = deviceTokenService.findAllDeviceTokens_groupFlag1(goalMember.getMember());
-                firebaseCloudMessageService.sendMessageTo(deviceTokenList, "[그룹 Todo]", "그룹목표의 다른 별 주민이 to-do를 완료했습니다. 오늘의 to-do를 빨리 완료해주세요!\n");
+                firebaseCloudMessageService.sendMessageTo(deviceTokenList, "[그룹 Todo]", "그룹목표의 다른 별 주민이 to-do를 완료했습니다. 오늘의 to-do를 빨리 완료해주세요!");
             }catch (BaseException e){
                 log.error("[FCM 전송 실패] " + e.getStatus());
             }
@@ -326,7 +326,7 @@ public class TodoService {
         ,null,null,null);
         try {
             List<String> deviceTokenList = deviceTokenService.findAllDeviceTokens_friendFlag1(member.getUserId());
-            firebaseCloudMessageService.sendMessageTo(deviceTokenList,"[응원]","다른 별 주민이 응원을 눌렀습니다. 빨리 행성을 확인해주세요!\n");
+            firebaseCloudMessageService.sendMessageTo(deviceTokenList,"[응원]","다른 별 주민이 응원을 눌렀습니다. 빨리 행성을 확인해주세요!");
         }catch (BaseException e){
             log.error("[FCM 전송 실패] " + e.getStatus());
         }

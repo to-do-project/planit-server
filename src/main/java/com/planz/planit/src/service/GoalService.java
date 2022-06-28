@@ -98,12 +98,12 @@ public class GoalService {
 
                     //notification 테이블 추가
                     notificationService.createNotification(user,GROUP_REQUEST,
-                            createGoalReqDTO.getTitle()+" 그룹목표에 초대받았습니다.\n",null,goal,null);
+                            createGoalReqDTO.getTitle()+" 그룹목표에 초대받았습니다.",null,goal,null);
                     //fcm알림 추가
                     try{
                         List<String> deviceTokenList = deviceTokenService.findAllDeviceTokens_groupFlag1(goalMember.getMember());
                         firebaseCloudMessageService.sendMessageTo(deviceTokenList,"그룹 초대 요청"
-                                ,"새로운 그룹목표에 초대받았습니다. 빨리 행성을 확인해주세요!\n"
+                                ,"새로운 그룹목표에 초대받았습니다. 빨리 행성을 확인해주세요!"
                         );
                     }catch(BaseException e){
                         log.error("[FCM 전송 실패] " + e.getStatus());
@@ -199,7 +199,7 @@ public class GoalService {
             if(goalMember.getMember().getUserId()==userId) continue; //나는 패스!
             //notification 테이블 추가
             notificationService.createNotification(goalMember.getMember(),GROUP_REQUEST,
-                    user.getNickname()+" 님이"+ goal.getTitle()+" 그룹목표에 참가하였습니다.\n",null,goal,null);
+                    user.getNickname()+" 님이"+ goal.getTitle()+" 그룹목표에 참가하였습니다.",null,goal,null);
             //fcm알림 추가
             try{
                 List<String> deviceTokenList = deviceTokenService.findAllDeviceTokens_groupFlag1(goalMember.getMember());
@@ -351,7 +351,7 @@ public class GoalService {
             int completeCount = todoMembers.stream().filter(m->m.getCompleteFlag()==CompleteFlag.COMPLETE)
                     .collect(Collectors.toList()).size();
             List<GetTodoMainResDTO> todoMainResList = new ArrayList<>();
-            boolean likeFlag = targetGoalMember.getGoal().getOpenFlag().toString().equals("PUBLIC")?true:false;
+            //boolean likeFlag = targetGoalMember.getGoal().getOpenFlag().toString().equals("PUBLIC")?true:false;
             for (TodoMember todoMember : todoMembers) {
                 boolean completeFlag = todoMember.getCompleteFlag() == CompleteFlag.COMPLETE ? true : false;
                 todoMainResList.add(
@@ -360,7 +360,7 @@ public class GoalService {
                                 todoMember.getTodo().getTitle(),
                                 completeFlag,
                                 todoMember.getTodoMemberLikes().size(),
-                                likeFlag
+                                false
                         ));
             }
             boolean groupFlag = targetGoalMember.getGoal().getGroupFlag()==GroupCategory.GROUP?true:false;
