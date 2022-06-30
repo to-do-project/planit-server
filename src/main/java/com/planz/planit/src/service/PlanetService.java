@@ -54,18 +54,6 @@ public class PlanetService {
         }
     }
 
-    /**
-     * Planet 삭제
-     */
-    public void deletePlanet(Long longUserId) throws BaseException {
-        try {
-            planetRepository.deleteByUserIdInQuery(longUserId);
-        } catch (Exception e) {
-            log.error("deletePlanet() : planetRepository.deleteByUserIdInQuery(longUserId) 실행 중 데이터베이스 에러 발생");
-            e.printStackTrace();
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
 
     /**
      * Planet 조회

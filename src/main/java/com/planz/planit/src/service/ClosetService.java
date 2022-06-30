@@ -9,6 +9,7 @@ import com.planz.planit.src.domain.user.User;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -109,6 +110,7 @@ public class ClosetService {
      * 3. itemId에 대한 논리적 validation => 해당 캐릭터 아이템을 보유하고 있는지
      * 4. 사용자가 현재 사용 중인 캐릭터 아이템 변경
      */
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void applyCharacterItem(Long userId, Long itemId) throws BaseException {
         try{
 

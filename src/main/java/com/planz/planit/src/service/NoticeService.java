@@ -12,6 +12,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,6 +45,7 @@ public class NoticeService {
      * 3. 공지사항 알림 생성
      * 4. FCM 보내기
      */
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void createNotice(String title, String content) throws BaseException {
 
         try {

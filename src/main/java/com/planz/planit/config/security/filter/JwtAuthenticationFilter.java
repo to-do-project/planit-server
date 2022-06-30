@@ -152,6 +152,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .point(loginUser.getPoint())
                 .missionStatus(loginUser.getMissionStatus())
                 .deviceToken(loginUser.getDeviceToken())
+                .exp(planet.getExp())
                 .build();
 
         httpResponseService.successRespond(response, loginResDTO);

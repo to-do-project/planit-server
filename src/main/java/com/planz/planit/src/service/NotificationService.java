@@ -10,6 +10,7 @@ import com.planz.planit.src.domain.user.User;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
@@ -36,8 +37,8 @@ public class NotificationService {
      * 2. 친구 요청 알림인 경우, FriendReqNotification 엔티티 생성후 DB에 저장
      * 3. 그룹 초대 요청 알림인 경우, GroupReqNotification 엔티티 생성후 DB에 저장
      * 4. 그 외 알림인 경우, Notification 엔티티 생성후 DB에 저장
-     * 5. 푸쉬 알림 보내기 => 추가 로직 필요!!!!
      */
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void createNotification(User user, NotificationSmallCategory category, String content, Friend friend, Goal goal, Notice notice) throws BaseException {
         try {
 
@@ -122,6 +123,7 @@ public class NotificationService {
      * 1. notificationId와 userId로 Notification 엔티티 조회
      * 2. 조회한 Notification의 readStatus를 읽음 상태(READ)로 변경
      */
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void readNotification(Long notificationId, Long userId) throws BaseException {
 
         try {
@@ -141,6 +143,7 @@ public class NotificationService {
      * 1. userId, goalId로 Notification 엔티티 조회
      * 2. 조회한 Notification의 confirmStatus를 확정 상태(CONFIRM)로 변경
      */
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void confirmGroupReqNotification(Long userId, Long goalId) throws BaseException {
         try {
             // 1. userId, goalId로 Notification 엔티티 조회
@@ -158,6 +161,7 @@ public class NotificationService {
      * 1. userId, friendId로 Notification 엔티티 조회
      * 2. 조회한 Notification의 confirmStatus를 확정 상태(CONFIRM)로 변경
      */
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void confirmFriendReqNotification(Long userId, Long friendId) throws BaseException {
         try {
             // 1. userId, friendId로 Notification 엔티티 조회

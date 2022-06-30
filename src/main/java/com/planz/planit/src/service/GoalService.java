@@ -12,6 +12,7 @@ import com.planz.planit.src.domain.user.User;
 import com.planz.planit.src.domain.user.dto.GoalSearchUserResDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -507,5 +508,19 @@ public class GoalService {
             throw new BaseException(FAILED_TO_GET_GOAL_INFO);
         }
 
+    }
+
+    public void deleteGoals(Long userId, GoalMemberRole role) throws BaseException{
+        try{
+            List<Goal> goals = goalMemberRepository.getGoalsByUserIdAndRole(userId, role);
+            for(Goal goal : goals){
+                goalRepository.deleteGoalByIdInDB(goal.getGoalId());
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            log.error("getGoalsByUserIdAndRole() : goalMemberRepository.getGoalsByUserIdAndRole(userId, role) 실행 중 데이터베이스 에러 발생함");
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
 }
