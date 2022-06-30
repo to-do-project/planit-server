@@ -41,7 +41,7 @@ jobs:
           spring.datasource.username: ${{ secrets.RDS_USERNAME }} 
           spring.datasource.password: ${{ secrets.RDS_PASSWORD }} 
           spring.mvc.pathmatch.matching-strategy: ${{ secrets.MVC_MATCH_STRATEGY }} 
-          spring.jpa.hibernate.ddl-auto: update
+          spring.jpa.hibernate.ddl-auto: ${{ secrets.DDL_AUTO }} 
           spring.jpa.hibernate.naming.physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl 
           spring.jpa.show-sql: true
           spring.jpa.database-platform: org.hibernate.dialect.MySQL5Dialect
