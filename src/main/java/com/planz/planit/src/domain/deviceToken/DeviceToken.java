@@ -36,7 +36,7 @@ public class DeviceToken {
     @Column(name="device_token", nullable = false)
     private String deviceToken;
 
-    @Column(name="friendFlag")
+    @Column(name="friend_flag")
     private int friendFlag = 1;
     @Column(name="group_flag")
     private int groupFlag = 1;
