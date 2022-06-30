@@ -21,3 +21,8 @@ dev 서버 4차 자동 배포
 - 가출 관련 스프링 배치 및 스케줄러 작성
 - application-dev.yml, deploy.yml 
 - 재시작
+
+dev 서버 5차 자동 배포
+- 회원 탈퇴 API 호출 시, Users 테이블과 연관된 모든 데이터 삭제
+- application-prod.yml 추가
+- @Transactional 어노테이션 추가
