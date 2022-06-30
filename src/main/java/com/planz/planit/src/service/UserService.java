@@ -5,6 +5,9 @@ import com.planz.planit.config.BaseException;
 import com.planz.planit.src.domain.closet.Closet;
 import com.planz.planit.src.domain.deviceToken.DeviceToken;
 import com.planz.planit.src.domain.deviceToken.dto.DeviceTokenReqDTO;
+import com.planz.planit.src.domain.goal.Goal;
+import com.planz.planit.src.domain.goal.GoalMember;
+import com.planz.planit.src.domain.goal.GoalMemberRole;
 import com.planz.planit.src.domain.inventory.Inventory;
 import com.planz.planit.src.domain.inventory.Position;
 import com.planz.planit.src.domain.item.BasicItem;
@@ -58,10 +61,11 @@ public class UserService {
     private final ClosetService closetService;
     private final ItemService itemService;
     private final Random random;
+    private final GoalService goalService;
 
 
     @Autowired
-    public UserService(UserRepository userRepository, JwtTokenService jwtTokenService, MailService mailService, RedisService redisService, @Lazy DeviceTokenService deviceTokenService, PasswordEncoder passwordEncoder, @Lazy PlanetService planetService, @Lazy InventoryService inventoryService, @Lazy ClosetService closetService, @Lazy ItemService itemService, Random random) {
+    public UserService(UserRepository userRepository, JwtTokenService jwtTokenService, MailService mailService, RedisService redisService, @Lazy DeviceTokenService deviceTokenService, PasswordEncoder passwordEncoder, @Lazy PlanetService planetService, @Lazy InventoryService inventoryService, @Lazy ClosetService closetService, @Lazy ItemService itemService, Random random, @Lazy GoalService goalService) {
         this.userRepository = userRepository;
         this.jwtTokenService = jwtTokenService;
         this.mailService = mailService;
@@ -73,6 +77,7 @@ public class UserService {
         this.closetService = closetService;
         this.itemService = itemService;
         this.random = random;
+        this.goalService = goalService;
     }
 
     //은지 추가 코드
@@ -203,6 +208,7 @@ public class UserService {
                     .point(userEntity.getPoint())
                     .missionStatus(userEntity.getMissionStatus())
                     .deviceToken(userEntity.getDeviceToken())
+                    .exp(planetEntity.getExp())
                     .build();
         } catch (BaseException e) {
             throw e;
@@ -416,11 +422,8 @@ public class UserService {
                 redisService.deleteRefreshTokenInRedis(deviceTokenId.toString());
             }
 
-            // DeviceToken 삭제
-            deviceTokenService.deleteAllDeviceToken(longUserId);
-
-            // Planet 삭제
-            planetService.deletePlanet(longUserId);
+            // Goal 삭제
+            goalService.deleteGoals(longUserId, GoalMemberRole.MANAGER);
 
             // User 삭제
             deleteUser(longUserId);
@@ -562,6 +565,7 @@ public class UserService {
      * 2. User의 profileColor 변경
      * 3. DB에 저장
      */
+     @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void modifyProfile(Long userId, String profileColor) throws BaseException{
         try{
             // 1. 유저 조회
@@ -617,6 +621,7 @@ public class UserService {
     /**
      * 현재 사용중인 캐릭터 아이템(옷) 변경
      */
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void changeCharacterItem(User user, Long itemId) throws BaseException {
         try{
             user.setCharacterItem(itemId);
@@ -635,6 +640,7 @@ public class UserService {
      * 2. 해당 유저의 missionStatus 값 변경
      * 3. 다시 저장
      */
+    @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public void convertMissionStatus(Long userId, int status) throws BaseException{
 
         try{

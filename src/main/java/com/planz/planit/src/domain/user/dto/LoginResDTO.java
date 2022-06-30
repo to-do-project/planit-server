@@ -29,4 +29,6 @@ public class LoginResDTO {
     private Integer missionStatus;
 
     private String deviceToken;
+
+    private Integer exp;
 }
