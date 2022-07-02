@@ -1,0 +1,14 @@
+package com.planz.planit.src.domain.todo.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+public class LikeUserResDTO {
+    private Long userId;
+    private String nickname;
+    private String profileColor;
+}

@@ -4,7 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+!**/src/main/resources/application.yml
 ### STS ###
 .apt_generated
 .classpath
@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+/src/main/java/com/planz/planit/config/secret/
+/src/main/resources/firebase/
+/src/test/java/com/planz/planit/src/
+/src/main/resources/application-local.yml
+/logs/
+/logs/spring.log
+/logs/logback.log
