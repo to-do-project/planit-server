@@ -27,3 +27,6 @@ dev 서버 5차 자동 배포
 - 회원 탈퇴 API 호출 시, Users 테이블과 연관된 모든 데이터 삭제
 - application-prod.yml 추가
 - @Transactional 어노테이션 추가
+
+prod 서버 1차 자동 배포 (2022-07-02)
+- 운영 서버 세팅 완료
