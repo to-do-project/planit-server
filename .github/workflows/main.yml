@@ -51,7 +51,7 @@ jobs:
           spring.jpa.database-platform: org.hibernate.dialect.MySQL5Dialect
           spring.jpa.properties.hibernate.format_sql: true
           spring.jpa.properties.hibernate.use_sql_comments: true
-          spring.redis.host: ${{ secrets.REDIS_HOST }}
+          spring.redis.host: ${{ secrets.PROD_REDIS_HOST }}
           spring.redis.port: ${{ secrets.REDIS_PORT }}
           spring.mail.host: ${{ secrets.MAIL_HOST }} 
           spring.mail.port: ${{ secrets.MAIL_PORT }} 
