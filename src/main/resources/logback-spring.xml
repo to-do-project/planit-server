@@ -31,6 +31,14 @@
             <appender-ref ref="FILE"/>
         </root>
     </springProfile>
+    
+    <springProfile name="prod">
+        <property name="LOG_PATH" value="/home/ubuntu/logs"/>
+
+        <root level="INFO">
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
 
 </configuration>
 
