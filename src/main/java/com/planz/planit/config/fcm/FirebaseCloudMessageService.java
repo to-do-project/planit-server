@@ -48,7 +48,7 @@ public class FirebaseCloudMessageService {
 
                 Response response = client.newCall(request).execute();
 
-                //log.info(response.body().string());
+                log.info(response.body().string());
             } catch (IOException e) {
                 fcmPushSuccess.set(false);
             }
