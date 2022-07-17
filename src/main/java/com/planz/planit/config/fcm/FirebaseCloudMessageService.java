@@ -61,7 +61,7 @@ public class FirebaseCloudMessageService {
         FcmMessage fcmMessage = FcmMessage.builder()
                 .message(FcmMessage.Message.builder()
                         .token(targetToken)
-                        .data(FcmMessage.Data.builder()
+                        .notification(FcmMessage.Notification.builder()
                                 .title(title)
                                 .body(body)
                                 .build()
