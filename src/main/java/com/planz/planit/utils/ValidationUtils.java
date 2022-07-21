@@ -1,4 +1,4 @@
-package com.planz.planit.src.apicontroller.utils;
+package com.planz.planit.utils;
 
 import com.planz.planit.config.BaseException;
 import lombok.extern.log4j.Log4j2;

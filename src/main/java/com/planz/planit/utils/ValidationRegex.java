@@ -1,4 +1,4 @@
-package com.planz.planit.src.apicontroller.utils;
+package com.planz.planit.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
