@@ -244,11 +244,11 @@ public class TodoService {
         //내 id 가져오기
         User user = userService.findUser(userId);
 
-        notificationService.createNotification(toUser,TODO_FAVORITE,user.getNickname()+" 님이 "+todoMember.getTodo().getTitle()+" 에 좋아요를 눌렀습니다.\n"
+        notificationService.createNotification(toUser,TODO_FAVORITE,user.getNickname()+" 님이 "+todoMember.getTodo().getTitle()+" 에 좋아요를 눌렀습니다."
         ,null,null,null);
         try{
             List<String> deviceTokenList = deviceTokenService.findAllDeviceTokens_friendFlag1(toUser.getUserId());
-            firebaseCloudMessageService.sendMessageTo(deviceTokenList,"[좋아요]","다른 별 주민이 좋아요를 눌렀습니다. 행성을 확인해주세요!\n");
+            firebaseCloudMessageService.sendMessageTo(deviceTokenList,"[좋아요]","다른 별 주민이 좋아요를 눌렀습니다. 행성을 확인해주세요!");
         }catch (BaseException e){
             log.error("[FCM 전송 실패] " + e.getStatus());
         }

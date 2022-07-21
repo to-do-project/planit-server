@@ -48,7 +48,7 @@ public class FirebaseCloudMessageService {
 
                 Response response = client.newCall(request).execute();
 
-                //log.info(response.body().string());
+                log.info(response.body().string());
             } catch (IOException e) {
                 fcmPushSuccess.set(false);
             }
@@ -61,7 +61,7 @@ public class FirebaseCloudMessageService {
         FcmMessage fcmMessage = FcmMessage.builder()
                 .message(FcmMessage.Message.builder()
                         .token(targetToken)
-                        .data(FcmMessage.Data.builder()
+                        .notification(FcmMessage.Notification.builder()
                                 .title(title)
                                 .body(body)
                                 .build()
@@ -82,3 +82,4 @@ public class FirebaseCloudMessageService {
     }
 
 }
+

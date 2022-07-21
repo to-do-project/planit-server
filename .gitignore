@@ -42,3 +42,4 @@ out/
 /logs/
 /logs/spring.log
 /logs/logback.log
+/src/main/resources/firebase/firebase_service_key.json

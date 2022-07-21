@@ -6,7 +6,7 @@ import com.planz.planit.config.BaseResponseStatus;
 import com.planz.planit.src.domain.inventory.dto.GetInventoryResDTO;
 import com.planz.planit.src.domain.inventory.dto.PlacePlanetItemsReqDTO;
 import com.planz.planit.src.service.InventoryService;
-import com.planz.planit.utils.ValidationRegex;
+import com.planz.planit.src.apicontroller.utils.ValidationRegex;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
-import java.util.List;
 
 import static com.planz.planit.config.BaseResponseStatus.INVALID_INVENTORY_CATEGORY;
 
