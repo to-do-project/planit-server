@@ -17,14 +17,6 @@ import static com.planz.planit.src.domain.friend.FriendStatus.WAIT;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name="subscribe_uk",
-                        columnNames = {"from_user_id", "to_user_id"}
-                )
-        }
-)
 public class Friend {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

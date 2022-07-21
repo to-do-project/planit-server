@@ -16,13 +16,13 @@ public class FcmMessage {
     @Getter
     public static class Message {
         private String token;
-        private Data data;
+        private Notification notification;
     }
 
     @Builder
     @AllArgsConstructor
     @Getter
-    public static class Data {
+    public static class Notification {
         private String title;
         private String body;
     }
