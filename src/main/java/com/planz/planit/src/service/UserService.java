@@ -652,10 +652,14 @@ public class UserService {
 
             // 3. 다시 저장
             saveUser(user);
+
+            //4. 미션 상태 변경
+            goalService.changeToArchiveMission(userId);
         }
         catch (BaseException e){
             throw e;
         }
+
     }
 
     /**
