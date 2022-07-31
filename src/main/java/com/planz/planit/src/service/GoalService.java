@@ -25,8 +25,7 @@ import java.util.stream.Collectors;
 import static com.planz.planit.config.BaseResponseStatus.*;
 import static com.planz.planit.src.domain.goal.GoalMemberRole.MANAGER;
 import static com.planz.planit.src.domain.goal.GoalMemberRole.MEMBER;
-import static com.planz.planit.src.domain.goal.GoalStatus.ACTIVE;
-import static com.planz.planit.src.domain.goal.GoalStatus.ARCHIVE;
+import static com.planz.planit.src.domain.goal.GoalStatus.*;
 import static com.planz.planit.src.domain.goal.GroupCategory.MISSION;
 import static com.planz.planit.src.domain.goal.GroupStatus.ACCEPT;
 import static com.planz.planit.src.domain.goal.GroupStatus.WAIT;
@@ -330,6 +329,11 @@ public class GoalService {
         GetGoalDetailResDTO getGoalDetailResDTO = new GetGoalDetailResDTO();
         //goal이 비공개인 경우 유저가 회원인지 확인 (구현 필요)
         Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new BaseException(NOT_EXIST_GOAL));
+        //goal이 삭제인 경우 에러 처리
+        if(goal.getGoalStatus()==DELETE){
+            throw new BaseException(NOT_EXIST_GOAL);
+        }
+
         //DTO에 값 넣기 (goalId, title)
         getGoalDetailResDTO.setGoalId(goal.getGoalId());
         getGoalDetailResDTO.setGoalTitle(goal.getTitle());
