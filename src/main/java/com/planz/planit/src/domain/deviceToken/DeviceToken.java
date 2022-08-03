@@ -2,6 +2,7 @@ package com.planz.planit.src.domain.deviceToken;
 
 import com.planz.planit.src.domain.friend.FriendStatus;
 import com.planz.planit.src.domain.user.User;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import static java.time.LocalDateTime.now;
 @Getter
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(
         uniqueConstraints = {
                 @UniqueConstraint(

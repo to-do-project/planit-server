@@ -129,6 +129,20 @@ public class DeviceTokenService {
     }
 
     /**
+     * 운영자 매일 미션 프로시저 호출
+     */
+    public List<DeviceToken> callMissionProcedure(){
+        try{
+            return deviceTokenRepository.callMissionProcedure();
+        }
+        catch (Exception e){
+            log.error("callMissionProcedure() : deviceTokenRepository.callMissionProcedure() 실행 중 데이터베이스 에러 발생");
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+    /**
      * notice_flag가 1인 모든 사용자의 deviceToken 리스트 조회
      */
     public List<String> findAllDeviceTokens_noticeFlag1(){
