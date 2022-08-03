@@ -13,7 +13,7 @@ import com.planz.planit.config.security.auth.PrincipalDetails;
 import com.planz.planit.src.domain.user.dto.LoginReqDTO;
 import com.planz.planit.src.domain.user.User;
 import com.planz.planit.src.service.JwtTokenService;
-import com.planz.planit.utils.ValidationRegex;
+import com.planz.planit.src.apicontroller.utils.ValidationRegex;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;

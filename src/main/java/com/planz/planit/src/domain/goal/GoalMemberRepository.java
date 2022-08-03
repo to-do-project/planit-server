@@ -44,4 +44,7 @@ public interface GoalMemberRepository extends JpaRepository<GoalMember,Long> {
     @Query("select gm.goal from GoalMember gm where gm.member.userId = :userId and gm.memberRole = :role")
     List<Goal> getGoalsByUserIdAndRole(@Param("userId") Long userId, @Param("role") GoalMemberRole role);
 
+    @Query("select gm.goal from GoalMember gm where gm.member.userId= :userId and gm.goal.groupFlag='MISSION'")
+    Goal getGoalByMissionAndUser(@Param("userId") Long userId);
+
 }

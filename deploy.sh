@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-REPOSITORY=/home/ubuntu/deploy
+REPOSITORY=/home/ubuntu/planit-server
 cd $REPOSITORY
 
 APP_NAME=planit

@@ -6,7 +6,7 @@ import com.planz.planit.config.BaseResponseStatus;
 import com.planz.planit.src.domain.inventory.dto.GetInventoryResDTO;
 import com.planz.planit.src.domain.inventory.dto.PlacePlanetItemsReqDTO;
 import com.planz.planit.src.service.InventoryService;
-import com.planz.planit.utils.ValidationRegex;
+import com.planz.planit.src.apicontroller.utils.ValidationRegex;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
