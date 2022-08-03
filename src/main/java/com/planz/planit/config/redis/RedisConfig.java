@@ -1,4 +1,4 @@
-package com.planz.planit.src.domain.notice.redis;
+package com.planz.planit.config.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

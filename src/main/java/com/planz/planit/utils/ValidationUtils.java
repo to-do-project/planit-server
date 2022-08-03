@@ -1,13 +1,9 @@
-package com.planz.planit.src.apicontroller.utils;
+package com.planz.planit.utils;
 
 import com.planz.planit.config.BaseException;
 import lombok.extern.log4j.Log4j2;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
 import static com.planz.planit.config.BaseResponseStatus.*;
-import static com.planz.planit.config.BaseResponseStatus.INVALID_ACCESS_TOKEN;
 
 @Log4j2
 public class ValidationUtils {
