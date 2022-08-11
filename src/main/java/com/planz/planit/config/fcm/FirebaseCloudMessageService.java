@@ -50,7 +50,7 @@ public class FirebaseCloudMessageService {
 
                 log.info(response.body().string());
             } catch (IOException e) {
-                e.printStackTrace();
+                log.info(e.printStackTrace());
                 fcmPushSuccess.set(false);
             }
         });
