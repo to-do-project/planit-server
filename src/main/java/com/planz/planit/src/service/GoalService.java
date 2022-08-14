@@ -31,6 +31,7 @@ import static com.planz.planit.src.domain.goal.GroupStatus.ACCEPT;
 import static com.planz.planit.src.domain.goal.GroupStatus.WAIT;
 import static com.planz.planit.src.domain.goal.OpenCategory.PUBLIC;
 import static com.planz.planit.src.domain.notification.NotificationSmallCategory.GROUP_REQUEST;
+import static com.planz.planit.src.domain.user.UserStatus.RUN_AWAY;
 
 @Slf4j
 @Service
@@ -426,6 +427,7 @@ public class GoalService {
                         ));
             }
             boolean groupFlag = targetGoalMember.getGoal().getGroupFlag()==GroupCategory.GROUP?true:false;
+            boolean missionFlag = targetGoalMember.getGoal().getGroupFlag()== MISSION?true:false;
             boolean managerFlag = targetGoalMember.getMemberRole() == MANAGER ? true : false;
             boolean openFlag = targetGoalMember.getGoal().getOpenFlag()== PUBLIC?true:false;
             int percentage = todoMembers.size()==0?0:100*completeCount/todoMembers.size();
@@ -436,6 +438,7 @@ public class GoalService {
                     percentage,
                     managerFlag,
                     openFlag,
+                    missionFlag,
                     todoMainResList
             ));
         }
@@ -484,6 +487,7 @@ public class GoalService {
                         ));
             }
             boolean groupFlag = targetGoalMember.getGoal().getGroupFlag()==GroupCategory.GROUP?true:false;
+            boolean missionFlag = targetGoalMember.getGoal().getGroupFlag()== MISSION?true:false;
             boolean managerFlag = targetGoalMember.getMemberRole() == MANAGER ? true : false;
             boolean openFlag = targetGoalMember.getGoal().getOpenFlag()== PUBLIC?true:false;
             int percentage = todoMembers.size()==0?0:100*completeCount/todoMembers.size();
@@ -494,6 +498,7 @@ public class GoalService {
                     percentage,
                     managerFlag,
                     openFlag,
+                    missionFlag,
                     todoMainResList
             ));
         }

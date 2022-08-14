@@ -17,5 +17,6 @@ public class GetGoalMainInfoResDTO {
     private int percentage;
     private boolean managerFlag;
     private boolean openFlag;
+    private boolean missionFlag;
     private List<GetTodoMainResDTO> getTodoMainResList;
 }
