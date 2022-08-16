@@ -78,9 +78,12 @@ public class TodoService {
                 todoMemberRepository.save(todoMember);
             }
 
+            //투두 퍼센테이지 반환
             TodoMember result = todoMemberRepository.findTodoMemberByTodoAndGoalMember(todo.getTodoId(), first.getGoalMemberId());
-            return new CreateTodoResDTO(result.getTodoMemberId());
-
+            List<TodoMember> todoMembersByGoalMemberId = todoMemberRepository.findTodoMembersByGoalMemberId(first.getGoalMemberId());
+            int completeCount = todoMembersByGoalMemberId.stream().filter(m -> m.getCompleteFlag() == CompleteFlag.COMPLETE).collect(Collectors.toList()).size();
+            int percentage = todoMembersByGoalMemberId.size()==0?0:100*completeCount/todoMembersByGoalMemberId.size();
+            return new CreateTodoResDTO(result.getTodoMemberId(),percentage);
         }catch(Exception e){
             throw new BaseException(FAILED_TO_CREATE_TODO);
         }

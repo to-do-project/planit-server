@@ -177,7 +177,6 @@ public class ItemService {
      */
     public Item findItemByItemId(Long itemId) throws BaseException {
         try {
-            log.info("여기인가");
             return itemRepository.findById(itemId).orElseThrow(() -> new BaseException(INVALID_ITEM_ID));
         }
         catch (BaseException e){
