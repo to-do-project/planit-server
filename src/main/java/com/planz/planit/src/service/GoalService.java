@@ -407,9 +407,9 @@ public class GoalService {
         }
         List<GetGoalMainInfoResDTO> goalMainInfoResList = new ArrayList<>();
         for (GoalMember targetGoalMember : targetGoalMembers) {
-            //todoMember 조회 (오늘자 것만)
+            //todoMember 조회 (생성 기준 오늘자 것만)
             List<TodoMember> todoMembers = targetGoalMember.getTodoMembers()
-                    .stream().filter(m->m.getUpdateAt().toLocalDate().isEqual(LocalDate.now()))
+                    .stream().filter(m->m.getTodo().getCreateAt().toLocalDate().isEqual(LocalDate.now()))
                     .collect(Collectors.toList());
             int completeCount = todoMembers.stream().filter(m->m.getCompleteFlag()==CompleteFlag.COMPLETE)
                     .collect(Collectors.toList()).size();
