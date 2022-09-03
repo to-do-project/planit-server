@@ -119,6 +119,5 @@ public class BatchConfig {
         return stepCallMissionProcedure;
     }
 
-
 }
 

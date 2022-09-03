@@ -10,4 +10,5 @@ import lombok.Setter;
 public class CreateTodoResDTO {
     private Long todoMemberId;
     private int percentage;
+
 }
