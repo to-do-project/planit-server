@@ -123,6 +123,7 @@ public class PlanetService {
                     .userId(targetUserId)
                     .planetColor(planet.getColor().name())
                     .level(planet.getLevel())
+                    .prePercent(user.getPrevPercent())
                     .isRunAway(isRunAway)
                     .characterItem(user.getCharacterItem())
                     .planetItemList(planetItemList)

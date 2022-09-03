@@ -97,6 +97,7 @@ public class UserService {
      * 6-2. 포탈 : (-3.82, 3.8), 집 : (3.73, 3.29) 배치
      * 7. Closet 테이블에 기본 캐릭터 아이템(기본 옷) insert
      * 8. access token, refresh token 생성해서 헤더에 담기
+     * 9. Goal-mission 생성 (운영자 매일 미션 목표 생성)
      */
     @Transactional(rollbackFor = {Exception.class, BaseException.class})
     public LoginResDTO join(JoinReqDTO reqDTO, HttpServletResponse response) throws BaseException {
@@ -195,6 +196,9 @@ public class UserService {
 
             response.addHeader(ACCESS_TOKEN_HEADER_NAME, "Bearer " + jwtAccessToken);
             response.addHeader(REFRESH_TOKEN_HEADER_NAME, "Bearer " + jwtRefreshToken);
+
+            // 9. Goal-mission 생성 (운영자 매일 미션 목표 생성)
+            goalService.createMissionGoal(userEntity.getUserId());
 
             return LoginResDTO.builder()
                     .userId(userEntity.getUserId())
@@ -652,10 +656,14 @@ public class UserService {
 
             // 3. 다시 저장
             saveUser(user);
+
+            //4. 미션 상태 변경
+            goalService.changeToArchiveMission(userId);
         }
         catch (BaseException e){
             throw e;
         }
+
     }
 
     /**

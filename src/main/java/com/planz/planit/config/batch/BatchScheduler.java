@@ -28,6 +28,7 @@ public class BatchScheduler {
         this.batchConfig = batchConfig;
     }
 
+    // 가출 스케줄러
     //초 분 시 일 월 요일
     @Scheduled(cron = "0 0 0 * * *")
     public void runJob(){
@@ -41,6 +42,26 @@ public class BatchScheduler {
         catch (JobExecutionAlreadyRunningException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | JobRestartException e){
             log.error("스프링 가출 배치 실행중 에러 발생");
+            e.printStackTrace();
+        }
+    }
+
+
+    // 운영자 매일 미션 스케줄러
+    //초 분 시 일 월 요일
+    @Scheduled(cron = "0 0 0 * * *")
+    public void missionJob(){
+        log.info("운영자 매일 미션 스케줄러 실행");
+        Map<String, JobParameter> confMap = new HashMap<>();
+        confMap.put("time", new JobParameter(System.currentTimeMillis()));
+        JobParameters jobParameters = new JobParameters(confMap);
+
+        try{
+            jobLauncher.run(batchConfig.jobMission(), jobParameters);
+        }
+        catch (JobExecutionAlreadyRunningException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException | JobRestartException e){
+            log.error("스프링 운영자 매일 미션 배치 실행중 에러 발생");
             e.printStackTrace();
         }
     }

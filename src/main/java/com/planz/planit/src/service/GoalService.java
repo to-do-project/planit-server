@@ -25,11 +25,13 @@ import java.util.stream.Collectors;
 import static com.planz.planit.config.BaseResponseStatus.*;
 import static com.planz.planit.src.domain.goal.GoalMemberRole.MANAGER;
 import static com.planz.planit.src.domain.goal.GoalMemberRole.MEMBER;
-import static com.planz.planit.src.domain.goal.GoalStatus.ACTIVE;
-import static com.planz.planit.src.domain.goal.GoalStatus.ARCHIVE;
+import static com.planz.planit.src.domain.goal.GoalStatus.*;
+import static com.planz.planit.src.domain.goal.GroupCategory.MISSION;
 import static com.planz.planit.src.domain.goal.GroupStatus.ACCEPT;
 import static com.planz.planit.src.domain.goal.GroupStatus.WAIT;
+import static com.planz.planit.src.domain.goal.OpenCategory.PUBLIC;
 import static com.planz.planit.src.domain.notification.NotificationSmallCategory.GROUP_REQUEST;
+import static com.planz.planit.src.domain.user.UserStatus.RUN_AWAY;
 
 @Slf4j
 @Service
@@ -116,6 +118,61 @@ public class GoalService {
             throw new BaseException(FAILED_TO_CREATE_GOAL);
         }
         return true; //그룹 생성 성공 시 true
+    }
+    /**
+     * 회원가입 후 자동으로 생성되는 운영자 매일 미션 함수
+     * @param userId
+     * @return goalId
+     */
+    public Long createMissionGoal(Long userId) throws BaseException {
+        //유저 찾기
+        User user = userService.findUser(userId);
+        //운영자 목표 생성
+        try{
+            Goal goal = Goal.builder()
+                    .title("매일 미션")
+                    .groupFlag(MISSION)
+                    .openFlag(PUBLIC)
+                    .build();
+            //목표 추가
+            goalRepository.save(goal);
+
+            //사용자 - goalMember에 멤버로 넣기
+            GoalMember goalManager = GoalMember.builder()
+                    .goal(goal)
+                    .member(user)
+                    .status(ACCEPT) //매니저의 경우 무조건 accept
+                    .memberRole(GoalMemberRole.MEMBER)
+                    .build();
+
+            goalMemberRepository.save(goalManager);
+
+            //성공 시 목표 id를 반환한다.
+            return goal.getGoalId();
+        }catch(Exception e) {
+            throw new BaseException(FAILED_TO_CREATE_GOAL);
+        }
+    }
+
+    /**
+     * 매일 미션 기능 끄기 (예외처리 필요)
+     * @param userId
+     * @return
+     */
+    public boolean changeToArchiveMission(Long userId) throws BaseException {
+        try {
+            Goal goalByMissionAndUser = goalMemberRepository.getGoalByMissionAndUser(userId);
+
+            if (goalByMissionAndUser.getGoalStatus() == ACTIVE) {
+                goalByMissionAndUser.archiveGoal();
+            } else {
+                goalByMissionAndUser.activateGoal();
+            }
+            goalRepository.save(goalByMissionAndUser); //저장
+        }catch(Exception e){
+            throw new BaseException(FAILED_TO_ARCHIVE_GOAL);
+        }
+            return true;
     }
 
 
@@ -273,10 +330,16 @@ public class GoalService {
         GetGoalDetailResDTO getGoalDetailResDTO = new GetGoalDetailResDTO();
         //goal이 비공개인 경우 유저가 회원인지 확인 (구현 필요)
         Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new BaseException(NOT_EXIST_GOAL));
+      
+        //goal이 삭제인 경우 에러 처리
+        if(goal.getGoalStatus()==DELETE){
+            throw new BaseException(NOT_EXIST_GOAL);
+        }
+
         //DTO에 값 넣기 (goalId, title)
         getGoalDetailResDTO.setGoalId(goal.getGoalId());
         getGoalDetailResDTO.setGoalTitle(goal.getTitle());
-        if(goal.getOpenFlag()==OpenCategory.PUBLIC){
+        if(goal.getOpenFlag()== PUBLIC){
             getGoalDetailResDTO.setOpenFlag(true);
         }else{
             getGoalDetailResDTO.setOpenFlag(false);
@@ -345,9 +408,9 @@ public class GoalService {
         }
         List<GetGoalMainInfoResDTO> goalMainInfoResList = new ArrayList<>();
         for (GoalMember targetGoalMember : targetGoalMembers) {
-            //todoMember 조회 (오늘자 것만)
+            //todoMember 조회 (생성 기준 오늘자 것만)
             List<TodoMember> todoMembers = targetGoalMember.getTodoMembers()
-                    .stream().filter(m->m.getUpdateAt().toLocalDate().isEqual(LocalDate.now()))
+                    .stream().filter(m->m.getTodo().getCreateAt().toLocalDate().isEqual(LocalDate.now()))
                     .collect(Collectors.toList());
             int completeCount = todoMembers.stream().filter(m->m.getCompleteFlag()==CompleteFlag.COMPLETE)
                     .collect(Collectors.toList()).size();
@@ -365,8 +428,9 @@ public class GoalService {
                         ));
             }
             boolean groupFlag = targetGoalMember.getGoal().getGroupFlag()==GroupCategory.GROUP?true:false;
+            boolean missionFlag = targetGoalMember.getGoal().getGroupFlag()== MISSION?true:false;
             boolean managerFlag = targetGoalMember.getMemberRole() == MANAGER ? true : false;
-            boolean openFlag = targetGoalMember.getGoal().getOpenFlag()==OpenCategory.PUBLIC?true:false;
+            boolean openFlag = targetGoalMember.getGoal().getOpenFlag()== PUBLIC?true:false;
             int percentage = todoMembers.size()==0?0:100*completeCount/todoMembers.size();
             goalMainInfoResList.add(new GetGoalMainInfoResDTO(
                     targetGoalMember.getGoal().getGoalId(),
@@ -375,6 +439,7 @@ public class GoalService {
                     percentage,
                     managerFlag,
                     openFlag,
+                    missionFlag,
                     todoMainResList
             ));
         }
@@ -394,7 +459,7 @@ public class GoalService {
         //비공개 제외
         //목표 조회 (수락, 공개, 보관함 X)
         List<GoalMember> targetGoalMembers = goalMemberRepository.findGoalMembersByMember(targetUserId)
-                .stream().filter(m->m.getGoal().getOpenFlag()==OpenCategory.PUBLIC && m.getGoal().getGoalStatus()==ACTIVE&&m.getStatus()==ACCEPT)
+                .stream().filter(m->m.getGoal().getOpenFlag()== PUBLIC && m.getGoal().getGoalStatus()==ACTIVE&&m.getStatus()==ACCEPT)
                 .collect(Collectors.toList());
         //없으면 리턴
         if(targetGoalMembers.isEmpty() || targetGoalMembers==null){
@@ -423,8 +488,9 @@ public class GoalService {
                         ));
             }
             boolean groupFlag = targetGoalMember.getGoal().getGroupFlag()==GroupCategory.GROUP?true:false;
+            boolean missionFlag = targetGoalMember.getGoal().getGroupFlag()== MISSION?true:false;
             boolean managerFlag = targetGoalMember.getMemberRole() == MANAGER ? true : false;
-            boolean openFlag = targetGoalMember.getGoal().getOpenFlag()==OpenCategory.PUBLIC?true:false;
+            boolean openFlag = targetGoalMember.getGoal().getOpenFlag()== PUBLIC?true:false;
             int percentage = todoMembers.size()==0?0:100*completeCount/todoMembers.size();
             goalMainInfoResList.add(new GetGoalMainInfoResDTO(
                     targetGoalMember.getGoal().getGoalId(),
@@ -433,6 +499,7 @@ public class GoalService {
                     percentage,
                     managerFlag,
                     openFlag,
+                    missionFlag,
                     todoMainResList
             ));
         }

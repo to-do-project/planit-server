@@ -4,7 +4,6 @@ import com.planz.planit.config.BaseException;
 import com.planz.planit.config.fcm.FirebaseCloudMessageService;
 import com.planz.planit.src.domain.deviceToken.DeviceToken;
 import com.planz.planit.src.service.DeviceTokenService;
-import com.planz.planit.src.service.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -18,7 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -28,20 +26,21 @@ public class BatchConfig {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final UserService userService;
     private final DeviceTokenService deviceTokenService;
     private final FirebaseCloudMessageService firebaseCloudMessageService;
 
 
     @Autowired
-    public BatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, UserService userService, DeviceTokenService deviceTokenService, FirebaseCloudMessageService firebaseCloudMessageService) {
+    public BatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, DeviceTokenService deviceTokenService, FirebaseCloudMessageService firebaseCloudMessageService) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
-        this.userService = userService;
         this.deviceTokenService = deviceTokenService;
         this.firebaseCloudMessageService = firebaseCloudMessageService;
     }
 
+    /**
+     * 가출
+     */
     @Bean
     public Job jobRunAway(){
         Job jobRunAway = jobBuilderFactory.get("jobRunAway")
@@ -77,6 +76,47 @@ public class BatchConfig {
                 })
                 .build();
         return stepCallRunAwayProcedure;
+    }
+
+
+    /**
+     * 운영자 매일 미션
+      */
+    @Bean
+    public Job jobMission(){
+        Job jobMission = jobBuilderFactory.get("jobMission")
+                .start(stepCallMissionProcedure())
+                .build();
+        return jobMission;
+    }
+
+    @Bean
+    @JobScope
+    public Step stepCallMissionProcedure(){
+        Step stepCallMissionProcedure = stepBuilderFactory.get("stepCallMissionProcedure")
+                .tasklet((contribution, chunkContext) -> {
+                    log.info("stepCallMissionProcedure : 운영자 매일 미션 프로시저(mission) 실행");
+
+                    // MySQL의 운영자 매일 미션 프로시저 (mission) 실행
+                    List<DeviceToken> deviceTokenList = deviceTokenService.callMissionProcedure();
+                    // setting_flag가 1이고, 사용자 매일 미션을 받는 사용자의 deviceToken 값 리스트
+                    List<String> deviceTokens = deviceTokenList.stream()
+                            .map(DeviceToken::getDeviceToken)
+                            .collect(Collectors.toList());
+
+                    try{
+                        // push 알림 전송
+                        firebaseCloudMessageService.sendMessageTo(deviceTokens, "[운영자 매일 미션]", "행성의 성장을 돕기위한 오늘의 미션이 도착했습니다.");
+                        log.info("[FCM 전송 성공] setting_flag가 1이고 운영자 매일 미션을 받는 사용자에게, 운영자 매일 미션 FCM 전송 성공");
+                    }
+                    catch (BaseException e){
+                        log.error("[FCM 전송 실패] " + e.getStatus());
+                    }
+
+                    return RepeatStatus.FINISHED;
+                })
+                .build();
+        return stepCallMissionProcedure;
     }
 
 }

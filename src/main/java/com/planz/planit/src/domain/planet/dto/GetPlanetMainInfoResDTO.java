@@ -19,6 +19,9 @@ public class GetPlanetMainInfoResDTO {
     // 행성 레벨
     private Integer level;
 
+    // 전날 투두 완료 퍼센테이지 = 전날 목표량
+    private Integer prePercent;
+
     // 캐릭터 가출 여부
     private Boolean isRunAway;
 
