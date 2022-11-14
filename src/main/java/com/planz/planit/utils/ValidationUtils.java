@@ -5,7 +5,6 @@ import lombok.extern.log4j.Log4j2;
 
 import static com.planz.planit.config.BaseResponseStatus.*;
 
-
 @Log4j2
 public class ValidationUtils {
 

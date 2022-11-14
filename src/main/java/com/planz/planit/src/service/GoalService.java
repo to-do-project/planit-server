@@ -330,7 +330,7 @@ public class GoalService {
         GetGoalDetailResDTO getGoalDetailResDTO = new GetGoalDetailResDTO();
         //goal이 비공개인 경우 유저가 회원인지 확인 (구현 필요)
         Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new BaseException(NOT_EXIST_GOAL));
-      
+
         //goal이 삭제인 경우 에러 처리
         if(goal.getGoalStatus()==DELETE){
             throw new BaseException(NOT_EXIST_GOAL);
