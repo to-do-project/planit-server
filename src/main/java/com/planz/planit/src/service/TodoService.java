@@ -112,6 +112,7 @@ public class TodoService {
         //lastCheckAt 정리
         User user = userService.findUser(userId);
         addTmpExp(user,50);
+
         //퍼센테이지 리턴
         try {
             Long goalMemberId = todoMember.getGoalMember().getGoalMemberId();
@@ -180,6 +181,7 @@ public class TodoService {
         //lastCheckAt 정리
         User user = userService.findUser(userId);
         addTmpExp(user, -50);
+
         //퍼센테이지 리턴
         try {
             Long goalMemberId = todoMember.getGoalMember().getGoalMemberId();

@@ -46,6 +46,7 @@ public class BatchScheduler {
         }
     }
 
+
     // 운영자 매일 미션 스케줄러
     //초 분 시 일 월 요일
     @Scheduled(cron = "0 0 0 * * *")
